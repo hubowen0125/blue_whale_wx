@@ -1,0 +1,20 @@
+{
+    "pages": [
+        {
+            "path": "pages/home/index"
+        }
+    ],
+    "globalStyle": {
+        "navigationBarTextStyle": "black",
+        "navigationBarBackgroundColor": "#ffffff",
+        "backgroundColor": "#ffffff",
+        "usingComponents": {}
+    },
+    "easycom": {
+        "autoscan": true,
+        "custom": {
+            "^com-": "@/components/",
+            "^uni-(.*)": "@dcloudio/uni-ui/lib/uni-$1/uni-$1.vue"
+        }
+    }
+}
