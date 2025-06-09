@@ -1,0 +1,249 @@
+<script lang="ts" setup>
+import { checkStr } from '@/utils/utils';
+import checkbox from "@/static/images/checkbox.png"
+import checkbox_active from "@/static/images/checkbox_active.png"
+
+
+const { proxy } = getCurrentInstance() as any;
+
+const loginParams = reactive({
+    phone: '',
+    smsCode: ''
+})
+const pointerBtn = ref(false)
+const codeBtn = ref('获取验证码')
+const checked = ref(false)
+
+/**
+ * 获取验证吗
+ * @param judge 判断当前是否需要图形验证 
+ */
+const setTimeFu = () => {
+    // pointerBtn.value = true
+    // const { phone } = loginParams.value
+    // if (!checkStr(phone)) {
+    //     proxy.$Toast({ title: '请输入正确手机号' });
+    //     pointerBtn.value = false;
+    //     return;
+    // }
+    // proxy.$Loading();
+    // sendLoginSmsCodeApi({ phone }).then((res: any) => {
+    //     proxy.$CloseLoading();
+    //     const { code, msg } = res
+    //     if (code == 'S000000') {
+    //         let countDown = 60
+    //         codeBtn.value = countDown + 's后重新获取'
+    //         timer = setInterval(() => {
+    //             countDown--
+    //             codeBtn.value = countDown + 's后重新获取'
+    //             if (countDown == 0) {
+    //                 codeBtn.value = '获取验证码'
+    //                 pointerBtn.value = false
+    //                 clearInterval(timer)
+    //             }
+    //         }, 1000)
+    //     } else {
+    //         pointerBtn.value = false;
+    //         proxy.$Toast({ title: msg })
+    //     }
+    // }, (req => {
+    //     pointerBtn.value = false;
+    //     proxy.$CloseLoading();
+    //     proxy.$Toast({ title: req.msg })
+    // }))
+}
+
+
+const formSubmit = (e: any) => {
+    const { phone, smsCode } = loginParams
+    if (!checkStr(phone)) {
+        proxy.$Toast({ title: '请输入正确手机号' });
+        return
+    }
+    if (smsCode.length < 6) {
+        proxy.$Toast({ title: '请输入正确验证码' });
+        return
+    }
+    if (!checked.value) {
+        proxy.$Toast({ title: '请先同意用户协议' })
+        return
+    }
+    // proxy.$Loading();
+    // loginBySmsCodeApi(loginParams.value).then((res: any) => {
+    //     proxy.$CloseLoading();
+    //     const { code, data, msg } = res
+    //     if (code == 'S000000') {
+    //         useUser.setTokenFu(data.token)
+    //         useUser.setUserInfoFu(data.userInfo)
+    //         // uni.navigateBack()
+    //         uni.reLaunch({
+    //             url: '/pages/tabbar/index'
+    //         })
+    //     } else {
+    //         proxy.$Toast({ title: msg })
+    //     }
+    // }, (req => {
+    //     proxy.$CloseLoading();
+    //     proxy.$Toast({ title: req.msg })
+    // }))
+}
+
+/**
+ * 查看协议
+ */
+const viewProtocolFu = (key: any) => {
+    // uni.navigateTo({
+    // url: `/pages/webView/index?key=${key}`
+    // })
+}
+
+</script>
+
+
+<template>
+    <view class="container container_defalut_bg flex_floumn">
+        <view class="login_title">欢迎登录/注册</view>
+        <view class="login_desc">蓝鲸, 聪明人的平台</view>
+        <form @submit="formSubmit">
+            <view class="input_con flex_align">
+                <view class="input_area_code">+86</view>
+                <input class="input" type="number" placeholder="请输入手机号" ref="phoneValue" maxlength="11" name="phone"
+                    v-model.trim="loginParams.phone">
+            </view>
+            <view class="input_con flex_align">
+                <input class="input flex_1" placeholder="请输入验证码" maxlength="6" name="smsCode" type="number"
+                    v-model.trim="loginParams.smsCode">
+                <button class="code_btn" @click="setTimeFu" hover-class="pointer"
+                    hover-stay-time="2000" :disabled="pointerBtn">
+                    {{ codeBtn }}
+                </button>
+            </view>
+            <view class="protocol_con flex_align">
+                <view class="checkbox_con" @click="checked = !checked">
+                    <image class="checked_icon" slot="icon"
+                        :src="checked ? checkbox_active : checkbox" />
+                </view>
+                <span>
+                    我已阅读并同意<span class="protocol_btn" @click="viewProtocolFu('PRIVACY_URL')">《用户手册》</span>和<span
+                        class="protocol_btn" @click="viewProtocolFu('USER_AGREEMENT_URL')">《隐私政策》</span>
+                </span>
+            </view>
+            <button class="button_defalut" hover-class="pointer" hover-stay-time="2000" form-type="submit">
+                登录
+            </button>
+        </form>
+    </view>
+</template>
+
+
+<style lang="scss" scoped>
+.container {
+    padding: 72rpx;
+    box-sizing: border-box;
+
+    .login_title {
+        font-weight: bold;
+        font-size: 52rpx;
+        color: #202020;
+        margin-top: 100rpx;
+    }
+
+    .login_desc {
+        font-weight: 400;
+        font-size: 28rpx;
+        color: #3F4561;
+        margin-top: 24rpx;
+        margin-bottom: 100rpx;
+    }
+
+    .input_con {
+        padding: 34rpx 40rpx;
+        background: #FFFFFF;
+        border-radius: 48rpx;
+        box-sizing: border-box;
+        height: 96rpx;
+        margin-bottom: 40rpx;
+
+        .input_area_code {
+            font-weight: 500;
+            font-size: 28rpx;
+            color: #202020;
+            padding-right: 48rpx;
+            position: relative;
+
+            &::after {
+                content: "";
+                width: 2rpx;
+                height: 22rpx;
+                background:  #9299BA;
+                position: absolute;
+                left: 80%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        .input {
+            font-size: 28rpx;
+            color: #111E36;
+        }
+
+        .code_btn {
+            border: none;
+            font-weight: 400;
+            font-size: 28rpx;
+            color: #0C62FF;
+            font-style: normal;
+            background-color: transparent;
+        }
+    }
+
+    .protocol_con {
+        margin-top: 40rpx;
+        height: 28rpx;
+        align-items: center;
+        font-weight: 400;
+        font-size: 24rpx;
+        color: #202020;
+
+        :deep(.van-checkbox) {
+            width: 30rpx;
+            height: 30rpx;
+            margin-right: 18rpx;
+        }
+
+        :deep(.van-checkbox__icon-wrap) {
+            line-height: 1;
+        }
+
+        .checkbox_con {
+            width: 28rpx;
+            height: 28rpx;
+            position: relative;
+            margin-right: 14rpx;
+
+            &::after {
+                content: "";
+                position: absolute;
+                width: 100rpx;
+                height: 80rpx;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+            .checked_icon {
+                width: 28rpx;
+                height: 28rpx;
+            }
+        }
+
+        .protocol_btn {
+            color: #2C64C1;
+        }
+    }
+    .button_defalut{
+        margin-top: 120rpx;
+    }
+}
+</style>

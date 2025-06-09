@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { onLaunch, onShow, onHide } from "@dcloudio/uni-app";
+import { useUserStore } from "@/store/modules/user";
 // import configDefault from "@/common/js/config.default"
 
 onLaunch(() => {
     console.log("App Launch");
+    const useUser = useUserStore()
+    useUser.setNavHeagihtFu()
     // loadFontFace()
 });
 onShow(() => {
@@ -30,7 +33,6 @@ onHide(() => {
 </script>
 
 <style lang="scss">
-@import '@/wxcomponents/vant-weapp/common/index.wxss';
 /* 注意要写在第一行，同时给style标签加入lang="scss"属性 */
-@import "../src/style//index.scss"
+@use "@/style/default.scss"
 </style>

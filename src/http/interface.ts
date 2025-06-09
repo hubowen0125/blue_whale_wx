@@ -1,6 +1,5 @@
-import configDefault from "@/common/js/config.default"
 import { useUserStore } from "@/store/modules/user";
-console.log(process.env.UNI_PLATFORM, 'processprocessprocess');
+console.log(process.env, 'processprocessprocess');
 const envVariable = process.env.UNI_PLATFORM
 let envVersion
 switch (envVariable) {
@@ -15,13 +14,7 @@ switch (envVariable) {
         break;
 }
 
-let baseUrl = ''
-if (envVersion == 'develop') {
-    baseUrl = configDefault.dev.interfaceApi
-} else {
-    baseUrl = configDefault.prod.interfaceApi
-}
-console.log(configDefault, envVersion, 'config');
+let baseUrl = process.env.VITE_APP_API; // 小程序环境 API
 const request = (requestData: any) => {
     return new Promise((resolve, reject) => {
         // 定义一个符合要求的变量/常量
@@ -33,17 +26,22 @@ const request = (requestData: any) => {
             data: requestData.method == 'GET' ? requestData.params : requestData.data,
             header: {
                 'content-type': 'application/json',
-                'token': token
+                'token': token,
+                'source': 'wechat'
             },
             dataType: 'json',
             timeout: 20000
         }).then(async (response: any) => {
             const code = response.data.code
             if (code == 'F000001') {
-                uni.hideLoading()
-                // uni.navigateTo({
-                //     url: `/pages/login/index?code=${code}`
-                // })
+                if (!useUser.jump401) {
+                    useUser.setJump401Fu(true)
+                    uni.hideLoading()
+                    uni.navigateTo({
+                        url: `/pages/login/index?code=${code}`
+                    })
+                }
+                return
             } else {
                 resolve(response.data)
             }

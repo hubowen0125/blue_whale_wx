@@ -1,8 +1,9 @@
-import { createSSRApp } from "vue";
+import { ComponentOptions, createSSRApp } from "vue";
 import App from "./App.vue";
 import pinia from "./store";
-import { toastFu, loadingFu } from "./utils/global";
+import { toastFu, loadingFu } from "./utils/utils";
 import { useUserStore } from "@/store/modules/user";
+import share from "@/static/share.jpg"
 
 
 // 重置默认css
@@ -56,6 +57,19 @@ uni.addInterceptor('navigateTo', {
     },
 })
 
+
+
+// 定义一个简单的 mixin
+const shareMixin: ComponentOptions<any> = {
+    onShareAppMessage() {
+        return {
+            title: '茶活力经销商',
+            path: '/pages/tabbar/index',
+            imageUrl: share
+        };
+    },
+};
+
 export function createApp() {
     const app = createSSRApp(App);
     app.config.globalProperties.$Toast = toastFu;
@@ -63,6 +77,7 @@ export function createApp() {
     app.config.globalProperties.$CloseLoading = uni.hideLoading
 
     app.use(pinia)
+    app.mixin(shareMixin)
     return {
         app,
     };

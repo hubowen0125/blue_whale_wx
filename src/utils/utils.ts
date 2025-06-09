@@ -1,4 +1,69 @@
 /**
+ * 全局提示文案
+ * @param toastParams 
+ */
+export const toastFu = (toastParams: {
+    title?: string,  // 提示的内容
+    icon?: 'none' | 'success' | 'loading', // 图标
+    image?: string, // 自定义图标的本地路径
+    mask?: boolean,  // 是否显示透明蒙层
+    duration?: number, // 提示的延迟时间
+    successCB?: () => void,  // 成功的回调函数
+    failCB?: () => void,  // 失败的回调函数
+    completeCB?: () => void,   // 回调函数（调用成功、失败都会执行）
+} = {}) => {
+    const {
+        title = '接口错误，请稍后...',
+        icon = 'none',
+        image = '',
+        mask = true,
+        duration = 2000,
+        successCB = () => { },
+        failCB = () => { },
+        completeCB = () => { }
+    } = toastParams;
+
+    uni.showToast({
+        title,
+        icon,
+        image,
+        mask,
+        duration,
+        success: successCB,
+        fail: failCB,
+        complete: completeCB,
+    });
+};
+
+
+
+/**
+ * 全局加载中
+ */
+export const loadingFu = (toastParams: {
+    title?: string,  // 提示的内容
+    mask?: boolean,  // 是否显示透明蒙层
+    successCB?: () => void,  // 成功的回调函数
+    failCB?: () => void,  // 失败的回调函数
+    completeCB?: () => void,   // 回调函数（调用成功、失败都会执行）
+} = {}) => {
+    const {
+        title = '加载中...',
+        mask = true,
+        successCB = () => { },
+        failCB = () => { },
+        completeCB = () => { }
+    } = toastParams;
+    uni.showLoading({
+        title,
+        mask,
+        success: successCB,
+        fail: failCB,
+        complete: completeCB,
+    });
+}
+
+/**
  *  设置对象拼接
  */
 export const splicingObjects = (obj: { [x: string]: any; }) => {
@@ -17,6 +82,8 @@ export const splicingObjects = (obj: { [x: string]: any; }) => {
  * 设置只能输入手机号
  */
 export function phoneFu(data: any) {
+    console.log(data, 'phoneFuphoneFuphoneFuphoneFu');
+
     if (data[0] != 1) {
         return ''
     }
@@ -25,6 +92,26 @@ export function phoneFu(data: any) {
     } else {
         return data = data.replace(/\D/g, '');
     }
+}
+
+
+/**
+ * 校验输入框只能输入整数
+ * @param value 
+ * @returns 
+ */
+export const handleInput = (value: string): Promise<string | number> => {
+    return new Promise<number | string>((resolve) => {
+        let input;
+        // 允许输入的格式：整数且不能为0
+        const formattedInput = value.replace(/[^0-9]/g, ''); // 过滤非数字字符
+        if (formattedInput === '0') {
+            input = ''; // 如果输入是0，则清空
+        } else {
+            input = formattedInput;
+        }
+        resolve(input);
+    });
 }
 
 // ---------------------------------数据验证
@@ -128,12 +215,12 @@ export function processPhoneNumber(phoneNumber: string) {
 /**
  * area数据格式转换
 */
-export function areasMap(arr: any[]) {
+export function areasMap(arr: any[], value = 'districtName', id = 'districtId') {
     arr.forEach(item => {
-        item.text = item.districtName
-        item.value = item.districtId
+        item.text = item[value]
+        item.value = item[id]
         if (item.children && item.children.length) {
-            areasMap(item.children)
+            areasMap(item.children, value, id)
         }
     })
     return arr
@@ -146,6 +233,29 @@ export function formatNumber(num: number | string): string {
     const formattedNum = parsedNum ? parsedNum.toFixed(2) : '0.00';
     return formattedNum;
 }
+
+/**
+ * 使用正则表达式限制输入只能是两位小数
+ * @param value 
+ * @returns 
+ */
+export const validateInput = (value: string) => {
+    // 1. 移除所有非数字和小数点的字符
+    let filteredValue = value.replace(/[^0-9.]/g, '');
+
+    // 2. 不能以 . 开头：如果以 . 开头，移除开头的 .
+    if (filteredValue.startsWith('.')) {
+        filteredValue = filteredValue.slice(1);
+    }
+
+    // 3. 限制只能有一个小数点，并保留第一个小数点
+    filteredValue = filteredValue.replace(/(\..*?)\..*/g, '$1');
+
+    // 4. 限制小数点后最多两位小数
+    filteredValue = filteredValue.replace(/(\d*\.\d{2}).*/g, '$1');
+
+    return filteredValue;
+};
 
 /**
  * 日期格式转换
@@ -164,7 +274,7 @@ export const dateStrToDateFormat = (str: string, format = 'yyyy-mm-dd') => {
 
     let isISO8601 = false;
     // 处理 ISO 8601 格式的日期字符串
-    if (normalizedStr.includes('T')) {
+    if (typeof normalizedStr == 'string' && normalizedStr.includes('T')) {
         isISO8601 = true;
         normalizedStr = normalizedStr.split('.')[0]; // 去掉毫秒部分
         normalizedStr = normalizedStr.replace('T', ' '); // 将 'T' 替换为 ' '
@@ -267,4 +377,36 @@ export function preciseMath() {
             return Math.round(value * adjuster);
         }
     }
+}
+
+
+// 获取指定url中的所有参数
+export function getParams(url: string) {
+    const params: any = {};
+    const urlArr = url.split('?');
+    if (urlArr.length > 1) {
+        const queryStr = urlArr[1];
+        const queryArr = queryStr.split('&');
+        queryArr.forEach(item => {
+            const keyValueArr = item.split('=');
+            if (keyValueArr.length > 1) {
+                params[keyValueArr[0]] = keyValueArr[1];
+            }
+        });
+    }
+    return params;
+}
+
+// 深拷贝方法
+export const deepCopy = (obj: any): any => {
+    if (typeof obj !== 'object' || obj === null) {
+        return obj;
+    }
+    const newObj: Record<string, any> = Array.isArray(obj) ? [] : {}; // 指定 newObj 的类型
+    for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            newObj[key] = deepCopy(obj[key]);
+        }
+    }
+    return newObj;
 }
