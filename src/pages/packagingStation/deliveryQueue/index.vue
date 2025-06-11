@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import wait_icon from "@/static/images/wait_icon.png";
 
+const { proxy } = getCurrentInstance() as any;
+
 const orderDetails = [
     {
         title: '厂家',

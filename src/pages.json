@@ -41,6 +41,42 @@
             "style": {
                 "navigationStyle": "custom"
             }
+        },
+        {
+            "path": "pages/packagingStation/wholesalerDetails/index",
+            "style": {
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/packagingStation/addWholesaler/index",
+            "style": {
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/packagingStation/myReport/index",
+            "style": {
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/packagingStation/myEmployees/index",
+            "style": {
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/packagingStation/addEmployee/index",
+            "style": {
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/wholesaler/home/index",
+            "style": {
+                "navigationStyle": "custom"
+            }
         }
     ],
     "globalStyle": {

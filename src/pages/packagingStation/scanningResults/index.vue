@@ -1,30 +1,33 @@
 <script lang="ts" setup>
 import scan_icon from "@/static/images/packagingStation/scan_icon.png"
 
+const { proxy } = getCurrentInstance() as any;
+
+
 const orderDetail = [
     {
         title: '厂家',
-        key: '上海蓝鲸童装有限公司',
+        value: '上海蓝鲸童装有限公司',
         type: 'text'
     },
     {
         title: '批发商',
-        key: '上海-陈冠希',
+        value: '上海-陈冠希',
         type: 'text'
     },
     {
         title: '客户仓位',
-        key: 'AI',
+        value: 'AI',
         type: 'text'
     },
     {
         title: '订单数量(手)',
-        key: '20',
+        value: '20',
         type: 'text'
     },
     {
         title: '核点数量(手)',
-        key: '请输入核点数量',
+        value: '请输入核点数量',
         type: 'input'
     },
 ]
@@ -52,9 +55,9 @@ const orderDetail = [
                     <view class="result_item flex_align" v-for="item in orderDetail" :key="item.title">
                         <view class="result_item_title">{{ item.title }}</view>
                         <view class="result_item_key flex_1" v-if="item.type === 'text'">
-                            {{ item.key }}
+                            {{ item.value }}
                         </view>
-                        <input class="result_item_key flex_1" v-else type="text" :placeholder="item.key">
+                        <input class="result_item_key flex_1" v-else type="text" :placeholder="item.value">
                     </view>
                 </view>
                 <view class="btn_con flex_align">

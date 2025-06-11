@@ -4,17 +4,37 @@ import scan_code_icon from "@/static/images/packagingStation/scan_code_icon.png"
 import { useUserStore } from '@/store/modules/user';
 
 const useUser = useUserStore()
+const { proxy } = getCurrentInstance() as any;
 
 const tabBarIndex = inject("tabBarIndex") as Ref<number>
 
 
 watch(() => tabBarIndex.value, (newVal) => {
     if (newVal == 0) {
-        // useDataBoard.setConditionIndex(0)
         console.log('213213');
-
     }
 })
+
+
+const scanCodeFu = () => {
+    proxy.$Loading()
+    uni.scanCode({
+        onlyFromCamera: true,
+        success: function (res) {
+            console.log('条码类型：' + res.scanType);
+            console.log('条码内容：' + res.result);
+            proxy.$CloseLoading()
+            uni.navigateTo({
+                url: '/pages/packagingStation/scanningResults/index'
+            })
+        },
+        fail: function (res) {
+            console.log('扫描失败：' + res.errMsg);
+            proxy.$CloseLoading()
+            proxy.$Toast('扫描失败，请扫描正确的二维码！')
+        }
+    });
+}
 
 </script>
 
@@ -22,7 +42,7 @@ watch(() => tabBarIndex.value, (newVal) => {
 <template>
     <view class="home_com flex_column">
         <view class="header_con flex_align">
-            <image class="header_img" :src=position_1></image>
+            <image class="header_img" :src="position_1"></image>
             <view class="header_title">新村路打包站</view>
         </view>
         <view class="home_main flex_column">
@@ -31,9 +51,9 @@ watch(() => tabBarIndex.value, (newVal) => {
                 <input class="table_input" type="text" placeholder="请输入厂家名称">
             </view>
             <view class="table_con">
-                <text class="table_title">厂家名称</text>
+                <text class="table_title">批发商名称</text>
                 <view class="flex table_input_list">
-                    <input class="table_input table_input_item" type="text" placeholder="请输入厂家名称">
+                    <input class="table_input table_input_item" type="text" placeholder="请输入批发商名称">
                     <input class="table_input flex_1" type="text" placeholder="请输入仓位">
                 </view>
             </view>
@@ -46,7 +66,7 @@ watch(() => tabBarIndex.value, (newVal) => {
                 <button class="button_defalut flex_1">立即入库</button>
             </view>
         </view>
-        <view class="scan_code_con flex_align flex_column">
+        <view class="scan_code_con flex_align flex_column" @click="scanCodeFu">
             <image class="scan_code_icon" :src="scan_code_icon"></image>
             <view class="scan_code_desc">扫码入库</view>
         </view>

@@ -1,6 +1,9 @@
 <script lang="ts" setup>
 import arrow_right from "@/static/images/arrow_right.png"
 
+
+const { proxy } = getCurrentInstance() as any;
+
 const inventoryDetail = [
     {
         title: '订单号: ',

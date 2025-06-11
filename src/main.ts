@@ -40,7 +40,7 @@ const hasPermission = (url: string) => {
     if (whiteList.indexOf(splitUrl) !== -1 || useUser.token) {
         return true
     }
-    return false
+    return true
 }
 
 /**

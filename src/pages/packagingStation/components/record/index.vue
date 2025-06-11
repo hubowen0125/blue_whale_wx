@@ -5,6 +5,22 @@ import search_icon from "@/static/images/search_icon.png"
 import { useUserStore } from '@/store/modules/user';
 
 const useUser = useUserStore()
+const { proxy } = getCurrentInstance() as any;
+
+const quertList = [
+    {
+        placeholder: '请输入批发商名称进行查询',
+        value: ''
+    },
+    {
+        placeholder: '请输入仓位名称进行查询',
+        value: ''
+    },
+    {
+        placeholder: '请输入厂家名称进行查询',
+        value: ''
+    },
+]
 
 const tabBarIndex = inject("tabBarIndex") as Ref<number>
 
@@ -45,17 +61,9 @@ watch(() => tabBarIndex.value, (newVal) => {
                     <view class="time_long flex_1">共7天</view>
                 </view>
                 <view class="quert_input_list flex_column">
-                    <view class="flex_align quert_input">
+                    <view class="flex_align quert_input" v-for="item, index in quertList" :key="index">
                         <image class="search_icon" :src="search_icon"></image>
-                        <input class="flex_1" type="text" placeholder="请输入批发商名称进行查询" />
-                    </view>
-                    <view class="flex_align quert_input">
-                        <image class="search_icon" :src="search_icon"></image>
-                        <input class="flex_1" type="text" placeholder="请输入仓位名称进行查询" />
-                    </view>
-                    <view class="flex_align quert_input">
-                        <image class="search_icon" :src="search_icon"></image>
-                        <input class="flex_1" type="text" placeholder="请输入厂家名称进行查询" />
+                        <input class="flex_1" type="text" :placeholder="item.placeholder" />
                     </view>
                 </view>
                 <button class="button_defalut">查询</button>
