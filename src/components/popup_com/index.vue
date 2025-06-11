@@ -10,28 +10,30 @@ const props = defineProps({
             popupContent?: any[];
             cancelText?: string;
             confirmText?: string;
+            placeholder?: string;
         },
         default: () => ({
             popupTitle: '',
-            pupupType: '',
+            pupupType: 'default',
             popupContent: undefined,
             cancelText: undefined,
             confirmText: undefined,
+            placeholder: ''
         }),
     }
 })
-
 const popupRef = ref();
+const inputData = ref('');
 
 // 显示弹窗
 const showPopup = () => {
-    console.log('544353');
     popupRef.value.open('center')
 }
 
 // 关闭弹窗
 const closePopupFu = () => {
     popupRef.value.close();
+    inputData.value = '';
 }
 
 // 确认弹窗
@@ -54,11 +56,20 @@ defineExpose({
         <uni-popup ref="popupRef">
             <view class="popup_content flex_cloumn text_align">
                 <view class="popup_title">{{ popupData.popupTitle }}</view>
-                <view class="popup_main flex_cloumn">
+                <view class="popup_main flex_cloumn" v-if="popupData.pupupType === 'default'">
+                    <view v-for="item in popupData.popupContent" :key="item.id" class="popup_text_item">
+                        <text>{{ item.text }}</text>
+                        <text v-if="item.desc" class="popup_text_desc">{{ item.desc }}</text>
+                        <text v-if="item.text1">{{ item.text1 }}</text>
+                    </view>
+                </view>
+                <view class="popup_main popup_input_con flex_cloumn" v-if="popupData.pupupType === 'input'">
                     <view v-for="item in popupData.popupContent" :key="item.id" class="popup_text_item">
                         <text>{{ item.text }}</text>
                         <text v-if="item.desc" class="popup_text_desc">{{ item.desc }}</text>
                     </view>
+                    <input class="popup_input" v-model.trim="inputData" type="text"
+                        :placeholder="popupData.placeholder">
                 </view>
                 <view class="popup_btn_con flex">
                     <button v-if="popupData.cancelText" class="popup_btn popup_btn_cancel flex_1"
@@ -100,6 +111,21 @@ defineExpose({
             .popup_text_desc {
                 color: #0C62FF;
             }
+        }
+    }
+
+    .popup_input_con {
+        margin-bottom: 30rpx;
+
+        .popup_input {
+            width: 452rpx;
+            height: 96rpx;
+            border-radius: 12rpx;
+            border: 1rpx solid #C0C0C0;
+            padding: 0 32rpx;
+            box-sizing: border-box;
+            margin: 24rpx auto 0;
+            text-align: left;
         }
     }
 

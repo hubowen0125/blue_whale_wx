@@ -15,6 +15,7 @@ import my from "@/static/images/packagingStation/tabbar/my.png"
 import my_active from "@/static/images/packagingStation/tabbar/my_active.png"
 import home_com from "../components/home/index.vue"
 import record_com from "../components/record/index.vue"
+import my_com from "../components/my/index.vue"
 
 // const useUser = useUserStore()
 // const useDataBoard = useDataBoardStore()
@@ -40,7 +41,7 @@ const tabbarList = [
         index: 2,
     },
 ]
-const tabBarIndex = ref(1)
+const tabBarIndex = ref(2)
 
 onLoad(() => {
     // proxy.$Loading()
@@ -75,15 +76,9 @@ provide('tabBarIndex', tabBarIndex);
             <view :class="[tabBarIndex == 1 ? 'opacity1' : 'opacity0']">
                 <record_com></record_com>
             </view>
-            <!-- <view :class="[tabBarIndex == 2 ? 'opacity1' : 'opacity0']">
-                <device_data></device_data>
+            <view :class="[tabBarIndex == 2 ? 'opacity1' : 'opacity0' , 'my_scroll']">
+                <my_com></my_com>
             </view>
-            <view :class="[tabBarIndex == 3 ? 'opacity1' : 'opacity0']">
-                <product_data></product_data>
-            </view>
-            <view :class="[tabBarIndex == 4 ? 'opacity1' : 'opacity0']">
-                <splitting_data></splitting_data>
-            </view> -->
         </view>
         <view class="tabbar_con">
             <com-tabBar :tabBarIndex="tabBarIndex" :tabbarList="tabbarList" @setTabBarIndex="setTabBarIndex">
@@ -106,6 +101,11 @@ provide('tabBarIndex', tabBarIndex);
 
     .opacity1 {
         height: 100%;
+    }
+
+    .my_scroll{
+        overflow-x: hidden;
+        overflow-y: auto;
     }
 
     :deep(.van-calendar__day--start) {

@@ -38,19 +38,19 @@ const identityList = [
         title: '我是厂家',
         iamge: icon_1,
         key: '1',
-        className:'icon_1'
+        className: 'icon_1'
     },
     {
         key: '2',
         iamge: icon_2,
         title: '我是批发商',
-        className:'icon_2',
+        className: 'icon_2',
     },
     {
         title: '我是打包站',
         iamge: icon_3,
         key: '3',
-        className:'icon_3'
+        className: 'icon_3'
     },
 ]
 const popupData = ref()
@@ -134,7 +134,8 @@ const confirmPopupFu = () => {
                 height: 36rpx;
                 margin-left: 20rpx;
             }
-            .identity_item_title{
+
+            .identity_item_title {
                 text-align: right;
             }
 
@@ -142,13 +143,19 @@ const confirmPopupFu = () => {
                 width: 240rpx;
                 height: 240rpx;
             }
-            .icon_1{
+
+            .icon_1 {
                 margin-top: -50rpx;
             }
-            .icon_3{
+
+            .icon_3 {
                 margin-top: 5rpx;
             }
         }
+    }
+
+    .button_defalut {
+        width: 606rpx;
     }
 }
 </style>

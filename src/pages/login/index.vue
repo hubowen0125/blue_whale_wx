@@ -175,7 +175,7 @@ const viewProtocolFu = (key: any) => {
                 content: "";
                 width: 2rpx;
                 height: 22rpx;
-                background:  #9299BA;
+                background: #9299BA;
                 position: absolute;
                 left: 80%;
                 top: 50%;
@@ -242,8 +242,10 @@ const viewProtocolFu = (key: any) => {
             color: #2C64C1;
         }
     }
-    .button_defalut{
+
+    .button_defalut {
         margin-top: 120rpx;
+        width: 606rpx;
     }
 }
 </style>

@@ -32,7 +32,36 @@ const inventoryDetail = [
         button: true
     },
 ]
+const popupData = {
+    popupTitle: '修改核点数量',
+    pupupType: 'input',
+    popupContent: [
+        {
+            text: '原核点数量: ',
+            desc: '20手'
+        },
+    ],
+    cancelText: '取消',
+    confirmText: '确认',
+    placeholder: '请输入数量',
+}
+const popupCom = ref()
 
+const modifyFu = () => {
+    popupCom.value.showPopup()
+}
+
+
+/**
+ * 确认选择
+ */
+const confirmPopupFu = () => {
+    console.log('324324');
+    // popupData.value = popupList[1]
+    // setTimeout(() => {
+    //     popupCom.value.showPopup()
+    // }, 200);
+}
 
 </script>
 
@@ -55,7 +84,7 @@ const inventoryDetail = [
                     <view class="flex_1  inventory_details_item_value" :class="{ 'flex_align flex_end': item.button }">
                         <view>{{ item.value }}</view>
                         <view v-if="item.value1">{{ item.value1 }}</view>
-                        <button class="inventory_details_item_button" v-if="item.button">修改</button>
+                        <button class="inventory_details_item_button" v-if="item.button" @click="modifyFu">修改</button>
                     </view>
                 </view>
             </view>
@@ -81,6 +110,7 @@ const inventoryDetail = [
             <button class="delete_record_button">删除记录</button>
         </view>
     </view>
+    <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="confirmPopupFu"></com-popup_com>
 </template>
 
 
