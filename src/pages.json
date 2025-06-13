@@ -31,7 +31,7 @@
             }
         },
         {
-            "path": "pages/packagingStation/deliveryQueue/index",
+            "path": "pages/packagingStation/orderDetails/index",
             "style": {
                 "navigationStyle": "custom"
             }
@@ -74,6 +74,24 @@
         },
         {
             "path": "pages/wholesaler/home/index",
+            "style": {
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/wholesaler/orderDetails/index",
+            "style": {
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/wholesaler/operationRecord/index",
+            "style": {
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/wholesaler/returnOrder/index",
             "style": {
                 "navigationStyle": "custom"
             }

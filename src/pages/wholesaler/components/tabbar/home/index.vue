@@ -62,12 +62,9 @@ const scrolltolower = () => {
     // resetManageDevicesParams()
 }
 
-
-
 // 确认弹窗
 const confirmPopupFu = () => {
     console.log('1111');
-
 }
 </script>
 
