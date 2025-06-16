@@ -13,20 +13,8 @@ const { proxy } = getCurrentInstance() as any;
 // 功能列表
 const funList = [
     {
-        name: '我的批发商',
-        path: '/pages/packagingStation/myWholesaler/index'
-    },
-    {
-        name: '报表管理',
-        path: '/pages/packagingStation/myReport/index'
-    },
-    {
-        name: '员工管理',
+        name: '我的员工',
         path: '/pages/packagingStation/myEmployees/index'
-    },
-    {
-        name: '打印机设置',
-        path: ''
     },
     {
         name: '联系客服',
@@ -34,7 +22,7 @@ const funList = [
     },
     {
         name: '用户协议',
-        path: ''
+        path: '/pages/packagingStation/myWholesaler/index'
     },
     {
         name: '隐私政策',
@@ -77,8 +65,8 @@ watch(() => tabBarIndex.value, (newVal) => {
  */
 const toPageFu = (item: any) => {
     const { path } = item
-    console.log(path , 'path');
-    
+    console.log(path, 'path');
+
     if (!path) return
     uni.navigateTo({
         url: path
@@ -88,9 +76,14 @@ const toPageFu = (item: any) => {
 // 确认弹窗
 const confirmPopupFu = () => {
     console.log('1111');
-
 }
 
+// 立即续费
+const renewFu = () => {
+    uni.navigateTo({
+        url: '/pages/wholesaler/renewalMembership/index'
+    })
+}
 
 </script>
 
@@ -117,11 +110,11 @@ const confirmPopupFu = () => {
             <view>
                 <view class="flex_align">
                     <image class="member_icon" :src="member_icon"></image>
-                    <text class="member_name">打包站</text>
+                    <text class="member_name">批发商</text>
                 </view>
                 <view class="member_desc">有效期至 2026-05-16</view>
             </view>
-            <button class="flex_align member_btn flex_center">
+            <button class="flex_align member_btn flex_center" @click="renewFu">
                 <text>立即续费</text>
                 <image class="arrow_right" :src="arrow_right"></image>
             </button>

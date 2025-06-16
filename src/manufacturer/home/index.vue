@@ -12,8 +12,8 @@ import my_active from "@/static/images/wholesaler/tabbar/my_active.png"
 import home_com from "../components/tabbar/home/index.vue"
 import order_com from "../components/tabbar/order/index.vue"
 import order_card_com from "../components/tabbar/orderCard/index.vue"
-import goods_shelves_com from "../components/tabbar/goodsShelves/index.vue"
-import my_com from "../components/tabbar/my/index.vue"
+// import goods_shelves_com from "../components/tabbar/goodsShelves/index.vue"
+// import my_com from "../components/tabbar/my/index.vue"
 
 
 const { proxy } = getCurrentInstance() as any
@@ -50,7 +50,7 @@ const tabbarList = [
         index: 4,
     },
 ]
-const tabBarIndex = ref(4)
+const tabBarIndex = ref(0)
 
 onLoad(() => {
     // proxy.$Loading()
@@ -75,7 +75,7 @@ provide('tabBarIndex', tabBarIndex);
     <view class="container flex_column">
         <view class="tabbar_main container_defalut_bg flex_1">
             <view :class="[tabBarIndex == 0 ? 'opacity1' : 'opacity0']">
-                <home_com></home_com>
+                <home_com @setTabBarIndex="setTabBarIndex"></home_com>
             </view>
             <view :class="[tabBarIndex == 1 ? 'opacity1' : 'opacity0']">
                 <order_com></order_com>
@@ -83,12 +83,12 @@ provide('tabBarIndex', tabBarIndex);
             <view :class="[tabBarIndex == 2 ? 'opacity1' : 'opacity0']">
                 <order_card_com></order_card_com>
             </view>
-            <view :class="[tabBarIndex == 3 ? 'opacity1' : 'opacity0']">
+            <!-- <view :class="[tabBarIndex == 3 ? 'opacity1' : 'opacity0']">
                 <goods_shelves_com></goods_shelves_com>
             </view>
             <view :class="[tabBarIndex == 4 ? 'opacity1' : 'opacity0', 'my_scroll']">
                 <my_com></my_com>
-            </view>
+            </view> -->
         </view>
         <view class="tabbar_con">
             <com-tabBar :tabBarIndex="tabBarIndex" :tabbarList="tabbarList" @setTabBarIndex="setTabBarIndex">

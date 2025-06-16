@@ -13,6 +13,12 @@
             }
         },
         {
+            "path": "pages/downloadImages/index",
+            "style": {
+                "navigationStyle": "custom"
+            }
+        },
+        {
             "path": "pages/packagingStation/home/index",
             "style": {
                 "navigationStyle": "custom"
@@ -95,6 +101,79 @@
             "style": {
                 "navigationStyle": "custom"
             }
+        },
+        {
+            "path": "pages/wholesaler/orderCardInformation/index",
+            "style": {
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/wholesaler/selectProduct/index",
+            "style": {
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/wholesaler/orderNow/index",
+            "style": {
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/wholesaler/orderCardDetails/index",
+            "style": {
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/wholesaler/orderConfirmation/index",
+            "style": {
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/wholesaler/renewalMembership/index",
+            "style": {
+                "navigationStyle": "custom"
+            }
+        }
+    ],
+    "subPackages": [
+        {
+            "root": "manufacturer",
+            "pages": [
+                {
+                    "path": "home/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "orderDetails/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "operationRecord/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "deliverGoodsDetail/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "cashierPage/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                }
+            ]
         }
     ],
     "globalStyle": {

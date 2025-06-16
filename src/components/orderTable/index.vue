@@ -63,20 +63,8 @@ const selectItemFu = () => {
 
 <template>
     <view class="order_table">
-        <view class="flex order_info">
-            <view class="order_image_con">
-                <image class="order_image"></image>
-                <view class="order_image_tips">下载图片</view>
-            </view>
-            <view class="flex_column flex_1">
-                <view>儿童服装公主版</view>
-                <view class="flex_1 order_number">服号：123456789</view>
-                <view class="order_price">
-                    <text class="order_price_icon">¥</text>
-                    <text>100</text>
-                </view>
-            </view>
-            <view class="order_unit_con">
+        <com-orderInfo>
+            <template #button>
                 <template v-if="orderType == 'handleOrder'">
                     <view class="order_unit">1手/5件</view>
                     <view class="order_unit_price">¥200</view>
@@ -94,12 +82,13 @@ const selectItemFu = () => {
                         <text :class="[selectItem ? 'checkbox_active' : '']">剩余全退</text>
                     </view>
                 </template>
-            </view>
-        </view>
+            </template>
+        </com-orderInfo>
         <view class="table_container">
             <!-- 表头 -->
             <view class="table_row table_header">
-                <view :class="['table_cell', orderType == 'handleOrder' ? 'table_cell_input' : '']"
+                <view
+                    :class="['table_cell', orderType == 'handleOrder' && col.key == 'pending' ? 'table_cell_input' : '']"
                     v-for="(col, index) in columns" :key="index">
                     {{ col.title }}
                 </view>
@@ -107,7 +96,7 @@ const selectItemFu = () => {
             <!-- 表格数据 -->
             <view class="table_row" v-for="(row, rowIndex) in data" :key="rowIndex">
                 <template v-for="(col, colIndex) in columns" :key="colIndex">
-                    <view class="table_cell table_cell_input" v-if="orderType == 'handleOrder'">
+                    <view class="table_cell table_cell_input" v-if="orderType == 'handleOrder' && col.key == 'pending'">
                         <view class="flex_align flex_center table_cell_input_con">
                             <view class="table_cell_btn table_cell_btn_minus">-</view>
                             <input class="tabler_cell_input" type="number" v-model="row[col.key]">
@@ -124,107 +113,52 @@ const selectItemFu = () => {
 
 
 <style lang="scss" scoped>
-.order_info {
-    gap: 20rpx;
+.order_unit {
+    padding: 12rpx 16rpx;
+    background: rgba(12, 104, 255, 0.03);
+    border-radius: 12rpx;
+    border: 1rpx solid #CDE1FF;
+    font-weight: 400;
+    font-size: 26rpx;
+    color: #0C62FF;
+    margin-bottom: 20px;
+}
+
+.order_unit_price {
     font-weight: 500;
     font-size: 28rpx;
+    color: #F73030;
+}
+
+.order_quantity {
+    padding: 8rpx 14rpx;
+    font-weight: 500;
+    font-size: 26rpx;
+    color: #0C62FF;
+    background: rgba(12, 104, 255, 0.03);
+    border-radius: 12rpx;
+    border: 1rpx solid #CDE1FF;
+}
+
+.order_refund_btn {
+    gap: 12rpx;
+    font-weight: 500;
+    font-size: 26rpx;
     color: #202020;
-    margin-bottom: 36rpx;
 
-    .order_image_con {
-        position: relative;
-        width: 140rpx;
-        height: 140rpx;
-        border-radius: 16rpx;
-        overflow: hidden;
-
-        .order_image {
-            width: 140rpx;
-            height: 140rpx;
-        }
-
-        .order_image_tips {
-            width: 140rpx;
-            height: 40rpx;
-            background: rgba(1, 7, 18, 0.4);
-            font-weight: 400;
-            font-size: 20rpx;
-            color: #FFFFFF;
-            line-height: 40rpx;
-            text-align: center;
-            position: absolute;
-            bottom: 0;
-            left: 0;
-        }
-
+    .checkbox_active {
+        color: #0C62FF;
     }
 
-    .order_number {
-        font-weight: 400;
-        font-size: 24rpx;
-        color: #7C8191;
+    .checkbox {
+        width: 30rpx;
+        height: 30rpx;
     }
-
-    .order_price {
-        font-weight: 500;
-        font-size: 32rpx;
-        color: #202020;
-
-        .order_price_icon {
-            font-size: 24rpx;
-        }
-    }
-
-    .order_unit_con {
-
-        .order_unit {
-            padding: 12rpx 16rpx;
-            background: rgba(12, 104, 255, 0.03);
-            border-radius: 12rpx;
-            border: 1rpx solid #CDE1FF;
-            font-weight: 400;
-            font-size: 26rpx;
-            color: #0C62FF;
-            margin-bottom: 20px;
-        }
-
-        .order_unit_price {
-            font-weight: 500;
-            font-size: 28rpx;
-            color: #F73030;
-        }
-
-        .order_quantity {
-            padding: 8rpx 14rpx;
-            font-weight: 500;
-            font-size: 26rpx;
-            color: #0C62FF;
-            background: rgba(12, 104, 255, 0.03);
-            border-radius: 12rpx;
-            border: 1rpx solid #CDE1FF;
-        }
-
-        .order_refund_btn {
-            gap: 12rpx;
-            font-weight: 500;
-            font-size: 26rpx;
-            color: #202020;
-
-            .checkbox_active {
-                color: #0C62FF;
-            }
-
-            .checkbox {
-                width: 30rpx;
-                height: 30rpx;
-            }
-        }
-    }
-
 }
 
 .table_container {
     width: 100%;
+    margin-top: 36rpx;
 
     .table_row {
         display: flex;
