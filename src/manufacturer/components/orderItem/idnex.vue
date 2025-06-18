@@ -1,12 +1,28 @@
 <script lang="ts" setup>
+import { dateStrToDateFormat, formatNumber } from '@/utils/utils'
+
+const props = defineProps({
+    orderData: {
+        type: Object as () => {
+            orderNo: string,
+            status: number,
+            totalHandNum: number,
+            totalNum: number,
+            totalAmount: number,
+            createTime: string,
+            statusMsg: string
+        },
+        default: () => ({})
+    }
+})
 
 
 // 查看订单详情
 const viewOrderDetailFu = () => {
-  console.log('查看订单详情')
-  uni.navigateTo({
-    url: '/manufacturer/orderDetails/index?order_id=GuLang008'
-  })
+    console.log('查看订单详情')
+    uni.navigateTo({
+        url: '/manufacturer/orderDetails/index?order_id=GuLang008'
+    })
 }
 
 </script>
@@ -16,20 +32,20 @@ const viewOrderDetailFu = () => {
     <view class="order_item flex_column" @click="viewOrderDetailFu">
         <view class="order_item_title flex_align">
             <view class="order_unpaid">未付清</view>
-            <view class="flex_1">订单号: GuLang008</view>
-            <view class="order_item_status">待发货</view>
+            <view class="flex_1">订单号: {{ orderData.orderNo }}</view>
+            <view class="order_item_status">{{ orderData.statusMsg }}</view>
         </view>
         <view class="order_item_info flex">
             <view>陈冠希</view>
             <view class="flex_1 order_item_info_address">上海</view>
-            <view>23手</view>
+            <view>{{ orderData.totalHandNum }}手</view>
         </view>
         <view class="flex_align order_item_price">
-            <view class="flex_1">下单时间: 2025-05-05 11:26</view>
-            <view class="order_item_price_old">¥100</view>
+            <view class="flex_1">下单时间: {{ dateStrToDateFormat(orderData.createTime, '') }}</view>
+            <view class="order_item_price_old">¥{{ formatNumber(orderData.totalAmount) }}</view>
             <view class="flex_align">
                 <text>已收:</text>
-                <text class="order_item_price_new">¥100</text>
+                <text class="order_item_price_new">¥{{ formatNumber(100)}}</text>
             </view>
         </view>
     </view>

@@ -13,7 +13,7 @@ const roderCardList = [
         titleEn: 'Send order cards to wholesalers',
         image: card_1,
         key: 1,
-        path: '/pages/wholesaler/orderCardInformation/index'
+        path: '/manufacturer/selectProduct/index'
     },
     {
         title: '选择货架商品进行订货',

@@ -11,6 +11,7 @@ const props = defineProps({
             cancelText?: string;
             confirmText?: string;
             placeholder?: string;
+            callBack?: boolean
         },
         default: () => ({
             popupTitle: '',
@@ -18,7 +19,8 @@ const props = defineProps({
             popupContent: undefined,
             cancelText: undefined,
             confirmText: undefined,
-            placeholder: ''
+            placeholder: '',
+            callBack: true
         }),
     }
 })
@@ -39,9 +41,12 @@ const closePopupFu = () => {
 // 确认弹窗
 const confirmPopupFu = () => {
     closePopupFu()
-    setTimeout(() => {
-        emit('confirmPopupFu')
-    }, 200);
+    console.log(props.popupData.callBack , '000000');
+    if (props.popupData.callBack) {
+        setTimeout(() => {
+            emit('confirmPopupFu')
+        }, 200);
+    }
 }
 
 defineExpose({

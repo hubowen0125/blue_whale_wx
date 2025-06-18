@@ -12,8 +12,8 @@ import my_active from "@/static/images/wholesaler/tabbar/my_active.png"
 import home_com from "../components/tabbar/home/index.vue"
 import order_com from "../components/tabbar/order/index.vue"
 import order_card_com from "../components/tabbar/orderCard/index.vue"
-// import goods_shelves_com from "../components/tabbar/goodsShelves/index.vue"
-// import my_com from "../components/tabbar/my/index.vue"
+import goods_shelves_com from "../components/tabbar/goodsShelves/index.vue"
+import my_com from "../components/tabbar/my/index.vue"
 
 
 const { proxy } = getCurrentInstance() as any
@@ -50,7 +50,7 @@ const tabbarList = [
         index: 4,
     },
 ]
-const tabBarIndex = ref(0)
+const tabBarIndex = ref(4)
 
 onLoad(() => {
     // proxy.$Loading()
@@ -83,12 +83,12 @@ provide('tabBarIndex', tabBarIndex);
             <view :class="[tabBarIndex == 2 ? 'opacity1' : 'opacity0']">
                 <order_card_com></order_card_com>
             </view>
-            <!-- <view :class="[tabBarIndex == 3 ? 'opacity1' : 'opacity0']">
+            <view :class="[tabBarIndex == 3 ? 'opacity1' : 'opacity0']">
                 <goods_shelves_com></goods_shelves_com>
             </view>
             <view :class="[tabBarIndex == 4 ? 'opacity1' : 'opacity0', 'my_scroll']">
                 <my_com></my_com>
-            </view> -->
+            </view>
         </view>
         <view class="tabbar_con">
             <com-tabBar :tabBarIndex="tabBarIndex" :tabbarList="tabbarList" @setTabBarIndex="setTabBarIndex">
@@ -116,6 +116,7 @@ provide('tabBarIndex', tabBarIndex);
     .my_scroll {
         overflow-x: hidden;
         overflow-y: auto;
+        background: #F2F1F5;
     }
 
     :deep(.van-calendar__day--start) {

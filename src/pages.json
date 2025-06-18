@@ -19,121 +19,13 @@
             }
         },
         {
-            "path": "pages/packagingStation/home/index",
+            "path": "pages/myEmployees/index",
             "style": {
                 "navigationStyle": "custom"
             }
         },
         {
-            "path": "pages/packagingStation/scanningResults/index",
-            "style": {
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/packagingStation/inventoryDetails/index",
-            "style": {
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/packagingStation/orderDetails/index",
-            "style": {
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/packagingStation/myWholesaler/index",
-            "style": {
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/packagingStation/wholesalerDetails/index",
-            "style": {
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/packagingStation/addWholesaler/index",
-            "style": {
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/packagingStation/myReport/index",
-            "style": {
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/packagingStation/myEmployees/index",
-            "style": {
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/packagingStation/addEmployee/index",
-            "style": {
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/wholesaler/home/index",
-            "style": {
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/wholesaler/orderDetails/index",
-            "style": {
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/wholesaler/operationRecord/index",
-            "style": {
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/wholesaler/returnOrder/index",
-            "style": {
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/wholesaler/orderCardInformation/index",
-            "style": {
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/wholesaler/selectProduct/index",
-            "style": {
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/wholesaler/orderNow/index",
-            "style": {
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/wholesaler/orderCardDetails/index",
-            "style": {
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/wholesaler/orderConfirmation/index",
-            "style": {
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/wholesaler/renewalMembership/index",
+            "path": "pages/addEmployee/index",
             "style": {
                 "navigationStyle": "custom"
             }
@@ -169,6 +61,202 @@
                 },
                 {
                     "path": "cashierPage/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "selectProduct/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "orderCard/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "createOrder/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "orderCardDetails/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "orderConfirmation/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "productDetails/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "addProduct/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "addParameters/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "wholesalerList/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "addWholesaler/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                }
+            ]
+        },
+        {
+            "root": "wholesaler",
+            "pages": [
+                {
+                    "path": "home/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "orderDetails/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "operationRecord/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "returnOrder/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "orderCardInformation/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "selectProduct/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "orderNow/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "orderCardDetails/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "orderConfirmation/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "renewalMembership/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                }
+            ]
+        },
+        {
+            "root": "packagingStation",
+            "pages": [
+                {
+                    "path": "home/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "scanningResults/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "inventoryDetails/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "orderDetails/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "myWholesaler/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "wholesalerDetails/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "addWholesaler/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "myReport/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "myEmployees/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "addEmployee/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "printerSettings/index",
                     "style": {
                         "navigationStyle": "custom"
                     }

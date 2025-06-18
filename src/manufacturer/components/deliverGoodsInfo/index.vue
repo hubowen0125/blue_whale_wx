@@ -1,9 +1,31 @@
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import arrow_right from "@/static/images/arrow_right.png"
+
+const props = defineProps({
+    deliverInfo: {
+        type: Object,
+        default: () => ({})
+    },
+    edit: {
+        type: Boolean,
+        default: false
+    }
+})
+
+
+</script>
 
 
 <template>
     <view class="deliver_goods_info flex_column">
-        <view>送货信息</view>
+        <!-- <view>送货信息</view> -->
+        <view class="flex_between select_con">
+            <view>送货信息</view>
+            <view v-if="edit" class="flex_align select_desc">
+                <text>请选择</text>
+                <image class="arrow_right" :src="arrow_right"></image>
+            </view>
+        </view>
         <view class="flex_align deliver_goods_info_item">
             <view>配送站信息</view>
             <view class="flex_1">
@@ -12,6 +34,7 @@
                 <view class="deliver_goods_tel">13601805978</view>
             </view>
         </view>
+        <slot name="input"></slot>
     </view>
 </template>
 
@@ -25,6 +48,20 @@
     gap: 24rpx;
     background: #FFFFFF;
     border-radius: 24rpx;
+
+    .select_con {
+        .select_desc {
+            font-weight: 500;
+            font-size: 28rpx;
+            color: #0C62FF;
+        }
+
+        .arrow_right {
+            width: 28rpx;
+            height: 28rpx;
+            margin-right: 8rpx;
+        }
+    }
 
     .deliver_goods_info_item {
         background: #F2F6FF;

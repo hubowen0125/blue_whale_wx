@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { infoApi } from "@/manufacturer/http/manufacturer"
+import { orderPageApi } from "@/http/api/all"
 import position_1 from "@/static/images/position_1.png"
 import arrow_right_1 from "@/static/images/arrow_right_1.png"
 import long_arrow from "@/static/images/long_arrow.png"
@@ -42,9 +44,15 @@ const popupData = {
 
 const popupCom = ref()
 const tabBarIndex = inject("tabBarIndex") as Ref<number>
+const params = reactive({
+    pageNum: 1,
+    pageSize: 10,
+})
+const orderList = ref([])
 
 onMounted(() => {
     // popupCom.value.showPopup()
+    // orderPageFu()
 })
 
 
@@ -53,6 +61,27 @@ watch(() => tabBarIndex.value, (newVal) => {
         console.log('213213');
     }
 })
+
+/**
+ * 分页查询订单
+ */
+const orderPageFu = () => {
+    proxy.$Loading();
+    orderPageApi(params).then((res: any) => {
+        const { code, data, msg } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data, 'datadata');
+            orderList.value = data.datas
+            console.log(orderList.value, 'orderList');
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
 
 /**
  * 滑动加载
@@ -102,8 +131,8 @@ const lookAll = () => {
                 lower-threshold="50"
                 @scrolltolower="scrolltolower">
                 <view class="order_list flex_column">
-                    <template v-for="item in 10" :key="item">
-                        <orderItem></orderItem>
+                    <template v-for="item in orderList" :key="item.orderNo">
+                        <orderItem :orderData="item"></orderItem>
                     </template>
                 </view>
             </scroll-view>

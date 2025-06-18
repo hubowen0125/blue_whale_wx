@@ -1,66 +1,85 @@
 <script lang="ts" setup>
+import { getSmsCodeApi, verifySmsApi, getUserInfoApi } from '@/http/api/all';
 import { checkStr } from '@/utils/utils';
 import checkbox from "@/static/images/checkbox.png"
 import checkbox_active from "@/static/images/checkbox_active.png"
+import { useUserStore } from '@/store/modules/user';
 
-
+const useUser = useUserStore()
 const { proxy } = getCurrentInstance() as any;
 
+let timer: any
 const loginParams = reactive({
-    phone: '',
-    smsCode: ''
+    phone: '18003764250',
+    code: '888888'
 })
 const pointerBtn = ref(false)
 const codeBtn = ref('获取验证码')
 const checked = ref(false)
+
+
+onLoad((e) => {
+    if (e && e.code) {
+        proxy.$CloseLoading();
+        useUser.resetState()
+        useUser.setJump401Fu(false)
+    }
+})
+
+onShow(() => {
+    if (useUser.jump401) {
+        useUser.setJump401Fu(false)
+    }
+})
 
 /**
  * 获取验证吗
  * @param judge 判断当前是否需要图形验证 
  */
 const setTimeFu = () => {
-    // pointerBtn.value = true
-    // const { phone } = loginParams.value
-    // if (!checkStr(phone)) {
-    //     proxy.$Toast({ title: '请输入正确手机号' });
-    //     pointerBtn.value = false;
-    //     return;
-    // }
-    // proxy.$Loading();
-    // sendLoginSmsCodeApi({ phone }).then((res: any) => {
-    //     proxy.$CloseLoading();
-    //     const { code, msg } = res
-    //     if (code == 'S000000') {
-    //         let countDown = 60
-    //         codeBtn.value = countDown + 's后重新获取'
-    //         timer = setInterval(() => {
-    //             countDown--
-    //             codeBtn.value = countDown + 's后重新获取'
-    //             if (countDown == 0) {
-    //                 codeBtn.value = '获取验证码'
-    //                 pointerBtn.value = false
-    //                 clearInterval(timer)
-    //             }
-    //         }, 1000)
-    //     } else {
-    //         pointerBtn.value = false;
-    //         proxy.$Toast({ title: msg })
-    //     }
-    // }, (req => {
-    //     pointerBtn.value = false;
-    //     proxy.$CloseLoading();
-    //     proxy.$Toast({ title: req.msg })
-    // }))
+    pointerBtn.value = true
+    const { phone } = loginParams
+    if (!checkStr(phone)) {
+        proxy.$Toast({ title: '请输入正确手机号' });
+        pointerBtn.value = false;
+        return;
+    }
+    proxy.$Loading();
+    getSmsCodeApi({ phone }).then((res: any) => {
+        proxy.$CloseLoading();
+        const { code, msg } = res
+        if (code == proxy.$successCode) {
+            let countDown = 60
+            codeBtn.value = countDown + 's后重新获取'
+            timer = setInterval(() => {
+                countDown--
+                codeBtn.value = countDown + 's后重新获取'
+                if (countDown == 0) {
+                    codeBtn.value = '获取验证码'
+                    pointerBtn.value = false
+                    clearInterval(timer)
+                }
+            }, 1000)
+        } else {
+            pointerBtn.value = false;
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        pointerBtn.value = false;
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+
 }
 
 
 const formSubmit = (e: any) => {
-    const { phone, smsCode } = loginParams
+    const { phone, code } = loginParams
     if (!checkStr(phone)) {
         proxy.$Toast({ title: '请输入正确手机号' });
         return
     }
-    if (smsCode.length < 6) {
+    if (code.length < 6) {
         proxy.$Toast({ title: '请输入正确验证码' });
         return
     }
@@ -68,24 +87,56 @@ const formSubmit = (e: any) => {
         proxy.$Toast({ title: '请先同意用户协议' })
         return
     }
-    // proxy.$Loading();
-    // loginBySmsCodeApi(loginParams.value).then((res: any) => {
-    //     proxy.$CloseLoading();
-    //     const { code, data, msg } = res
-    //     if (code == 'S000000') {
-    //         useUser.setTokenFu(data.token)
-    //         useUser.setUserInfoFu(data.userInfo)
-    //         // uni.navigateBack()
-    //         uni.reLaunch({
-    //             url: '/pages/tabbar/index'
-    //         })
-    //     } else {
-    //         proxy.$Toast({ title: msg })
-    //     }
-    // }, (req => {
-    //     proxy.$CloseLoading();
-    //     proxy.$Toast({ title: req.msg })
-    // }))
+    proxy.$Loading();
+    verifySmsApi(loginParams).then((res: any) => {
+        const { code, data, msg, token } = res
+        if (code == proxy.$successCode) {
+            useUser.setTokenFu(token)
+            getUserInfoFu()
+        } else {
+            proxy.$CloseLoading();
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+const getUserInfoFu = () => {
+    getUserInfoApi().then((res: any) => {
+        const { code, data, msg } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            useUser.setUserInfoFu(data.sysUser)
+            useUser.setMiniRoleFu(data.miniRole)
+            console.log(data.miniRole, '213');
+            if (data.miniRole == 'guest') {
+                uni.redirectTo({
+                    url: '/pages/chooseIdentity/index'
+                })
+            }
+            if (data.miniRole == 'manufacturer') {
+                uni.redirectTo({
+                    url: '/manufacturer/home/index'
+                })
+            }
+            if (data.miniRole == 'wholesale') {
+                uni.redirectTo({
+                    url: '/wholesaler/home/index'
+                })
+            }
+            if (data.miniRole == 'packaging') {
+                uni.redirectTo({
+                    url: '/packagingStation/home/index'
+                })
+            }
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$Toast({ title: req.msg })
+    }))
 }
 
 /**
@@ -112,7 +163,7 @@ const viewProtocolFu = (key: any) => {
             </view>
             <view class="input_con flex_align">
                 <input class="input flex_1" placeholder="请输入验证码" maxlength="6" name="smsCode" type="number"
-                    v-model.trim="loginParams.smsCode">
+                    v-model.trim="loginParams.code">
                 <button class="code_btn" @click="setTimeFu" hover-class="pointer"
                     hover-stay-time="2000" :disabled="pointerBtn">
                     {{ codeBtn }}

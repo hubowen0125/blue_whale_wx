@@ -26,14 +26,14 @@ const request = (requestData: any) => {
             data: requestData.method == 'GET' ? requestData.params : requestData.data,
             header: {
                 'content-type': 'application/json',
-                'token': token,
+                'authorization': token,
                 'source': 'wechat'
             },
             dataType: 'json',
             timeout: 20000
         }).then(async (response: any) => {
             const code = response.data.code
-            if (code == 'F000001') {
+            if (code == '401') {
                 if (!useUser.jump401) {
                     useUser.setJump401Fu(true)
                     uni.hideLoading()

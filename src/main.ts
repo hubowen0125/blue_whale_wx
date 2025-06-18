@@ -75,6 +75,7 @@ export function createApp() {
     app.config.globalProperties.$Toast = toastFu;
     app.config.globalProperties.$Loading = loadingFu
     app.config.globalProperties.$CloseLoading = uni.hideLoading
+    app.config.globalProperties.$successCode = 200
 
     app.use(pinia)
     app.mixin(shareMixin)

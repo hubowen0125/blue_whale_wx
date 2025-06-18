@@ -1,10 +1,14 @@
 <script lang="ts" setup>
+import { getUserInfoApi, updateUserRoleApi } from "@/http/api/all"
 import checkbox from "@/static/images/checkbox.png"
 import checkbox_active from "@/static/images/checkbox_active.png"
-import icon_1 from "@/static/images/chooseIdentity/icon_1.png"
-import icon_2 from "@/static/images/chooseIdentity/icon_2.png"
-import icon_3 from "@/static/images/chooseIdentity/icon_3.png"
+import manufacturer_icon from "@/static/images/chooseIdentity/manufacturer_icon.png"
+import wholesale_icon from "@/static/images/chooseIdentity/wholesale_icon.png"
+import packaging_icon from "@/static/images/chooseIdentity/packaging_icon.png"
+import { useUserStore } from "@/store/modules/user"
 
+const useUser = useUserStore()
+const { proxy } = getCurrentInstance() as any;
 
 const popupList = [
     {
@@ -21,6 +25,7 @@ const popupList = [
         ],
         cancelText: '返回修改',
         confirmText: '确认选择',
+        callBack: true
     },
     {
         popupTitle: '提示',
@@ -31,36 +36,47 @@ const popupList = [
             }
         ],
         confirmText: '我知道了',
+        callBack: false
     }
 ]
+
 const identityList = [
     {
         title: '我是厂家',
-        iamge: icon_1,
-        key: '1',
+        iamge: manufacturer_icon,
+        key: 'manufacturer',
         className: 'icon_1'
     },
     {
-        key: '2',
-        iamge: icon_2,
         title: '我是批发商',
+        iamge: wholesale_icon,
+        key: 'wholesale',
         className: 'icon_2',
     },
     {
         title: '我是打包站',
-        iamge: icon_3,
-        key: '3',
+        iamge: packaging_icon,
+        key: 'packaging',
         className: 'icon_3'
     },
 ]
 const popupData = ref()
-const activeIndex = ref('')
 const popupCom = ref()
+const params = reactive({
+    userName: useUser.userInfo.userName,
+    userRole: ''
+})
+const roleTitle = ref('')
 
 
 const handleConfirmFu = () => {
     console.log('213213');
-    popupData.value = popupList[0]
+    if (params.userRole == '') {
+        proxy.$Toast({ title: '请选择身份' })
+        return
+    }
+    popupData.value = { ...popupList[0] }
+    popupData.value.popupContent[0].desc = roleTitle.value
     popupCom.value.showPopup()
 }
 
@@ -68,11 +84,41 @@ const handleConfirmFu = () => {
  * 确认选择
  */
 const confirmPopupFu = () => {
-    console.log('324324');
-    // popupData.value = popupList[1]
-    // setTimeout(() => {
-    //     popupCom.value.showPopup()
-    // }, 200);
+    proxy.$Loading();
+    updateUserRoleApi(params).then((res: any) => {
+        const { code, data, msg, miniRole } = res
+        if (code == proxy.$successCode) {
+            console.log('code');
+            getUserInfoFu()
+            if (params.userRole == 'packaging') {
+                popupData.value = { ...popupList[1] }
+                popupCom.value.showPopup()
+            } else {
+                uni.redirectTo({
+                    url: '/manufacturer/home/index'
+                })
+            }
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+const getUserInfoFu = () => {
+    getUserInfoApi().then((res: any) => {
+        const { code, data, msg } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            useUser.setUserInfoFu(data.sysUser)
+            useUser.setMiniRoleFu(data.miniRole)
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$Toast({ title: req.msg })
+    }))
 }
 
 </script>
@@ -84,10 +130,10 @@ const confirmPopupFu = () => {
         <view class="container_desc">帮助我们更好地为您提供服务</view>
         <view class="identity_list flex_column">
             <view class="identity_item flex_align" v-for="item in identityList" :key="item.key"
-                @click="activeIndex = item.key">
+                @click="params.userRole = item.key, roleTitle = item.title">
                 <image class="identity_item_image" :class="item.className" :src="item.iamge"></image>
                 <view class="identity_item_title flex_1">{{ item.title }}</view>
-                <image class="identity_item_checkbox" :src="activeIndex == item.key ? checkbox_active : checkbox" />
+                <image class="identity_item_checkbox" :src="params.userRole == item.key ? checkbox_active : checkbox" />
             </view>
         </view>
         <button class="button_defalut" @click="handleConfirmFu">确认选择</button>
