@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { wholesaleListApi } from '@/wholesaler/http/wholesaler';
 import { useUserStore } from '@/store/modules/user';
 
 const useUser = useUserStore()
@@ -6,6 +7,48 @@ const { proxy } = getCurrentInstance() as any;
 
 
 const tabBarIndex = inject("tabBarIndex") as Ref<number>
+const isLoad = ref(false) // 是否加载
+const slideLoading = ref(true) // 是否需要滑动加载
+const paramsPage = reactive({
+    pageNum: 1,
+    pageSize: 10,
+})
+// 货架列表
+const shelfList = ref<Array<any>>([])
+
+
+watch(() => tabBarIndex.value, (newVal) => {
+    if (newVal == 3 && !isLoad.value) {
+        console.log('213213');
+        isLoad.value = true
+        wholesaleListFu()
+    }
+})
+
+/**
+ * 获取货架列表
+ */
+const wholesaleListFu = () => {
+    proxy.$Loading()
+    wholesaleListApi({}, paramsPage).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data, '0000');
+            if (data && data.length > 0) {
+                shelfList.value = shelfList.value.concat(data)
+            }
+            if (data.length < paramsPage.pageSize) {
+                slideLoading.value = false
+            }
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
 
 /**
  * 立即订货
@@ -25,14 +68,14 @@ const handleBuyFu = () => {
         <com-searchInput placeholder="搜索厂家"></com-searchInput>
         <view class="main_con flex_1 flex_column">
             <view class="companys_list flex_column">
-                <view class="companys_item flex_column" v-for="items in 3" :key="items">
+                <view class="companys_item flex_column" v-for="(items, index) in shelfList" :key="index">
                     <view class="companys_item_title flex_align flex_between">
-                        <view>上海蓝鲸童装有限公司</view>
+                        <view>{{ items.dept.deptName }}</view>
                         <button class="btn_buy" @click="handleBuyFu">立即订货</button>
                     </view>
                     <view class="product_list flex_column">
-                        <template v-for="item in 4" :key="item">
-                            <com-orderInfo></com-orderInfo>
+                        <template v-for="item in items.productsList" :key="item.id">
+                            <com-orderInfo :productDetail="item"></com-orderInfo>
                         </template>
                     </view>
                 </view>

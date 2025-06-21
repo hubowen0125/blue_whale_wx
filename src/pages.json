@@ -1,6 +1,12 @@
 {
     "pages": [
         {
+            "path": "pages/loading/index",
+            "style": {
+                "navigationStyle": "custom"
+            }
+        },
+        {
             "path": "pages/login/index",
             "style": {
                 "navigationStyle": "custom"
@@ -189,6 +195,12 @@
                     "style": {
                         "navigationStyle": "custom"
                     }
+                },
+                {
+                    "path": "shareOrderCard/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
                 }
             ]
         },
@@ -244,18 +256,6 @@
                     }
                 },
                 {
-                    "path": "myEmployees/index",
-                    "style": {
-                        "navigationStyle": "custom"
-                    }
-                },
-                {
-                    "path": "addEmployee/index",
-                    "style": {
-                        "navigationStyle": "custom"
-                    }
-                },
-                {
                     "path": "printerSettings/index",
                     "style": {
                         "navigationStyle": "custom"
@@ -268,7 +268,9 @@
         "navigationBarTextStyle": "black",
         "navigationBarBackgroundColor": "#ffffff",
         "backgroundColor": "#ffffff",
-        "usingComponents": {}
+        "usingComponents": {
+            "van-popup": "/wxcomponents/vant-weapp/popup/index"
+        }
     },
     "easycom": {
         "autoscan": true,

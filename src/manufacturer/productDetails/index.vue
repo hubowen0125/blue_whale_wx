@@ -1,43 +1,97 @@
 <script lang="ts" setup>
+import { getByIdApi } from '../http/manufacturer';
+
+
+const { proxy } = getCurrentInstance() as any;
 
 const productDetails = [
     {
         title: '商品名称',
-        value: '儿童短袖',
+        value: 'productName',
         required: true
     },
     {
         title: '商品款号',
-        value: '20019',
+        value: 'styleNumber',
         required: true
     },
     {
         title: '尺码',
-        value: '8-12',
+        value: 'sizeName',
         required: true
     },
     {
         title: '颜色',
-        value: '白色、红色',
+        value: 'colors',
         required: true
     },
     {
         title: '价格',
-        value: '¥200',
+        value: 'price',
         required: true
     },
     {
         title: '一手件数',
-        value: '一手5件',
+        value: 'unitQuantity',
         required: true
-    },
-    {
-        title: '库存',
-        value: '20',
-        required: true
-    },
+    }
 ]
 
+const productId = ref('')
+let productDetailsData = ref<any>({
+    productName: '',
+    styleNumber: '',
+    sizeName: '',
+    colors: '',
+    price: '',
+    unitQuantity: '',
+    productImagesList: []
+})
+
+onLoad((e: any) => {
+    if (e.id) {
+        productId.value = e.id
+        getByIdFu()
+    }
+})
+
+onShow(() => {
+    const pages = getCurrentPages()
+    const currentPage = pages[pages.length - 1]
+    // @ts-ignore
+    if (currentPage.$vm.loading) {
+        console.log(currentPage.$vm.sizeActive, '00000selectActiveList');
+        getByIdFu()
+    }
+})
+
+const getByIdFu = () => {
+    proxy.$Loading()
+    getByIdApi({ id: productId.value }).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data, '0000');
+            let colors = ''
+            data.productColorsList.map((item: any) => {
+                colors += item.colorName + '、'
+            })
+            data.colors = colors.substring(0, colors.length - 1)
+            productDetailsData.value = data
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+const editProductFu = () => {
+    uni.navigateTo({
+        url: '/manufacturer/addProduct/index?id=' + productId.value
+    })
+}
 </script>
 
 
@@ -49,19 +103,22 @@ const productDetails = [
             <view class="product_img_con flex_column">
                 <view class="product_title">商品图片</view>
                 <view class="img_list">
-                    <image class="img" v-for="item in 5" :key="item"></image>
+                    <template v-for="(item, index) in productDetailsData.productImagesList" :key="index">
+                        <image class="img" :src="item.imageUrl"></image>
+                    </template>
                 </view>
             </view>
             <view class="product_detail">
-                <view class="product_detail_item flex_align flex_between" v-for="item, index in productDetails">
+                <view class="product_detail_item flex_align flex_between" v-for="item, index in productDetails"
+                    :key="index">
                     <view class="flex_align product_detail_item_title">{{ item.title }}</view>
                     <view class="flex_1  product_detail_item_value">
-                        <view>{{ item.value }}</view>
+                        <view>{{ productDetailsData[item.value] }}</view>
                     </view>
                 </view>
             </view>
         </view>
-        <view class="footer_con"><button class="button_defalut">商品编辑</button></view>
+        <view class="footer_con"><button class="button_defalut" @click="editProductFu">商品编辑</button></view>
     </view>
 </template>
 

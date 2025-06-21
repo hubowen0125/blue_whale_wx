@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { productsPageApi } from '@/manufacturer/http/manufacturer';
 import { useUserStore } from '@/store/modules/user';
 
 const useUser = useUserStore()
@@ -21,12 +22,46 @@ const inventoryType = [
 ]
 
 const tabBarIndex = inject("tabBarIndex") as Ref<number>
+const paramsPage = reactive({
+    pageNum: 1,
+    pageSize: 10,
+})
+const productList = ref<any[]>([])
+const isLoad = ref(false) // 是否加载
+const slideLoading = ref(true) // 是否需要滑动加载
 
 watch(() => tabBarIndex.value, (newVal) => {
-    if (newVal == 0) {
+    if (newVal == 3 && !isLoad.value) {
         console.log('213213');
+        isLoad.value = true
+        productsPageFu()
     }
 })
+
+/**
+ * 获取商品列表
+ */
+const productsPageFu = () => {
+    proxy.$Loading()
+    productsPageApi({}, paramsPage).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data, '0000');
+            if (data.datas && data.datas.length > 0) {
+                productList.value = [...productList.value, ...data.datas]
+            }
+            if (data.datas.length < paramsPage.pageSize) {
+                slideLoading.value = false
+            }
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
 
 /**
  * 创建订单
@@ -46,6 +81,28 @@ const addProductFu = () => {
     })
 }
 
+/**
+ * 查看商品详情
+ * @param productDetail 
+ */
+const viewDetailsFu = (productDetail: any) => {
+    uni.navigateTo({
+        url: `/manufacturer/productDetails/index?id=${productDetail.id}`
+    })
+}
+
+
+
+/**
+ * 滑动加载
+ */
+const scrolltolower = () => {
+    console.log('滑动加载');
+    if (!slideLoading.value) return
+    paramsPage.pageNum += 1
+    productsPageFu()
+}
+
 </script>
 
 
@@ -63,11 +120,13 @@ const addProductFu = () => {
             </view>
         </view>
         <view class="main_con flex_1 flex_column">
-            <view class="product_lsit flex_column">
-                <view v-for="item in 10" :key="item">
-                    <com-orderInfo></com-orderInfo>
+            <scroll-view class="scroll_con" scroll-y="true" lower-threshold="50" @scrolltolower="scrolltolower">
+                <view class="product_lsit flex_column">
+                    <view v-for="item in productList" :key="item.id">
+                        <com-orderInfo :productDetail="item" @viewDetailsFu="viewDetailsFu"></com-orderInfo>
+                    </view>
                 </view>
-            </view>
+            </scroll-view>
         </view>
         <view class="footer_con flex">
             <button class="create_btn" @click="createOrderFu">创建订单</button>

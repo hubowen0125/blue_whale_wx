@@ -1,27 +1,44 @@
 <script lang="ts" setup>
 
+const emit = defineEmits(['viewDetailsFu']);
+
 const props = defineProps({
     needDownload: {
         type: Boolean,
         default: true
+    },
+    productDetail: {
+        type: Object,
+        default: () => ({
+            productName: '',
+            styleNumber: '',
+            price: 0
+        })
     }
 });
+
+/**
+ * 查看详情
+ */
+const viewDetailsFu = () => {
+    emit('viewDetailsFu', props.productDetail);
+}
 
 
 </script>
 
 <template>
-    <view class="flex order_info">
+    <view class="flex order_info" @click="viewDetailsFu">
         <view :class="['order_image_con', needDownload ? '' : 'pointer']">
             <image class="order_image"></image>
             <view v-if="needDownload" class="order_image_tips">下载图片</view>
         </view>
         <view class="flex_column flex_1">
-            <view>儿童服装公主版</view>
-            <view class="flex_1 order_number">服号：123456789</view>
+            <view>{{ productDetail.productName }}</view>
+            <view class="flex_1 order_number">款号: {{ productDetail.styleNumber }}</view>
             <view class="order_price">
                 <text class="order_price_icon">¥</text>
-                <text>100</text>
+                <text>{{ productDetail.price }}</text>
             </view>
         </view>
         <view class="order_unit_con">

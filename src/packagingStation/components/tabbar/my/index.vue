@@ -18,7 +18,7 @@ const funList = [
     },
     {
         name: '员工管理',
-        path: '/packagingStation/myEmployees/index'
+        path: '/pages/myEmployees/index?userRole=packaging'
     },
     {
         name: '打印机设置',

@@ -2,28 +2,30 @@
 
 const emit = defineEmits(['confirmPopupFu'])
 
-const props = defineProps({
-    popupData: {
-        type: Object as () => {
-            popupTitle: string;
-            pupupType: string;
-            popupContent?: any[];
-            cancelText?: string;
-            confirmText?: string;
-            placeholder?: string;
-            callBack?: boolean
-        },
-        default: () => ({
-            popupTitle: '',
-            pupupType: 'default',
-            popupContent: undefined,
-            cancelText: undefined,
-            confirmText: undefined,
-            placeholder: '',
-            callBack: true
-        }),
-    }
-})
+interface POPUPDATA {
+    popupTitle: string;
+    pupupType: string;
+    popupContent?: any[];
+    cancelText?: string;
+    confirmText?: string;
+    placeholder?: string;
+    callBack?: boolean
+}
+
+const props = withDefaults(defineProps<{
+    popupData: POPUPDATA;
+}>(), {
+    popupData: () => ({
+        popupTitle: '',
+        pupupType: 'default',
+        popupContent: undefined,
+        cancelText: undefined,
+        confirmText: undefined,
+        placeholder: '',
+        callBack: true
+    }),
+});
+
 const popupRef = ref();
 const inputData = ref('');
 
@@ -35,17 +37,30 @@ const showPopup = () => {
 // 关闭弹窗
 const closePopupFu = () => {
     popupRef.value.close();
-    inputData.value = '';
+    setTimeout(() => {
+        inputData.value = '';
+    }, 500);
 }
 
 // 确认弹窗
 const confirmPopupFu = () => {
-    closePopupFu()
-    console.log(props.popupData.callBack , '000000');
+    console.log(props.popupData.callBack, '000000');
     if (props.popupData.callBack) {
+        if (props.popupData.pupupType === 'input') {
+            if (inputData.value === '') {
+                uni.showToast({
+                    title: '请输入内容',
+                    icon: 'none'
+                });
+                return;
+            }
+        }
+        closePopupFu()
         setTimeout(() => {
-            emit('confirmPopupFu')
+            emit('confirmPopupFu', inputData.value)
         }, 200);
+    } else {
+        closePopupFu()
     }
 }
 

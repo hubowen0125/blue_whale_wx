@@ -1,54 +1,63 @@
 <script lang="ts" setup>
 import checkbox from "@/static/images/checkbox.png"
 import checkbox_active from "@/static/images/checkbox_active.png"
+import { handleInput, formatNumber } from "@/utils/utils"
 
 
 const props = defineProps({
     orderType: {
         type: String,  // show 展示   handleOrder 下单  handleRefund 退款
         default: 'show'
+    },
+    productDetail: {
+        type: Object,
+        default: {}
     }
 })
 
 const columns = [
     {
         title: '颜色',
-        key: 'color'
+        key: 'colorName'
     },
     {
         title: '尺码',
-        key: 'size'
+        key: 'sizeName'
     },
     {
         title: '数量',
-        key: 'quantity'
+        key: 'unitQuantity'
     },
     {
         title: '待发货',
-        key: 'pending'
+        key: 'handNum'
     }
 ]
 
-const data: any = [
-    {
-        color: '红色',
-        size: '5-13',
-        quantity: 1,
-        pending: 1
-    },
-    {
-        color: '红色1',
-        size: '5-13',
-        quantity: 1,
-        pending: 1
-    },
-    {
-        color: '红色2',
-        size: '5-13',
-        quantity: 1,
-        pending: 1
-    },
-]
+const tableDetail = computed(() => {
+    return props.productDetail
+})
+
+const totalAmount = computed(() => {
+    let total = 0
+    if (tableDetail.value && tableDetail.value.productColorsList?.length > 0) {
+        for (let j = 0; j < tableDetail.value.productColorsList.length; j++) {
+            total += tableDetail.value.price * tableDetail.value.productColorsList[j].handNum
+        }
+    }
+    return total
+})
+
+const totalNum = computed(() => {
+    let total = 0
+    const list = tableDetail.value.productColorsList
+    if (list.length > 0) {
+        for (let j = 0; j < list.length; j++) {
+            total += list[j].handNum
+        }
+    }
+    return total
+})
 
 // 单个选择
 const selectItem = ref(false)
@@ -58,21 +67,65 @@ const selectItemFu = () => {
     selectItem.value = !selectItem.value
 }
 
+/**
+ * 输入框输入值
+ * @param e 
+ * @param item 
+ * @param key 
+ */
+const inputValueFu = async (e: any, item: any,) => {
+    const value = e.target.value
+    const result = await handleInput(value) as string;
+    console.log(result, 'resultresultresult');
+    if (result) {
+        item.handNum = parseInt(result, 10)
+    } else {
+        item.handNum = 1
+    }
+}
+
+/**
+ * 减少数量
+ */
+const reduceFu = (item: any) => {
+    if (item.handNum == 1) {
+        return
+    } else {
+        item.handNum = item.handNum - 1
+    }
+}
+
+/**
+ * 增加数量
+ */
+const addFu = (item: any) => {
+    if (item.handNum == item.stockNum) {
+        return
+    } else {
+        item.handNum = item.handNum + 1
+    }
+}
+
+
+
+defineExpose({
+    tableDetail
+});
 </script>
 
 
 <template>
     <view class="order_table">
-        <com-orderInfo>
+        <com-orderInfo :productDetail="tableDetail">
             <template #button>
                 <template v-if="orderType == 'handleOrder'">
-                    <view class="order_unit">1手/5件</view>
-                    <view class="order_unit_price">¥200</view>
+                    <view class="order_unit">1手/{{ tableDetail.unitQuantity }}件</view>
+                    <view class="order_unit_price">¥{{ formatNumber(totalAmount) }}</view>
                 </template>
                 <template v-if="orderType == 'show'">
                     <view class="order_quantity">
                         <text>x</text>
-                        <text>200</text>
+                        <text>{{ totalNum }}</text>
                     </view>
                 </template>
                 <template v-if="orderType == 'handleRefund'">
@@ -88,23 +141,28 @@ const selectItemFu = () => {
             <!-- 表头 -->
             <view class="table_row table_header">
                 <view
-                    :class="['table_cell', orderType == 'handleOrder' && col.key == 'pending' ? 'table_cell_input' : '']"
+                    :class="['table_cell', orderType == 'handleOrder' && col.key == 'handNum' ? 'table_cell_input' : '']"
                     v-for="(col, index) in columns" :key="index">
                     {{ col.title }}
                 </view>
             </view>
             <!-- 表格数据 -->
-            <view class="table_row" v-for="(row, rowIndex) in data" :key="rowIndex">
+            <view class="table_row" v-for="(row, rowIndex) in tableDetail.productColorsList" :key="rowIndex">
                 <template v-for="(col, colIndex) in columns" :key="colIndex">
-                    <view class="table_cell table_cell_input" v-if="orderType == 'handleOrder' && col.key == 'pending'">
+                    <view class="table_cell table_cell_input" v-if="orderType == 'handleOrder' && col.key == 'handNum'">
                         <view class="flex_align flex_center table_cell_input_con">
-                            <view class="table_cell_btn table_cell_btn_minus">-</view>
-                            <input class="tabler_cell_input" type="number" v-model="row[col.key]">
-                            <view class="table_cell_btn table_cell_btn_plus">+</view>
+                            <view class="table_cell_btn table_cell_btn_minus" @click="reduceFu(row)">-</view>
+                            <input class="tabler_cell_input"
+                                type="number"
+                                @input="(e: any) => inputValueFu(e, row)"
+                                :value="row.handNum">
+                            <view class="table_cell_btn table_cell_btn_plus" @click="addFu(row)">+</view>
                         </view>
                     </view>
-                    <view :class="['table_cell', col.key == 'pending' ? 'w' : '']" v-else>{{
-                        row[col.key] }}</view>
+                    <view :class="['table_cell', orderType == 'show' && col.key == 'handNum' ? 'table_cell_color' : '']"
+                        v-else>{{
+                            ['sizeName', 'unitQuantity'].includes(col.key) ? tableDetail[col.key] :
+                                row[col.key] }}</view>
                 </template>
             </view>
         </view>
@@ -121,7 +179,7 @@ const selectItemFu = () => {
     font-weight: 400;
     font-size: 26rpx;
     color: #0C62FF;
-    margin-bottom: 20px;
+    margin-bottom: 8px;
 }
 
 .order_unit_price {
@@ -216,7 +274,7 @@ const selectItemFu = () => {
             }
         }
 
-        .table_cell_pending {
+        .table_cell_color {
             color: #FF840C;
         }
 

@@ -1,12 +1,15 @@
 <script lang="ts" setup>
+import { manufacturerWholesaleAddApi } from "@/manufacturer/http/manufacturer";
+import { sysRegionListApi } from "@/http/api/all"
 import arrow_bottom from "@/static/images/arrow_bottom.png"
+import { areasMap } from "@/utils/utils";
 
 const { proxy } = getCurrentInstance() as any;
 
 const inputList = [
     {
         label: '批发商名称',
-        value: '',
+        value: 'wholesaleName',
         type: 'input',
         placeholder: '请输入批发商名称',
         maxlength: 20,
@@ -15,7 +18,7 @@ const inputList = [
     },
     {
         label: '批发商地区',
-        value: '',
+        value: 'areaDetail',
         type: 'select',
         placeholder: '请选择批发商地区',
         inputType: 'text',
@@ -24,7 +27,7 @@ const inputList = [
     },
     {
         label: '详细地址',
-        value: '',
+        value: 'address',
         type: 'input',
         placeholder: '请输入详情地址',
         maxlength: 100,
@@ -33,7 +36,7 @@ const inputList = [
     },
     {
         label: '批发商手机号',
-        value: '',
+        value: 'wholesalePhone',
         type: 'input',
         placeholder: '请输入批发商手机号',
         maxlength: 11,
@@ -51,6 +54,101 @@ const inputList = [
     },
 ]
 
+const addParams = reactive({
+    wholesaleName: '',
+    wholesalePhone: '',
+    districtIds: '',
+    address: '',
+})
+const cascaderOptions = ref<any>([])
+const selectedProvinceIndex = ref(0)
+const selectedCityIndex = ref(0)
+const selectedDistrictIndex = ref(0)
+const areaDetail = ref('请选择')
+const showArea = ref(false)
+
+onMounted(() => {
+    sysRegionListFu()
+})
+
+const sysRegionListFu = () => {
+    sysRegionListApi().then((res: any) => {
+        const { code, data, msg } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data);
+            cascaderOptions.value = areasMap(data);
+            // infoDetails.value = data
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+/**
+ * 关闭省市区选择
+ */
+const onClose = () => {
+    showArea.value = false
+}
+
+/**
+ * 省市区选择
+ * @param e 
+ */
+const bindPickerChange = (e: any) => {
+    const [provinceIndex, cityIndex, districtIndex] = e.detail.value;
+    if (selectedProvinceIndex.value != provinceIndex) {
+        selectedProvinceIndex.value = provinceIndex;
+        selectedCityIndex.value = 0;
+        selectedDistrictIndex.value = 0;
+    } else {
+        selectedProvinceIndex.value = provinceIndex;
+        if (selectedCityIndex.value != cityIndex) {
+            selectedCityIndex.value = cityIndex;
+            selectedDistrictIndex.value = 0;
+        } else {
+            selectedDistrictIndex.value = districtIndex
+        }
+    }
+}
+
+const confirmSelection = () => {
+    const province = cascaderOptions.value[selectedProvinceIndex.value].text || '';
+    const provinceCode = cascaderOptions.value[selectedProvinceIndex.value].value || '';
+    let city
+    let cityCode
+    let district
+    let districtCode
+    if (cascaderOptions.value[selectedProvinceIndex.value].children) {
+        city = cascaderOptions.value[selectedProvinceIndex.value].children[selectedCityIndex.value]?.text || ''
+        cityCode = cascaderOptions.value[selectedProvinceIndex.value]?.children[selectedCityIndex.value]?.value || ''
+        if (cascaderOptions.value[selectedProvinceIndex.value].children[selectedCityIndex.value].children) {
+            district = cascaderOptions.value[selectedProvinceIndex.value]?.children[selectedCityIndex.value]?.children[selectedDistrictIndex.value]?.text || ''
+            districtCode = cascaderOptions.value[selectedProvinceIndex.value]?.children[selectedCityIndex.value]?.children[selectedDistrictIndex.value]?.value || ''
+        } else {
+            district = ''
+            districtCode = ''
+        }
+    } else {
+        city = ''
+        cityCode = ''
+        district = ''
+        districtCode = ''
+    }
+    areaDetail.value = `${province}${city}${district}`
+    // areaParams.value.provinceCode = provinceCode
+    // areaParams.value.cityCode = cityCode
+    // areaParams.value.areaCode = districtCode
+    // areaParams.value.provinceName = province
+    // areaParams.value.cityName = city
+    // areaParams.value.areaName = district
+    showArea.value = false
+}
+
 const formSubmit = (e: any) => {
     console.log(e, 'formSubmit');
 }
@@ -63,7 +161,8 @@ const formSubmit = (e: any) => {
         <view class="main_con flex_1">
             <form @submit="formSubmit">
                 <view class="form_con flex_column">
-                    <view class="form_item " v-for="item in inputList" :key="item.label">
+                    <view class="form_item " v-for="item in inputList" :key="item.label"
+                        @click="item.type === 'select' && (showArea = true)">
                         <text class="form_label">{{ item.label }}</text>
                         <view class="form_input flex_align">
                             <input class="flex_1" :placeholder="item.placeholder" :maxlength="item.maxlength"
@@ -75,6 +174,39 @@ const formSubmit = (e: any) => {
                 </view>
             </form>
         </view>
+        <van-popup
+            :show="showArea"
+            round
+            custom-style="height: 80%;"
+            position="bottom">
+            <view class="popup_main flex_column">
+                <view class="flex_between popup_btn_con">
+                    <view class="btn_1" @click="onClose">取消</view>
+                    <view class="btn_2" @click="confirmSelection">确定</view>
+                </view>
+                <picker-view @change="bindPickerChange" class="picker_view flex_1"
+                    :value="[selectedProvinceIndex, selectedCityIndex, selectedDistrictIndex]">
+                    <picker-view-column class="picker_view_column">
+                        <view v-for="(province, index) in cascaderOptions" :key="index" class="flex_align flex_center">
+                            {{
+                                province.text }}</view>
+                    </picker-view-column>
+                    <picker-view-column class="picker_view_column"
+                        v-if="cascaderOptions[selectedProvinceIndex]?.children">
+                        <view v-for="(province, index) in cascaderOptions[selectedProvinceIndex].children" :key="index"
+                            class="flex_align flex_center">{{
+                                province.text }}</view>
+                    </picker-view-column>
+                    <picker-view-column class="picker_view_column"
+                        v-if="cascaderOptions[selectedProvinceIndex] && cascaderOptions[selectedProvinceIndex].children && cascaderOptions[selectedProvinceIndex].children[selectedCityIndex]?.children">
+                        <view
+                            v-for="(province, index) in cascaderOptions[selectedProvinceIndex].children[selectedCityIndex].children"
+                            class="flex_align flex_center"
+                            :key="index">{{ province.text }}</view>
+                    </picker-view-column>
+                </picker-view>
+            </view>
+        </van-popup>
     </view>
 </template>
 

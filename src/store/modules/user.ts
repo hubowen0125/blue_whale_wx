@@ -6,13 +6,14 @@ export const useUserStore = defineStore('use', () => {
     const wxNavObj = getWxNav()
 
     const token = ref('')
-    const miniRole = ref('') // 小程序角色
+    const miniRole = ref('guest') // 小程序角色
     const userInfo = ref<any>({})
     const navHeight = ref(0)  // 导航栏高度
     const statusBarHeight = ref(0)  // 状态栏高度
     const statusBarWidth = ref(0)  // 状态栏宽度
     const statusBarLeft = ref(0)  // 状态栏左侧距离
     const jump401 = ref(false)
+    const shareParam = ref<any>({})
 
     const setTokenFu = (data: string) => {
         token.value = data
@@ -37,6 +38,10 @@ export const useUserStore = defineStore('use', () => {
         jump401.value = data
     }
 
+    const setShareParamFu = (data: any) => {
+        shareParam.value = data
+    }
+
     const resetState = () => {
         token.value = ''
         jump401.value = false
@@ -51,12 +56,14 @@ export const useUserStore = defineStore('use', () => {
         statusBarHeight,
         statusBarWidth,
         statusBarLeft,
+        shareParam,
         jump401,
         setTokenFu,
         setNavHeagihtFu,
         setUserInfoFu,
         setMiniRoleFu,
         setJump401Fu,
+        setShareParamFu,
         resetState
     }
 

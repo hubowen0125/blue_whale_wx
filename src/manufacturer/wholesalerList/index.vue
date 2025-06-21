@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { wholesalePageApi } from '../http/manufacturer';
+import { manufacturerWholesalePageApi } from '../http/manufacturer';
 
 
 const { proxy } = getCurrentInstance() as any;
@@ -19,6 +19,7 @@ const wholesalerDetails = [
         value: '100'
     },
 ]
+const wholesalerList = ref<Array<any>>([])
 
 onMounted(() => {
     wholesalePageFu()
@@ -28,7 +29,7 @@ onMounted(() => {
  * 获取批发商信息
  */
 const wholesalePageFu = () => {
-    wholesalePageApi().then((res: any) => {
+    manufacturerWholesalePageApi({}).then((res: any) => {
         const { code, data, msg } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
@@ -67,7 +68,7 @@ const addWholesalerFu = () => {
             </view>
         </view>
         <view class="main_con flex_1">
-            <view class="wholesaler_list flex_column">
+            <view class="wholesaler_list flex_column" v-if="wholesalerList.length > 0">
                 <view class="wholesaler_item flex_column" v-for="item in 20" :key="item">
                     <view>
                         <text>陈冠希</text>
@@ -82,6 +83,7 @@ const addWholesalerFu = () => {
                     </view>
                 </view>
             </view>
+            <com-no_data v-else noDataText="暂无批发商"></com-no_data>
         </view>
         <view class="footer_con"><button class="button_defalut" @click="addWholesalerFu">添加批发商</button></view>
     </view>

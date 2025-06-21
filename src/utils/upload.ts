@@ -1,13 +1,16 @@
 
 // import { getSignedUriApi } from "@/http/api/system"
-import { toastFu, loadingFu } from "./global";
+
+import { getSignedUriApi } from "@/http/api/all";
+import { toastFu } from "./utils";
+
 /**
  * 上传字节流
  * @param url 上传的目标URL
  * @param data 字节流数据
  * @returns Promise
  */
-export const uploadByteStream = (url: string, data: ArrayBuffer): Promise<WechatMiniprogram.RequestSuccessCallbackResult> => {
+export const uploadByteStream = (url: string, data: ArrayBuffer): Promise<any> => {
     return new Promise((resolve, reject) => {
         uni.request({
             url: url,
@@ -59,20 +62,20 @@ export const getFileArrayBuffer = (filePath: string): Promise<ArrayBuffer> => {
 export const getSignedUriFu = async (code: string, detail: { tempFilePath: string; }) => {
     const arrayBuffer = await getFileArrayBuffer(detail.tempFilePath);
     return new Promise((resolve) => {
-        // getSignedUriApi({ code, fileType: "jpg" }).then(async (res: any) => {
-        //     const { code, data, msg } = res
-        //     if (code == 'S000000') {
-        //         const response = await uploadByteStream(data.signedUrl, arrayBuffer) as any
-        //         if (response.code == 'S000000') {
-        //             resolve(data.uploadPath)
-        //         } else {
-        //             uni.hideLoading()
-        //             toastFu({ title: response.msg })
-        //         }
-        //     } else {
-        //         uni.hideLoading()
-        //         toastFu({ title: msg })
-        //     }
-        // })
+        getSignedUriApi({ code, fileType: "jpg" }).then(async (res: any) => {
+            const { code, data, msg } = res
+            if (code == 'S000000') {
+                const response = await uploadByteStream(data.signedUrl, arrayBuffer) as any
+                if (response.code == 'S000000') {
+                    resolve(data.uploadPath)
+                } else {
+                    uni.hideLoading()
+                    toastFu({ title: response.msg })
+                }
+            } else {
+                uni.hideLoading()
+                toastFu({ title: msg })
+            }
+        })
     });
 }

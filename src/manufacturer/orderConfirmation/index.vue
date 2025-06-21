@@ -1,10 +1,16 @@
 <script lang="ts" setup>
+import { manufacturerWholesalePageApi } from "../http/manufacturer"
 import arrow_right from "@/static/images/arrow_right.png"
 import off_icon from "@/static/images/off_icon.png"
 import position_1 from "@/static/images/position_1.png"
 import checkbox from "@/static/images/checkbox.png"
 import checkbox_active from "@/static/images/checkbox_active.png"
 import deliverGoodsInfo from "../components/deliverGoodsInfo/index.vue"
+import { useManufacturerStore } from "@/manufacturer/store/manufacturer";
+
+
+const useManufacturer = useManufacturerStore()
+const { proxy } = getCurrentInstance() as any;
 
 const orderDetails = [
     {
@@ -25,6 +31,26 @@ const orderDetails = [
 
 const wholesalerRef = ref();
 const popupRef = ref();
+
+onMounted(() => {
+    console.log('mounted');
+    manufacturerWholesalePageFu()
+})
+
+const manufacturerWholesalePageFu = () => {
+    manufacturerWholesalePageApi({}).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data, '0000');
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
 
 // 显示弹窗
 const showPopup = () => {

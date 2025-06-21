@@ -1,18 +1,76 @@
 <script lang="ts" setup>
+import { createAddApi } from "@/http/api/all";
 import del_icon from "@/static/images/del_icon.png"
 import off_icon from "@/static/images/off_icon.png"
+import { useManufacturerStore } from "@/manufacturer/store/manufacturer";
+import { useUserStore } from "@/store/modules/user";
+
+const useUser = useUserStore()
+const useManufacturer = useManufacturerStore()
+const { proxy } = getCurrentInstance() as any;
 
 const popupRef = ref();
+const cartList = ref<Array<any>>(useManufacturer.orderCard);
+const createParams = reactive<any>({
+    viewInventory: 1,
+    cardProductsParams: []
+})
+const orderNo = ref('CD202506211459020318')
 
 onMounted(() => {
-    popupRef.value.open('center')
+    // popupRef.value.open('center')
 })
+
+/**
+ * 删除商品
+ * @param id 
+ */
+const deleteProduct = (id: number) => {
+    const index = cartList.value.findIndex((item) => item.id === id)
+    cartList.value.splice(index, 1)
+    useManufacturer.setOrderCardFu(cartList.value)
+}
+
+/**
+ * 切换是否允许批发商查看库存
+ * @param e 
+ */
+const switchChangeFu = (e: any) => {
+    console.log(e, '4234');
+    const { value } = e.detail
+    createParams.viewInventory = value ? 0 : 1
+}
+
+/**
+ * 创建订单
+ */
+const createAddFu = async () => {
+    createParams.cardProductsParams = cartList.value.map((item) => {
+        return {
+            productsDetailParams: item.productColorsList,
+            productId: item.id,
+        }
+    })
+    await createAddApi(createParams).then((res: any) => {
+        const { code, data, msg } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            orderNo.value = data
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
 
 /**
  * 分享
  */
-const shareFu = () => {
-    popupRef.value.open('center')
+const shareFu = async () => {
+    // popupRef.value.open('center')
+    await createAddFu()
 }
 
 const formSubmit = (e: any) => {
@@ -27,13 +85,14 @@ const formSubmit = (e: any) => {
         <view class="main_con flex_1 flex_column">
             <view class="flex_align flex_between switch_con">
                 <view>是否允许批发商查看库存</view>
-                <switch color="#0C61FD" checked />
+                <switch color="#0C61FD" :checked="!createParams.viewInventory" @change="switchChangeFu"></switch>
             </view>
             <view class="product_lsit flex_column">
-                <view v-for="item in 10" :key="item">
-                    <com-orderInfo>
+                <view v-for="item in cartList" :key="item.id">
+                    <com-orderInfo :productDetail="item">
                         <template #button>
-                            <view class="del_btn flex_align">
+                            <view class="del_btn flex_align"
+                                @click="deleteProduct(item.id)">
                                 <image class="del_icon" :src="del_icon"></image>
                                 <view>删除</view>
                             </view>

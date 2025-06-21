@@ -62,9 +62,16 @@ uni.addInterceptor('navigateTo', {
 // 定义一个简单的 mixin
 const shareMixin: ComponentOptions<any> = {
     onShareAppMessage() {
+        const useUser = useUserStore()
+        console.log(useUser.shareParam, 'useUser.shareParamuseParams.shareParam');
+        if (useUser.shareParam.title) {
+            const obj = { ...useUser.shareParam }
+            useUser.setShareParamFu({})
+            return obj; // 如果页面已有定义，跳过全局 mixin
+        }
         return {
-            title: '茶活力经销商',
-            path: '/pages/tabbar/index',
+            title: '蓝鲸',
+            path: '/pages/loading/index',
             imageUrl: share
         };
     },

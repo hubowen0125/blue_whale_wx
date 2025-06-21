@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+declare const wx: any;
 
 type PrintContent =
     | { type: 'text'; text: string; align?: 'left' | 'center' | 'right'; bold?: boolean }
@@ -22,9 +23,13 @@ const content: PrintContent[] = [
     { type: 'text', text: '香蕉      1      2.50' },
     { type: 'text', text: '--------------------------' },
     { type: 'text', text: '合计：8.50元', align: 'right' },
-    { type: 'qrcode', content: 'https://youstore.com/pay/123456' },
     { type: 'text', text: '请扫码付款', align: 'center' }
 ]
+
+
+onMounted(() => {
+
+})
 
 /**
  * 搜索蓝牙打印机
@@ -37,7 +42,7 @@ const searchPrinter = () => {
             devices.value = [] // 每次重新搜索时清空列表
             startDiscovery()
         },
-        fail: (err) => {
+        fail: (err: any) => {
             console.error('蓝牙适配器初始化失败', err)
             status.value = '蓝牙初始化失败，请检查手机蓝牙是否开启'
         }
@@ -61,7 +66,7 @@ const startDiscovery = () => {
                 status.value = '搜索结束，请点击设备连接'
             }, 10000)
         },
-        fail: (err) => {
+        fail: (err: any) => {
             console.error('搜索蓝牙设备失败', err)
             status.value = '搜索失败，请重试'
         }
@@ -72,18 +77,15 @@ const startDiscovery = () => {
  * 监听发现新设备
  */
 const onDeviceFound = () => {
-    wx.onBluetoothDeviceFound((res) => {
+    wx.onBluetoothDeviceFound((res: { devices: any[]; }) => {
         res.devices.forEach((device) => {
             console.log('发现新设备:', device, device.connectable);
-            // if (
-            //     device.deviceId &&
-            //     (device.deviceId === defaultDevice || device.name?.includes('华为'))
-            // ) {
-            // 避免重复添加 并判断当前设备是否可连接
-            if (device.connectable && !devices.value.find(d => d.deviceId === device.deviceId)) {
-                devices.value.push(device)
+            if (device.name && device.name?.includes('HM-A300')) {
+                // 避免重复添加 并判断当前设备是否可连接
+                if (device.connectable && !devices.value.find(d => d.deviceId === device.deviceId)) {
+                    devices.value.push(device)
+                }
             }
-            // }
         })
     })
 }
@@ -96,7 +98,7 @@ const stopDiscovery = () => {
         success: () => {
             console.log('已停止搜索蓝牙设备')
         },
-        fail: (err) => {
+        fail: (err: any) => {
             console.error('停止搜索失败', err)
         }
     })
@@ -117,8 +119,9 @@ const connectBLEDevice = (device: any) => {
             console.log('连接成功', device.deviceId)
             getBLEDeviceServices(device.deviceId)
             getBLEMTU(device.deviceId)
+            stopDiscovery()
         },
-        fail: (err) => {
+        fail: (err: any) => {
             console.error('连接失败', err)
             status.value = '连接失败，请重试'
         }
@@ -132,10 +135,10 @@ const connectBLEDevice = (device: any) => {
 const getBLEMTU = (deviceId: string) => {
     wx.getBLEMTU({
         deviceId,
-        success: (res) => {
+        success: (res: any) => {
             console.log('获取设备MTU成功', res)
         },
-        fail: (err) => {
+        fail: (err: any) => {
             console.error('获取设备MTU失败', err)
         }
     })
@@ -160,8 +163,8 @@ const connectPrinter = (device: any) => {
 const getBLEDeviceServices = (deviceId: string) => {
     wx.getBLEDeviceServices({
         deviceId,
-        success: (res) => {
-            const service = res.services.find(s => s.isPrimary)
+        success: (res: { services: any[]; }) => {
+            const service = res.services.find((s: { isPrimary: any; }) => s.isPrimary)
             if (service) {
                 serviceId.value = service.uuid
                 getBLEDeviceCharacteristics(deviceId, service.uuid)
@@ -169,7 +172,7 @@ const getBLEDeviceServices = (deviceId: string) => {
                 console.warn('未找到主服务')
             }
         },
-        fail: (err) => {
+        fail: (err: any) => {
             console.error('获取设备服务失败', err)
         }
     })
@@ -184,9 +187,9 @@ const getBLEDeviceCharacteristics = (deviceId: string, serviceId: string) => {
     wx.getBLEDeviceCharacteristics({
         deviceId,
         serviceId,
-        success: (res) => {
+        success: (res: { characteristics: any[]; }) => {
             console.log('获取设备特征值成功', res)
-            const writeChar = res.characteristics.find(c => c.properties.write || c.properties.writeNoResponse)
+            const writeChar = res.characteristics.find((c: { properties: { write: any; writeNoResponse: any; }; }) => c.properties.write || c.properties.writeNoResponse)
             if (writeChar) {
                 characteristicId.value = writeChar.uuid
                 console.log('找到可写特征值:', characteristicId)
@@ -195,7 +198,7 @@ const getBLEDeviceCharacteristics = (deviceId: string, serviceId: string) => {
                 console.error('未找到可写特征值')
             }
         },
-        fail: (err) => {
+        fail: (err: any) => {
             console.error('获取设备特征值失败', err)
         }
     })
@@ -204,7 +207,7 @@ const getBLEDeviceCharacteristics = (deviceId: string, serviceId: string) => {
 /**
  * 监听连接状态变化
  */
-wx.onBLEConnectionStateChange((res) => {
+wx.onBLEConnectionStateChange((res: { connected: any; }) => {
     console.log('连接状态变化:', res)
     if (res.connected) {
         connected.value = true
@@ -227,57 +230,30 @@ wx.onBLEConnectionStateChange((res) => {
  */
 const generatePrintCommand = (data: PrintContent[]): ArrayBuffer => {
     const ESC = 0x1b
-    const GS = 0x1d
     const cmds: number[] = []
-
     const append = (...bytes: number[]) => cmds.push(...bytes)
-    const textToBytes = (text: string) => Array.from(new TextEncoder().encode(text))
+
+    // GBK编码函数
+    const textToGBK = (text: string): number[] => {
+        // 使用我们之前实现的gbkEncoder
+        // const gbkBytes = encodeToGBK(text);
+        // return Array.from(gbkBytes);
+        return []
+    }
 
     append(ESC, 0x40) // 初始化
-
     for (const item of data) {
         if (item.type === 'text') {
             // 对齐
             const alignMap = { left: 0, center: 1, right: 2 }
             append(ESC, 0x61, alignMap[item.align ?? 'left'])
-
             // 加粗
             append(ESC, 0x45, item.bold ? 1 : 0)
-
-            // 文本
-            append(...textToBytes(item.text))
+            // 文本（使用GBK编码）
+            append(...textToGBK(item.text))
             append(0x0a) // 换行
         }
-
-        if (item.type === 'barcode') {
-            append(ESC, 0x61, 1) // 居中
-            append(GS, 0x68, 60) // 高度
-            append(GS, 0x77, 2)  // 宽度
-            append(GS, 0x48, 2)  // 显示字符
-            append(GS, 0x6b, 0x04, ...textToBytes(item.content), 0x00)
-            append(0x0a)
-        }
-
-        if (item.type === 'qrcode') {
-            const content = item.content
-            const storeLen = content.length + 3
-            const pL = storeLen % 256
-            const pH = Math.floor(storeLen / 256)
-
-            // 设置二维码模型
-            append(GS, 0x28, 0x6b, 0x04, 0x00, 0x31, 0x41, 0x32, 0x00)
-            // 设置大小
-            append(GS, 0x28, 0x6b, 0x03, 0x00, 0x31, 0x43, 0x06)
-            // 设置纠错等级
-            append(GS, 0x28, 0x6b, 0x03, 0x00, 0x31, 0x45, 0x30)
-            // 存储数据
-            append(GS, 0x28, 0x6b, pL, pH, 0x31, 0x50, 0x30, ...textToBytes(content))
-            // 打印二维码
-            append(GS, 0x28, 0x6b, 0x03, 0x00, 0x31, 0x51, 0x30)
-            append(0x0a)
-        }
     }
-
     // 结束切纸（部分打印机会执行）
     append(0x1d, 0x56, 0x41, 0x10)
 
@@ -288,52 +264,56 @@ const generatePrintCommand = (data: PrintContent[]): ArrayBuffer => {
  * 发送打印数据
  */
 const printReceipt = () => {
-    const buffer = generatePrintCommand(content)
-    const maxChunkSize = 20
-    const chunks: Array<ArrayBuffer> = []
+    try {
+        const buffer = generatePrintCommand(content)
+        const maxChunkSize = 20
+        const chunks: Array<ArrayBuffer> = []
+        for (let i = 0; i < buffer.byteLength; i += maxChunkSize) {
+            chunks.push(buffer.slice(i, i + maxChunkSize))
+        }
+        let index = 0
+        const maxRetryCount = 3
+        let retryCount = 0
+        const sendChunk = () => {
+            if (index >= chunks.length) {
+                console.log('打印数据发送完成')
+                return
+            }
+            console.log(chunks[index], 'chunks[index]chunks[index]chunks[index]');
+            index++
 
-    for (let i = 0; i < buffer.byteLength; i += maxChunkSize) {
-        chunks.push(buffer.slice(i, i + maxChunkSize))
-    }
-
-    let index = 0
-    const maxRetryCount = 3
-    let retryCount = 0
-
-    const sendChunk = () => {
-        if (index >= chunks.length) {
-            console.log('打印数据发送完成')
-            return
+            // wx.writeBLECharacteristicValue({
+            //     deviceId: deviceId.value,
+            //     serviceId: serviceId.value,
+            //     characteristicId: characteristicId.value,
+            //     value: chunks[index],
+            //     success: () => {
+            //         console.log(`第 ${index + 1} 包发送成功`)
+            //         index++
+            //         retryCount = 0 // 成功后清零重试次数
+            //         setTimeout(sendChunk, 20)
+            //     },
+            //     fail: (err: any) => {
+            //         console.warn(`第 ${index + 1} 包发送失败`, err)
+            //         if (retryCount < maxRetryCount) {
+            //             retryCount++
+            //             console.warn(`重试第 ${index + 1} 包，第 ${retryCount} 次`)
+            //             setTimeout(sendChunk, 100) // 稍作延时再试
+            //         } else {
+            //             console.error(`第 ${index + 1} 包发送失败，已重试 ${maxRetryCount} 次，跳过`)
+            //             index++
+            //             retryCount = 0
+            //             setTimeout(sendChunk, 20)
+            //         }
+            //     }
+            // })
         }
 
-        wx.writeBLECharacteristicValue({
-            deviceId: deviceId.value,
-            serviceId: serviceId.value,
-            characteristicId: characteristicId.value,
-            value: chunks[index],
-            success: () => {
-                console.log(`第 ${index + 1} 包发送成功`)
-                index++
-                retryCount = 0 // 成功后清零重试次数
-                setTimeout(sendChunk, 20)
-            },
-            fail: (err) => {
-                console.warn(`第 ${index + 1} 包发送失败`, err)
-                if (retryCount < maxRetryCount) {
-                    retryCount++
-                    console.warn(`重试第 ${index + 1} 包，第 ${retryCount} 次`)
-                    setTimeout(sendChunk, 100) // 稍作延时再试
-                } else {
-                    console.error(`第 ${index + 1} 包发送失败，已重试 ${maxRetryCount} 次，跳过`)
-                    index++
-                    retryCount = 0
-                    setTimeout(sendChunk, 20)
-                }
-            }
-        })
-    }
+        sendChunk()
+    } catch (error) {
+        console.log(error, 'error');
 
-    sendChunk()
+    }
 }
 
 </script>
@@ -349,6 +329,7 @@ const printReceipt = () => {
             </view>
             <view class="status">状态: {{ status }}</view>
         </view>
+        <view class="footer_con"><button class="button_defalut" @click="printReceipt">打印</button></view>
     </view>
 </template>
 

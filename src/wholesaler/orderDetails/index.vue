@@ -1,46 +1,48 @@
 <script lang="ts" setup>
+import { getByOrderNoApi } from "@/http/api/order";
 import wait_icon from "@/static/images/wait_icon.png";
 import del_icon from "@/static/images/del_icon.png";
+import { dateStrToDateFormat, formatNumber } from "@/utils/utils";
 
 const { proxy } = getCurrentInstance() as any;
 
-const orderDetails = [
+const orderText = reactive([
     {
         title: '厂家',
-        value: '上海蓝鲸童装有限公司',
-        value1: '13601805978',
+        value: computed(() => orderDetails.value?.manufacturer?.deptName),
+        value1: computed(() => orderDetails.value?.manufacturer?.phone),
     },
     {
         title: '总件数',
-        value: '60手/100件',
+        value: computed(() => `${orderDetails.value?.totalHandNum}手/${orderDetails.value?.totalNum}件`),
     },
     {
         title: '核点',
-        value: '60手/100件',
+        value: computed(() => `${orderDetails.value?.checkHandNum}手/${orderDetails.value?.checkNum}件`),
     },
     {
         title: '总金额',
-        value: '100.00',
+        value: computed(() => formatNumber(orderDetails.value?.totalAmount)),
         type: 'price',
     },
     {
         title: '已收金额',
-        value: '100.00',
+        value: computed(() => formatNumber(orderDetails.value?.paymentAmount)),
         type: 'price',
     },
     {
         title: '订单号',
-        value: '5655892019801',
+        value: computed(() => orderDetails.value?.orderNo),
     },
     {
         title: '创建时间',
-        value: '2025-05-05 11:26',
+        value: computed(() => dateStrToDateFormat(orderDetails.value?.createTime, '')),
     },
     {
         title: '备注',
-        value: '轻拿轻放, 感谢',
+        value: computed(() => orderDetails.value?.remark),
     },
-]
+])
 const popupData = {
     popupTitle: '作废订单',
     pupupType: 'default',
@@ -54,6 +56,60 @@ const popupData = {
 }
 
 const popupCom = ref()
+const orderNo = ref('')
+const orderDetails = ref<any>({})
+
+const detailTitle = computed(() => {
+    switch (orderDetails.value?.status) {
+        case 0:
+            return '待配送'
+        case 1:
+            return '待发货'
+        case 2:
+            return '部分发货'
+        case 3:
+            return '待付款'
+        case 4:
+            return '完成'
+        case 5:
+            return '订单异常'
+        case 6:
+            return '已取消'
+        default:
+            return '待配送'
+    }
+})
+
+onLoad((e: any) => {
+    if (e.orderNo) {
+        orderNo.value = e.orderNo
+        getByOrderNoFu()
+    }
+})
+
+/**
+ * 获取订单详情
+ */
+const getByOrderNoFu = () => {
+    proxy.$Loading()
+    getByOrderNoApi({ orderNo: orderNo.value }).then((res: any) => {
+        const { code, data, msg } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data);
+            data.orderProductsList.map((item: any) => {
+                item.productColorsList = item.orderProductsDetailList
+                return item
+            })
+            orderDetails.value = data
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
 
 /**
  * 查看操作记录
@@ -88,12 +144,12 @@ const confirmPopupFu = () => {
             <view class="wait_con">
                 <view class="flex_align flex_center">
                     <image class="wait_icon" :src="wait_icon"></image>
-                    <text>待配送</text>
+                    <text>{{ detailTitle }}</text>
                 </view>
                 <view class="wait_num">已发货0/60</view>
             </view>
             <view class="order_details">
-                <view class="order_details_item flex_align flex_between" v-for="item, index in orderDetails"
+                <view class="order_details_item flex_align flex_between" v-for="item, index in orderText"
                     :key="index">
                     <view class="flex_align order_details_item_title">{{ item.title }}</view>
                     <view class="flex_1  order_details_item_value">
@@ -107,8 +163,11 @@ const confirmPopupFu = () => {
             <view class="order_info">
                 <view class="order_info_title">商品信息</view>
                 <view class="table_con flex_column">
-                    <template v-for="item in 10" :key="item">
-                        <com-orderTable></com-orderTable>
+                    <template v-for="item in orderDetails.orderProductsList" :key="item.id">
+                        <com-orderTable
+                            orderType="show"
+                            :productDetail="item">
+                        </com-orderTable>
                     </template>
                 </view>
             </view>

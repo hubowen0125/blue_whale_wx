@@ -1,11 +1,18 @@
 <script lang="ts" setup>
+import { getByCardNoApi, createOrderApi } from "@/http/api/all"
 import arrow_right from "@/static/images/arrow_right.png"
 import off_icon from "@/static/images/off_icon.png"
 import position_1 from "@/static/images/position_1.png"
 import checkbox from "@/static/images/checkbox.png"
 import checkbox_active from "@/static/images/checkbox_active.png"
+import { formatNumber } from "@/utils/utils";
+import { useUserStore } from "@/store/modules/user"
 
-const orderDetails = [
+let timer: any
+const useUser = useUserStore()
+const { proxy } = getCurrentInstance() as any;
+
+const orderDetails = reactive([
     {
         title: '厂家',
         value: '上海蓝鲸童装有限公司',
@@ -13,37 +20,113 @@ const orderDetails = [
     },
     {
         title: '总件数',
-        value: '60手/100件',
-    },
-    {
-        title: '核点',
-        value: '60手/100件',
+        // value: '60手/100件',
+        value: computed(() => `${createParams.totalHandNum}手/${createParams.totalNum}件`), // 动态绑定计算属性
     },
     {
         title: '总金额',
-        value: '100.00',
+        value: computed(() => `${formatNumber(createParams.totalAmount)}`), // 动态绑定计算属性,
         type: 'price',
     },
     {
         title: '已收金额',
-        value: '100.00',
+        value: computed(() => `${formatNumber(productDetail.value.paymentAmount)}`), // 动态绑定计算属性,
         type: 'price',
-    },
-    {
-        title: '订单号',
-        value: '5655892019801',
-    },
-    {
-        title: '创建时间',
-        value: '2025-05-05 11:26',
     },
     {
         title: '备注',
         value: '轻拿轻放, 感谢',
+        type: 'input'
     },
-]
+])
 
 const popupRef = ref();
+const cardNo = ref('');
+const productDetail = ref<any>({
+    cardProductsList: [],
+    paymentAmount: 0,
+    manufacturerId: '',
+    viewInventory: 0,
+})
+const type = ref('')
+const createParams = reactive<any>({
+    manufacturerId: computed(() => productDetail.value.manufacturerId),
+    wholesaleId: useUser.userInfo.userId,
+    packagingId: '130',
+    totalHandNum: computed(() => {
+        let total = 0
+        const list = productDetail.value.cardProductsList
+        if (list.length > 0) {
+            for (let i = 0; i < list.length; i++) {
+                for (let j = 0; j < list[i].productColorsList.length; j++) {
+                    total += list[i].productColorsList[j].handNum
+                }
+            }
+        }
+        return total
+    }),
+    totalNum: computed(() => {
+        let total = 0
+        const list = productDetail.value.cardProductsList
+        if (list.length > 0) {
+            for (let i = 0; i < list.length; i++) {
+                for (let j = 0; j < list[i].productColorsList.length; j++) {
+                    total += list[i].unitQuantity * list[i].productColorsList[j].handNum
+                }
+            }
+        }
+        return total
+    }),
+    totalAmount: computed(() => {
+        let total = 0
+        const list = productDetail.value.cardProductsList
+        if (list.length > 0) {
+            for (let i = 0; i < list.length; i++) {
+                for (let j = 0; j < list[i].productColorsList.length; j++) {
+                    total += list[i].price * list[i].productColorsList[j].handNum
+                }
+            }
+        }
+        return total
+    }),
+    remark: '',
+    cardProductsList: [],
+    viewInventory: computed(() => productDetail.value.viewInventory),
+})
+
+onLoad((e: any) => {
+    if (e.type == 'share') {
+        type.value = e.type
+        cardNo.value = e.cardNo
+        getByCardNoFu()
+    }
+})
+
+/**
+ * 获取分享订单详情
+ */
+const getByCardNoFu = () => {
+    getByCardNoApi({ cardNo: cardNo.value }).then((res: any) => {
+        const { code, data, msg } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data);
+            createParams.cardProductsList = data.cardProductsList
+            data.cardProductsList.map((item: { productColorsList: any; cardProductsDetailList: any; }) => {
+                item.productColorsList = item.cardProductsDetailList
+                return item
+            })
+            productDetail.value = data
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+
 
 // 显示弹窗
 const showPopup = () => {
@@ -56,7 +139,54 @@ const closePopupFu = () => {
     popupRef.value.close();
 }
 
+const handleOrderFu = () => {
+    console.log('立即下单');
+    if (type.value == 'share') {
+        createOrderFu()
+    }
+}
 
+
+/**
+ * 创建订单
+ */
+const createOrderFu = () => {
+    proxy.$Loading()
+    createOrderApi(createParams).then((res: any) => {
+        const { code, data, msg } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data);
+            proxy.$Toast({
+                title: '下单成功',
+                successCB: () => {
+                    timer = setTimeout(() => {
+                        // myEmployeeFu()
+                        uni.reLaunch({
+                            url: `/wholesaler/orderDetails/index?orderNo=${data}`
+                        })
+                    }, 1500);
+                }
+            })
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+/**
+ * 页面
+ */
+onUnmounted(() => {
+    // 清除定时器
+    if (timer) {
+        clearTimeout(timer);
+        timer = null;
+    }
+})
 </script>
 
 
@@ -72,6 +202,8 @@ const closePopupFu = () => {
                     <view class="flex_1  order_details_item_value">
                         <view v-if="item.type === 'price'" class="order_details_item_value_price">¥{{ item.value }}
                         </view>
+                        <input v-else-if="item.type === 'input'" type="text" placeholder="请输入备注内容"
+                            v-model.trim="createParams.remark" />
                         <view v-else>{{ item.value }}</view>
                         <view v-if="item.value1">{{ item.value1 }}</view>
                     </view>
@@ -85,9 +217,9 @@ const closePopupFu = () => {
                 </view>
             </view>
             <view class="product_list flex_column">
-                <template v-for="item in 10" :key="item">
+                <template v-for="item in productDetail.cardProductsList" :key="item.id">
                     <view class="product_item">
-                        <com-orderTable orderType="handleOrder"></com-orderTable>
+                        <com-orderTable orderType="show" :productDetail="item"></com-orderTable>
                     </view>
                 </template>
             </view>
@@ -96,11 +228,11 @@ const closePopupFu = () => {
             <view>
                 <view>
                     <text class="price_icon">¥</text>
-                    <text>80</text>
+                    <text>{{ formatNumber(createParams.totalAmount) }}</text>
                 </view>
-                <view class="unit_info">2手/10件</view>
+                <view class="unit_info">{{ createParams.totalHandNum }}手/{{ createParams.totalNum }}件</view>
             </view>
-            <button class="button_defalut">立即下单</button>
+            <button class="button_defalut" @click="handleOrderFu">立即下单</button>
         </view>
     </view>
 

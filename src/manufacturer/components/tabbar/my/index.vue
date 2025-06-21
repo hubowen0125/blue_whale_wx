@@ -178,53 +178,6 @@ const renewFu = () => {
         top: 0;
     }
 
-    .my_header {
-        font-weight: 400;
-        font-size: 24rpx;
-        color: #DDEFFF;
-        position: relative;
-
-        .my_header_info {
-            gap: 12rpx;
-
-            .position_info {
-                font-weight: bold;
-                font-size: 40rpx;
-                color: #FFFFFF;
-                margin-bottom: 4rpx;
-
-                .position_icon {
-                    width: 36rpx;
-                    height: 36rpx;
-                    margin-right: 18rpx;
-                }
-            }
-
-            .edit_btn {
-                width: 120rpx;
-                box-sizing: border-box;
-                padding: 18rpx 20rpx;
-                background: rgba(255, 255, 255, 0.05);
-                border-radius: 40rpx;
-                border: 1rpx solid #8CBAFF;
-                font-weight: 500;
-                font-size: 26rpx;
-                color: #FFFFFF;
-
-                .edit_icon {
-                    width: 20rpx;
-                    height: 20rpx;
-                    margin-right: 8rpx;
-                }
-            }
-        }
-
-        .my_header_icon {
-            width: 360rpx;
-            height: 360rpx;
-        }
-    }
-
     .member_info {
         padding: 38rpx 28rpx;
         background: #FFFFFF;

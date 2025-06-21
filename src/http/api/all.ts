@@ -167,3 +167,123 @@ export function updateEmployeeStatusApi(params: any) {
     })
 }
 
+/**
+ * 获取取得预签名链接
+ * @param params
+ * @returnsF
+ */
+export function getSignedUriApi(data: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `service/system/oss/getSignedUri`,
+                method: "POST",
+                data
+            })
+        )
+    })
+}
+
+/**
+ * 查询地区信息
+ * @param params
+ * @returnsF
+ */
+export function sysRegionListApi() {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/system/SysRegion/list`,
+                method: "GET",
+            })
+        )
+    })
+}
+
+/**
+ * 生成订单
+ * @param data
+ * @returnsF
+ */
+export function createOrderApi(data: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/card/createOrder`,
+                method: "POST",
+                data
+            })
+        )
+    })
+}
+
+/**
+ * 新增订货卡
+ * @param data
+ * @returnsF
+ */
+export function createAddApi(data: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/card/add`,
+                method: "POST",
+                data
+            })
+        )
+    })
+}
+
+/**
+ * 分享链接打开查询订单
+ * @param params
+ * @returnsF
+ */
+export function selectByShareApi(params: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/card/selectByShare`,
+                method: "GET",
+                params
+            })
+        )
+    })
+}
+
+/**
+ * 添加订货卡商品
+ * @param data
+ * @returnsF
+ */
+export function addProductApi(data: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/card/addProduct`,
+                method: "POST",
+                data
+            })
+        )
+    })
+}
+
+/**
+ * 获取订货卡详细信息
+ * @param params
+ * @returnsF
+ */
+export function getByCardNoApi(params: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/card/getByCardNo`,
+                method: "GET",
+                params
+            })
+        )
+    })
+}
+
+
+

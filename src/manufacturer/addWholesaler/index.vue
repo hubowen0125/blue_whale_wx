@@ -3,7 +3,7 @@
 </script>
 
 <template>
-    <com-addWholesaler></com-addWholesaler>
+    <com-addWholesaler type="manufacturer"></com-addWholesaler>
 </template>
 
 <style lang="scss" scoped></style>
