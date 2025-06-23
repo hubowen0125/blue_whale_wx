@@ -9,13 +9,16 @@ onLoad((e: any) => {
     proxy.$Loading()
     if (useUser.token) {
         if (e.type) {
+            console.log(e.type, 'werwere');
             if (e.type == 'manufacturer') {
                 uni.redirectTo({
-                    url: `/wholesaler/shareOrderCard/index?type=${e.type}&cardNo=${e.cardNo}`
+                    url: `/manufacturer/shareOrderCard/index?type=${e.type}&cardNo=${e.cardNo}`
                 })
             }
             if (e.type == 'wholesale') {
-
+                uni.redirectTo({
+                    url: `/wholesaler/shareOrderCard/index?type=${e.type}&cardNo=${e.cardNo}`
+                })
             }
         } else {
             if (useUser.miniRole) {

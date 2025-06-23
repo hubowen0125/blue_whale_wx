@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { getByCardNoApi, createOrderApi } from "@/http/api/all"
 import { manufacturerWholesalePageApi } from "../http/manufacturer"
 import arrow_right from "@/static/images/arrow_right.png"
 import off_icon from "@/static/images/off_icon.png"
@@ -7,36 +8,85 @@ import checkbox from "@/static/images/checkbox.png"
 import checkbox_active from "@/static/images/checkbox_active.png"
 import deliverGoodsInfo from "../components/deliverGoodsInfo/index.vue"
 import { useManufacturerStore } from "@/manufacturer/store/manufacturer";
+import { formatNumber } from "@/utils/utils"
+import { useUserStore } from "@/store/modules/user"
 
-
+const useUser = useUserStore()
 const useManufacturer = useManufacturerStore()
 const { proxy } = getCurrentInstance() as any;
 
-const orderDetails = [
+const orderTextList = reactive([
     {
         title: '批发商',
-        value: '选择批发商',
+        value: computed(() => orderDetails.value?.wholesale?.address || '选择批发商'),
+        value1: computed(() => orderDetails.value?.wholesale?.phone || ''),
         type: 'select'
     },
     {
         title: '总件数',
-        value: '60手/100件',
+        value: computed(() => `${orderDetails.value?.totalHandNum}手/${orderDetails.value?.totalNum}件`),
     },
     {
         title: '总金额',
-        value: '100.00',
+        value: computed(() => formatNumber(orderDetails.value?.totalAmount)), // 动态绑定计算属性,
         type: 'price',
     },
-]
+])
 
 const wholesalerRef = ref();
 const popupRef = ref();
+const orderDetails = ref<any>({
+    totalHandNum: 0,
+    totalNum: 0,
+    totalAmount: 0,
+    packaging: {},
+    remark: ''
+})
+const type = ref('')
 
-onMounted(() => {
-    console.log('mounted');
-    manufacturerWholesalePageFu()
+
+onLoad((e: any) => {
+    if (e.type == 'share') {
+        type.value = e.type;
+        getByCardNoFu(e.cardNo)
+    } else {
+        manufacturerWholesalePageFu()
+    }
 })
 
+// onMounted(() => {
+//     console.log('mounted');
+//     manufacturerWholesalePageFu()
+// })
+
+/**
+ * 获取订单详情
+ */
+const getByCardNoFu = (cardNo: string) => {
+    getByCardNoApi({ cardNo }).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data, '0000');
+            data.cardProductsList.map((item: { productColorsList: any; cardProductsDetailList: any; id: any; productId: any; }) => {
+                item.productColorsList = item.cardProductsDetailList
+                item.id = item.productId
+                return item
+            })
+            orderDetails.value = data
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+
+/**
+ * 
+ */
 const manufacturerWholesalePageFu = () => {
     manufacturerWholesalePageApi({}).then((res: any) => {
         const { code, data, msg, token } = res
@@ -73,6 +123,26 @@ const showWholesalerFu = () => {
 const closeWholesalerFu = () => {
     wholesalerRef.value.close();
 }
+
+const createOrderFu = () => {
+    proxy.$Loading();
+    orderDetails.value.manufacturerId = useUser.userInfo.userId
+    createOrderApi(orderDetails.value).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data, '0000');
+            uni.reLaunch({
+                url: `/manufacturer/orderDetails/index?orderNo=${data}`
+            })
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
 </script>
 
 
@@ -83,29 +153,40 @@ const closeWholesalerFu = () => {
         <view class="main_con flex_1 flex_column">
             <view class="order_details">
                 <view class="order_details_item flex_align flex_between"
-                    :class="{ 'order_details_item_select ': item.type == 'select' }" v-for="item, index in orderDetails"
+                    :class="{ 'order_details_item_select ': item.type == 'select' && type != 'share' }"
+                    v-for="item, index in orderTextList"
                     :key="index" @click="showWholesalerFu">
                     <view class="flex_align order_details_item_title">{{ item.title }}</view>
                     <view class="flex_1  order_details_item_value">
                         <view v-if="item.type === 'price'" class="order_details_item_value_price">¥{{ item.value }}
                         </view>
                         <view v-else>{{ item.value }}</view>
+                        <view v-if="item.value1">{{ item.value1 }}</view>
                     </view>
-                    <image v-if="item.type == 'select'" class="arrow_right" :src="arrow_right"></image>
+                    <image v-if="item.type == 'select' && type != 'share'" class="arrow_right" :src="arrow_right">
+                    </image>
                 </view>
             </view>
-            <deliverGoodsInfo :edit="true">
+            <deliverGoodsInfo :deliverInfo="orderDetails.packaging" :edit="type == 'share' ? false : true">
                 <template #input>
+                    <view class="flex_align pay_way_item">
+                        <view>付款方式</view>
+                        <view class="flex_1 pay_way_value">请选择</view>
+                        <image class="arrow_right" :src="arrow_right">
+                        </image>
+                    </view>
                     <view class="flex_align flex_between deliver_info_item">
                         <view>备注</view>
-                        <input class="deliver_info_item_input" type="text" placeholder="请输入备注内容">
+                        <input class="deliver_info_item_input" type="text" placeholder="请输入备注内容"
+                            v-model="orderDetails.remark">
                     </view>
                 </template>
             </deliverGoodsInfo>
             <view class="product_list flex_column">
-                <template v-for="item in 10" :key="item">
+                <template v-for="item in orderDetails.cardProductsList" :key="item.id">
                     <view class="product_item">
-                        <com-orderTable orderType="handleOrder"></com-orderTable>
+                        <com-orderTable orderType="show"
+                            :productDetail="item"></com-orderTable>
                     </view>
                 </template>
             </view>
@@ -114,11 +195,11 @@ const closeWholesalerFu = () => {
             <view>
                 <view>
                     <text class="price_icon">¥</text>
-                    <text>80</text>
+                    <text>{{ formatNumber(orderDetails.totalAmount) }}</text>
                 </view>
-                <view class="unit_info">2手/10件</view>
+                <view class="unit_info">{{ orderDetails.totalHandNum }}手/{{ orderDetails.totalNum }}件</view>
             </view>
-            <button class="button_defalut">生成订单</button>
+            <button class="button_defalut" @click="createOrderFu">生成订单</button>
         </view>
     </view>
 
@@ -192,6 +273,13 @@ const closeWholesalerFu = () => {
         top: 0;
     }
 
+    .arrow_right {
+        width: 28rpx;
+        height: 28rpx;
+        margin-left: 8rpx;
+        transform: rotate(90deg);
+    }
+
     .main_con {
         padding: 24rpx;
         position: relative;
@@ -236,12 +324,19 @@ const closeWholesalerFu = () => {
                     color: #0C62FF;
                 }
 
-                .arrow_right {
-                    width: 28rpx;
-                    height: 28rpx;
-                    margin-left: 8rpx;
-                    transform: rotate(90deg);
-                }
+            }
+        }
+
+        .pay_way_item {
+            padding: 34rpx 0;
+            border-bottom: 1rpx solid #EFEFEF;
+            margin-bottom: 34rpx;
+
+            .pay_way_value {
+                text-align: right;
+                font-weight: 500;
+                font-size: 28rpx;
+                color: #0C62FF;
             }
         }
 

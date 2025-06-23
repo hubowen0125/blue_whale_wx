@@ -23,22 +23,33 @@ const roderCardList = [
         path: ''
     },
 ]
+const editInformationRef = ref()
 
 const tabBarIndex = inject("tabBarIndex") as Ref<number>
 /**
  * 设置页面跳转
  * @param path 
  */
-const toPageFu = (item: { path: string }) => {
-    const { path } = item
+const toPageFu = (item: { path: string, key: number }) => {
+    const { path, key } = item
     console.log(path, 'path');
-
     if (!path) return
+    if (key === 1) {
+        if (!useUser.userInfo.dept.address) {
+            editInformationRef.value.showPopupFu()
+            return
+        }
+    }
     uni.navigateTo({
         url: path
     })
 }
 
+const editInformationFu = () => {
+    uni.navigateTo({
+        url: '/wholesaler/orderCardInformation/index'
+    })
+}
 </script>
 
 
@@ -59,6 +70,8 @@ const toPageFu = (item: { path: string }) => {
             </view>
         </view>
     </view>
+    <com-editInformation ref="editInformationRef" type="wholesaler"
+        @editInformationFu="editInformationFu"></com-editInformation>
 </template>
 
 <style lang="scss" scoped>

@@ -189,6 +189,54 @@ export function manufacturerWholesaleAddApi(data: any) {
     })
 }
 
+/**
+ * 编辑信息
+ * @param data
+ * @returnsF
+ */
+export function manufacturerEditApi(data: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/manufacturer/edit`,
+                method: "POST",
+                data
+            })
+        )
+    })
+}
+
+/**
+ * 查询商品信息(厂家-订货卡新增商品时查询)
+ * @param data
+ * @returnsF
+ */
+export function productListApi(data: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/products/productList`,
+                method: "POST",
+                data
+            })
+        )
+    })
+}
+
+/**
+ * 获取订单统计信息
+ * @returns
+ */
+export function getOrderStatisticsApi() {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/manufacturer/getOrderStatistics`,
+                method: "GET",
+            })
+        )
+    })
+}
 
 
 

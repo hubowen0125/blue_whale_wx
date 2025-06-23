@@ -8,6 +8,8 @@ import member_icon from "@/static/images/member_icon.png"
 import arrow_right from "@/static/images/arrow_right.png"
 import position_2 from "@/static/images/position_2.png"
 
+const emit = defineEmits(['editInformationFu'])
+
 const props = defineProps({
     userRole: {
         type: String,
@@ -20,9 +22,9 @@ const props = defineProps({
     }
 })
 const headerIcon = ref()
+const editInformationRef = ref()
 
 onMounted(() => {
-    console.log(props.userRole, 'props.userRoleprops.userRoleprops.userRole');
     if (props.userRole === 'wholesaler') {
         headerIcon.value = wholesale_icon
     }
@@ -34,11 +36,19 @@ onMounted(() => {
     }
 })
 
+const editFu = () => {
+    editInformationRef.value.showPopupFu()
+}
+
 // 立即续费
 const renewFu = () => {
     uni.navigateTo({
         url: '/wholesaler/renewalMembership/index'
     })
+}
+
+const editInformationFu = () => {
+    emit('editInformationFu')
 }
 </script>
 
@@ -52,7 +62,7 @@ const renewFu = () => {
             </view>
             <view>{{ infoDetails.address }}</view>
             <view>{{ infoDetails.userPhone }}</view>
-            <button class="flex_align edit_btn">
+            <button class="flex_align edit_btn" @click="editFu">
                 <image class="edit_icon" :src="edit_icon"></image>
                 <text>编辑</text>
             </button>
@@ -72,7 +82,8 @@ const renewFu = () => {
             <image class="arrow_right" :src="arrow_right"></image>
         </button>
     </view>
-
+    <com-editInformation ref="editInformationRef" :type="userRole"
+        @editInformationFu="editInformationFu"></com-editInformation>
 </template>
 
 <style lang="scss" scoped>

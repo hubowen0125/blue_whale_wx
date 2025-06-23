@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { getOrderPageApi } from "@/http/api/order";
 import orderItem from "../../orderItem/idnex.vue"
 import { useUserStore } from '@/store/modules/user';
 
@@ -30,16 +31,45 @@ const stateList = [
 
 const tabBarIndex = inject("tabBarIndex") as Ref<number>
 const activeState = ref(0)
+const isLoad = ref(false) // 是否加载
+const slideLoading = ref(true) // 是否需要滑动加载
+const paramsPage = reactive({
+    pageNum: 1,
+    pageSize: 10,
+})
+const orderList = ref<any[]>([])
 
 
 watch(() => tabBarIndex.value, (newVal) => {
-    if (newVal == 1) {
+    if (newVal == 1 && !isLoad.value) {
         // useDataBoard.setConditionIndex(0)
         console.log('111111');
-
+        isLoad.value = true
+        getOrderPageFu()
     }
 })
 
+const getOrderPageFu = () => {
+    proxy.$Loading()
+    getOrderPageApi({},paramsPage).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data, '0000');
+            if (data.datas && data.datas.length > 0) {
+                orderList.value = [...orderList.value, ...data.datas]
+            }
+            if (data.datas.length < paramsPage.pageSize) {
+                slideLoading.value = false
+            }
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
 
 /**
  * 滑动加载

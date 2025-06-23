@@ -1,6 +1,14 @@
 <script lang="ts" setup>
-
 import long_arrow from "@/static/images/long_arrow.png"
+import { dateStrToDateFormat, formatNumber } from "@/utils/utils";
+
+const props = defineProps({
+    orderData: {
+        type: Object,
+        required: true,
+        default: () => ({})
+    }
+})
 
 </script>
 
@@ -8,27 +16,27 @@ import long_arrow from "@/static/images/long_arrow.png"
 <template>
     <view class="order_item flex_column">
         <view class="order_item_title flex_align flex_between">
-            <view>订单号: GuLang008</view>
-            <view class="order_item_status">待发货</view>
+            <view>订单号: {{ orderData?.orderNo }}</view>
+            <view class="order_item_status">{{ orderData?.statusMsg }}</view>
         </view>
         <view class="order_item_info flex_align">
-            <view class="flex_1">上海春之都店</view>
+            <view class="flex_1">{{ orderData?.manufacturer?.leader }}</view>
             <image class="long_arrow" :src="long_arrow"></image>
             <view class="flex_column flex_align">
-                <view>23手</view>
+                <view>{{ orderData?.checkHandNum }}手</view>
                 <view class="order_item_info_title">核点</view>
             </view>
             <view class="flex_column flex_align">
-                <view>23手</view>
+                <view>{{ orderData?.totalHandNum }}手</view>
                 <view class="order_item_info_title">厂家</view>
             </view>
         </view>
         <view class="flex_align order_item_price">
-            <view class="flex_1">下单时间: 2025-05-05 11:26</view>
-            <view class="order_item_price_old">¥100</view>
+            <view class="flex_1">下单时间: {{ dateStrToDateFormat(orderData?.createTime, ' ') }}</view>
+            <view class="order_item_price_old">¥{{ formatNumber(orderData?.totalAmount) }}</view>
             <view class="flex_align">
                 <text>已付:</text>
-                <text class="order_item_price_new">¥100</text>
+                <text class="order_item_price_new">¥{{ formatNumber(orderData?.paymentAmount) }}</text>
             </view>
         </view>
     </view>

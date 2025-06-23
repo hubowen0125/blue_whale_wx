@@ -37,4 +37,54 @@ export function getOrderPageApi(data: any, params: any) {
     })
 }
 
+/**
+ * 查询订单发货记录
+ * @param params
+ * @returnsF
+ */
+export function orderShipRecordListApi(params: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/orderShipRecord/list`,
+                method: "GET",
+                params
+            })
+        )
+    })
+}
+
+/**
+ * 查询订单支付记录
+ * @param params
+ * @returnsF
+ */
+export function orderPaymentRecordListApi(params: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/orderPaymentRecord/list`,
+                method: "GET",
+                params
+            })
+        )
+    })
+}
+
+/**
+ * 查询订单操作记录
+ * @param params
+ * @returnsF
+ */
+export function orderOperationRecordListApi(params: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/orderOperationRecord/list`,
+                method: "GET",
+                params
+            })
+        )
+    })
+}
 

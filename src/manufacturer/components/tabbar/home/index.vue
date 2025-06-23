@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { infoApi } from "@/manufacturer/http/manufacturer"
-import { orderPageApi } from "@/http/api/all"
+import { infoApi, getOrderStatisticsApi } from "@/manufacturer/http/manufacturer"
+import { getOrderPageApi } from "@/http/api/order";
 import position_1 from "@/static/images/position_1.png"
 import arrow_right_1 from "@/static/images/arrow_right_1.png"
 import long_arrow from "@/static/images/long_arrow.png"
@@ -12,20 +12,22 @@ const { proxy } = getCurrentInstance() as any;
 
 const emit = defineEmits(['setTabBarIndex'])
 
-const orderType = [
-    {
-        title: '今日订单',
-        value: '100',
-    },
-    {
-        title: '未发货订单',
-        value: '80',
-    },
-    {
-        title: '异常订单',
-        value: '20',
-    },
-]
+const orderType = reactive(
+    [
+        {
+            title: '今日订单',
+            value: computed(() => statisticsDetail.value.orderToday),
+        },
+        {
+            title: '在库订单',
+            value: computed(() => statisticsDetail.value.orderNotShipped),
+        },
+        {
+            title: '总订单',
+            value: computed(() => statisticsDetail.value.orderTotal),
+        },
+    ]
+)
 const popupData = {
     popupTitle: '续费提醒',
     pupupType: 'default',
@@ -49,25 +51,49 @@ const params = reactive({
     pageSize: 10,
 })
 const orderList = ref([])
+const statisticsDetail = ref({
+    orderNotShipped: 0,
+    orderToday: 0,
+    orderTotal: 0,
+})
 
 onMounted(() => {
     // popupCom.value.showPopup()
     // orderPageFu()
+    getOrderStatisticsFu()
 })
 
 
 watch(() => tabBarIndex.value, (newVal) => {
     if (newVal == 0) {
         console.log('213213');
+        getOrderStatisticsFu()
     }
 })
+
+/**
+ * 获取订单统计数据
+ */
+const getOrderStatisticsFu = () => {
+    getOrderStatisticsApi().then((res: any) => {
+        const { code, data, msg } = res
+        if (code == proxy.$successCode) {
+            console.log(data, 'data');
+            statisticsDetail.value = data
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$Toast({ title: req.msg })
+    }))
+}
 
 /**
  * 分页查询订单
  */
 const orderPageFu = () => {
     proxy.$Loading();
-    orderPageApi(params).then((res: any) => {
+    getOrderPageApi({}, params).then((res: any) => {
         const { code, data, msg } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {

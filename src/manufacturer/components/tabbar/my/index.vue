@@ -86,7 +86,7 @@ const getInfoFu = () => {
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
             console.log(data);
-            infoDetails.value = data
+            infoDetails.value = {...infoDetails.value ,...data}
         } else {
             proxy.$Toast({ title: msg })
         }
@@ -129,7 +129,7 @@ const renewFu = () => {
 <template>
     <view class="my_con flex_column">
         <view class="bg"></view>
-        <com-myHeader :userRole="'manufacturer'" :infoDetails="infoDetails"></com-myHeader>
+        <com-myHeader :userRole="'manufacturer'" :infoDetails="infoDetails" @editInformationFu="getInfoFu"></com-myHeader>
         <view class="daily_report">
             <view>日报表</view>
             <view class="select_time flex_align">

@@ -110,7 +110,7 @@ const renewFu = () => {
 <template>
     <view class="my_con flex_column">
         <view class="bg"></view>
-        <com-myHeader :userRole="'wholesaler'" :infoDetails="infoDetails"></com-myHeader>
+        <com-myHeader :userRole="'wholesaler'" :infoDetails="infoDetails" @editInformationFu="getInfoFu"></com-myHeader>
         <view class="fun_list">
             <view class="fun_item flex_between flex_align" @click="toPageFu(item)" v-for="item, index in funList"
                 :key="index">
@@ -127,6 +127,7 @@ const renewFu = () => {
 <style lang="scss" scoped>
 .my_con {
     width: 100%;
+    height: 100%;
     padding: v-bind('`${useUser.statusBarHeight + useUser.navHeight}px`') 24rpx 30rpx 24rpx;
     box-sizing: border-box;
     background: #F2F1F5;

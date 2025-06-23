@@ -29,9 +29,9 @@ const props = defineProps({
         <view class="flex_align deliver_goods_info_item">
             <view>配送站信息</view>
             <view class="flex_1">
-                <view class="deliver_goods_title">新村路打包站</view>
-                <view class="deliver_goods_address">上海市甘泉路809号</view>
-                <view class="deliver_goods_tel">13601805978</view>
+                <view class="deliver_goods_title">{{deliverInfo.deptName}}</view>
+                <view class="deliver_goods_address">{{deliverInfo.address}}</view>
+                <view class="deliver_goods_tel">{{deliverInfo.phone}}</view>
             </view>
         </view>
         <slot name="input"></slot>

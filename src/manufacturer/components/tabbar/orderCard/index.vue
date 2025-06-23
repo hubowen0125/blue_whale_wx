@@ -4,6 +4,9 @@ import card_2 from "@/manufacturer/images/orderCard/card_2.png"
 import arrow_right from "@/static/images/arrow_right.png"
 import { useUserStore } from '@/store/modules/user';
 
+
+const emit = defineEmits(['setTabBarIndex'])
+
 const useUser = useUserStore()
 const { proxy } = getCurrentInstance() as any;
 
@@ -13,7 +16,7 @@ const roderCardList = [
         titleEn: 'Send order cards to wholesalers',
         image: card_1,
         key: 1,
-        path: '/manufacturer/selectProduct/index'
+        path: `/manufacturer/selectProduct/index?type=orderCard`
     },
     {
         title: '选择货架商品进行订货',
@@ -31,9 +34,9 @@ const tabBarIndex = inject("tabBarIndex") as Ref<number>
  */
 const toPageFu = (item: { path: string }) => {
     const { path } = item
-    console.log(path, 'path');
-
-    if (!path) return
+    if (!path) {
+        return emit('setTabBarIndex', 3)
+    }
     uni.navigateTo({
         url: path
     })

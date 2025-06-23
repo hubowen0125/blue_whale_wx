@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { getByCardNoApi, createOrderApi } from "@/http/api/all"
+import { packagingWholesalePageApi } from "../http/wholesaler";
 import arrow_right from "@/static/images/arrow_right.png"
 import off_icon from "@/static/images/off_icon.png"
 import position_1 from "@/static/images/position_1.png"
@@ -15,8 +16,8 @@ const { proxy } = getCurrentInstance() as any;
 const orderDetails = reactive([
     {
         title: '厂家',
-        value: '上海蓝鲸童装有限公司',
-        value1: '13601805978',
+        value: computed(() => productDetail.value.manufacturer?.deptName),
+        value1: computed(() => productDetail.value.manufacturer?.phone),
     },
     {
         title: '总件数',
@@ -47,12 +48,19 @@ const productDetail = ref<any>({
     paymentAmount: 0,
     manufacturerId: '',
     viewInventory: 0,
+    manufacturer: {}
 })
+const paramsPage = reactive({
+    pageNum: 1,
+    pageSize: 10,
+})
+const packagingStationList = ref<Array<any>>([])
+const packaginhStationActive = ref<any>({})
+const slideLoading = ref(true) // 是否需要滑动加载
 const type = ref('')
 const createParams = reactive<any>({
     manufacturerId: computed(() => productDetail.value.manufacturerId),
-    wholesaleId: useUser.userInfo.userId,
-    packagingId: '130',
+    packagingId: '',
     totalHandNum: computed(() => {
         let total = 0
         const list = productDetail.value.cardProductsList
@@ -92,6 +100,8 @@ const createParams = reactive<any>({
     remark: '',
     cardProductsList: [],
     viewInventory: computed(() => productDetail.value.viewInventory),
+     cardNo: computed(() => cardNo.value),
+     status:1
 })
 
 onLoad((e: any) => {
@@ -99,6 +109,7 @@ onLoad((e: any) => {
         type.value = e.type
         cardNo.value = e.cardNo
         getByCardNoFu()
+        packagingWholesalePageFu()
     }
 })
 
@@ -126,7 +137,31 @@ const getByCardNoFu = () => {
     }))
 }
 
-
+/**
+ * 获取打包站列表
+ */
+const packagingWholesalePageFu = () => {
+    //  wholesaleId: useUser.userInfo.userId, 
+    packagingWholesalePageApi({}, paramsPage).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            if (data.datas && data.datas.length > 0) {
+                packagingStationList.value = [...packagingStationList.value, ...data.datas]
+                if (data.datas.length < paramsPage.pageSize) {
+                    slideLoading.value = false
+                }
+            } else {
+                slideLoading.value = false
+            }
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
 
 // 显示弹窗
 const showPopup = () => {
@@ -136,6 +171,30 @@ const showPopup = () => {
 
 // 关闭弹窗
 const closePopupFu = () => {
+    popupRef.value.close();
+    if (!createParams.packagingId) {
+        packaginhStationActive.value = {}
+    }
+}
+
+/**
+ * 选择打包站
+ * @param item 
+ */
+const selectPackagingStationFu = (item: any) => {
+    console.log('选择打包站', item);
+    packaginhStationActive.value = item
+}
+
+/**
+ * 提交打包站
+ */
+const submitPackagingStationFu = () => {
+    console.log('提交打包站', createParams.packagingId);
+    if (!packaginhStationActive.value.packagingId) {
+        return proxy.$Toast({ title: '请选择打包站' })
+    }
+    createParams.packagingId = packaginhStationActive.value.packagingId
     popupRef.value.close();
 }
 
@@ -151,6 +210,9 @@ const handleOrderFu = () => {
  * 创建订单
  */
 const createOrderFu = () => {
+    if (!createParams.packagingId) {
+        return proxy.$Toast({ title: '请选择打包站' })
+    }
     proxy.$Loading()
     createOrderApi(createParams).then((res: any) => {
         const { code, data, msg } = res
@@ -175,6 +237,16 @@ const createOrderFu = () => {
         proxy.$CloseLoading();
         proxy.$Toast({ title: req.msg })
     }))
+}
+
+/**
+ * 滑动加载
+ */
+const scrolltolower = () => {
+    // if (!slideLoading.value) return
+    console.log('++++++++');
+    // manageDevicesParams.value.page += 1
+    // resetManageDevicesParams()
 }
 
 /**
@@ -212,7 +284,7 @@ onUnmounted(() => {
             <view class="flex_between select_con" @click="showPopup">
                 <view>送货信息</view>
                 <view class="flex_align select_desc">
-                    <text>请选择</text>
+                    <text>{{ packaginhStationActive.packagingName || '请选择' }}</text>
                     <image class="arrow_right" :src="arrow_right"></image>
                 </view>
             </view>
@@ -242,23 +314,30 @@ onUnmounted(() => {
                 <text>选择打包站</text>
                 <image class="off_icon" :src="off_icon" @click="closePopupFu"></image>
             </view>
-            <view class="packaging_station_list flex_column flex_1">
-                <template v-for="item in 10" :key="item">
-                    <view class="packaging_station_item flex_align flex_between"
-                        :class="{ 'packaging_station_item_active': item % 2 === 0 }">
-                        <view class="flex_column">
-                            <view class="flex_align packaging_station_info">
-                                <image class="position_icon" :src="position_1"></image>
-                                <view class="packaging_station_name">新村路打包站</view>
+            <view class="flex_1 popup_mian">
+                <scroll-view class="scroll_con " scroll-y="true" lower-threshold="50" @scrolltolower="scrolltolower">
+                    <view class="packaging_station_list flex_column ">
+                        <template v-for="item in packagingStationList" :key="item.packagingId">
+                            <view class="packaging_station_item flex_align flex_between"
+                                :class="{ 'packaging_station_item_active': item.packagingId === packaginhStationActive.packagingId }"
+                                @click="selectPackagingStationFu(item)">
+                                <view class="flex_column">
+                                    <view class="flex_align packaging_station_info">
+                                        <image class="position_icon" :src="position_1"></image>
+                                        <view class="packaging_station_name">{{ item.packagingName }}</view>
+                                    </view>
+                                    <view>{{ item.packagingAddress }}</view>
+                                    <view>{{ item.packagingPhone }}</view>
+                                </view>
+                                <image class="checkbox_icon"
+                                    :src="item.packagingId === packaginhStationActive.packagingId ? checkbox_active : checkbox">
+                                </image>
                             </view>
-                            <view>上海市普陀区甘泉路280号</view>
-                            <view>15618257147</view>
-                        </view>
-                        <image class="checkbox_icon" :src="checkbox"></image>
+                        </template>
                     </view>
-                </template>
+                </scroll-view>
             </view>
-            <button class="button_defalut">确认</button>
+            <button class="button_defalut" @click="submitPackagingStationFu">确认</button>
         </view>
     </uni-popup>
 </template>
@@ -390,46 +469,55 @@ onUnmounted(() => {
 
     }
 
-    .packaging_station_list {
-        gap: 20rpx;
+    .popup_mian {
         overflow-x: hidden;
         overflow-y: auto;
 
-        .packaging_station_item {
-            background: #F7F8FA;
-            border-radius: 24rpx;
-            padding: 32rpx;
-            font-weight: 400;
-            font-size: 24rpx;
-            color: #7C8191;
-            gap: 12rpx;
-
-            .packaging_station_info {
-                margin-bottom: 8rpx;
-
-                .packaging_station_name {
-                    font-weight: 500;
-                    font-size: 32rpx;
-                    color: #202020;
-                }
-
-                .position_icon {
-                    width: 28rpx;
-                    height: 28rpx;
-                    margin-right: 8rpx;
-                }
-            }
-
-            .checkbox_icon {
-                width: 36rpx;
-                height: 36rpx;
-            }
+        .scroll_con {
+            width: 100%;
+            height: 100%;
         }
 
-        .packaging_station_item_active {
-            border: 2rpx solid rgba(1, 163, 255, 1);
-            border-radius: 24rpx;
-            background: #FFFFFF;
+        .packaging_station_list {
+            gap: 20rpx;
+
+            .packaging_station_item {
+                border: 2rpx solid #F7F8FA;
+                background: #F7F8FA;
+                border-radius: 24rpx;
+                padding: 32rpx;
+                font-weight: 400;
+                font-size: 24rpx;
+                color: #7C8191;
+                gap: 12rpx;
+
+                .packaging_station_info {
+                    margin-bottom: 8rpx;
+
+                    .packaging_station_name {
+                        font-weight: 500;
+                        font-size: 32rpx;
+                        color: #202020;
+                    }
+
+                    .position_icon {
+                        width: 28rpx;
+                        height: 28rpx;
+                        margin-right: 8rpx;
+                    }
+                }
+
+                .checkbox_icon {
+                    width: 36rpx;
+                    height: 36rpx;
+                }
+            }
+
+            .packaging_station_item_active {
+                border: 2rpx solid rgba(1, 163, 255, 1);
+                border-radius: 24rpx;
+                background: #FFFFFF;
+            }
         }
     }
 

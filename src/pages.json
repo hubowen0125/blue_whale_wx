@@ -130,6 +130,12 @@
                     "style": {
                         "navigationStyle": "custom"
                     }
+                },
+                {
+                    "path": "shareOrderCard/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
                 }
             ]
         },

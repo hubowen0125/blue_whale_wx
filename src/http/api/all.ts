@@ -85,22 +85,6 @@ export function updateUserRoleApi(params: any) {
 }
 
 /**
- * 获取订单列表
- * @param params
- * @returnsF
- */
-export function orderPageApi(data: any) {
-    return new Promise((resolve, reject) => {
-        resolve(
-            request({
-                url: `api/business/order/page?${splicingObjects(data)}`,
-                method: "POST",
-            })
-        )
-    })
-}
-
-/**
  * 我的-我的员工
  * @param params
  * @returnsF
@@ -285,5 +269,19 @@ export function getByCardNoApi(params: any) {
     })
 }
 
-
-
+/**
+ * 修改订货卡
+ * @param data
+ * @returnsF
+ */
+export function editCardApi(data: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/card/editCard`,
+                method: "POST",
+                data
+            })
+        )
+    })
+}

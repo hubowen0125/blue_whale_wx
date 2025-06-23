@@ -17,3 +17,21 @@ export function wholesaleListApi(data: any, params: any) {
         )
     })
 }
+
+/**
+ * 分页查询打包站-批发商
+ * @param params
+ * @returnsF
+ */
+export function packagingWholesalePageApi(data: any, params: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/packagingWholesale/page?${splicingObjects(params)}`,
+                method: "POST",
+                data
+            })
+        )
+    })
+}
+

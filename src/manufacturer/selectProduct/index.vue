@@ -1,9 +1,12 @@
 <script lang="ts" setup>
-import { getByIdApi, productsPageApi } from "../http/manufacturer";
+import { getByIdApi, productsPageApi, productListApi } from "../http/manufacturer";
+import { addProductApi } from "@/http/api/all";
+import off_icon from "@/static/images/off_icon.png"
 import order_fixed from "@/static/images/wholesaler/order_fixed.png"
 import { useManufacturerStore } from "@/manufacturer/store/manufacturer";
+import { useUserStore } from "@/store/modules/user";
 
-
+const useUser = useUserStore()
 const useManufacturer = useManufacturerStore()
 const { proxy } = getCurrentInstance() as any;
 
@@ -13,16 +16,76 @@ const paramsPage = reactive({
 })
 const productList = ref<any[]>([])
 const slideLoading = ref(true) // 是否需要滑动加载
+const selectProductType = ref('')
+const headerTitle = ref('')
+const popupRef = ref();
 const popupProductDetail = ref<any>({})
+const shareCradList = ref<Array<any>>([])
+const addProductParams = ref<any>({
+    cardNo: '',
+    cardProductsParams: [
+
+    ]
+})
+const shareProductParams = ref({
+    productName: "",
+    manufacturerName: useUser.userInfo.nickName,
+    cardNo: ""
+})
+
 
 const shoppingCartNum = computed(() => {
     return useManufacturer.orderCard.length
 })
 
-
-onMounted(() => {
-    productsPageFu()
+onLoad((e: any) => {
+    if (e.type) {
+        selectProductType.value = e.type
+        if (e.type == 'orderCard') {
+            headerTitle.value = '立即订货'
+            productsPageFu()
+        } else {
+            headerTitle.value = '选择商品'
+            addProductParams.value.cardNo = e.cardNo
+            shareProductParams.value.cardNo = e.cardNo
+            productListFu()
+        }
+    }
 })
+
+// onMounted(() => {
+//     productsPageFu()
+// })
+
+const productListFu = () => {
+    proxy.$Loading()
+    productListApi(shareProductParams.value).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data, '0000');
+            if (data.datas && data.datas.length > 0) {
+                data.datas.map((item: any) => {
+                    if (useManufacturer.orderCard.some((cartItem: any) => cartItem.id === item.id)) {
+                        item.isAdded = true
+                    } else {
+                        item.isAdded = false
+                    }
+                })
+                productList.value = [...productList.value, ...data.datas]
+                console.log(productList.value, '00000');
+            }
+            if (data.datas.length < paramsPage.pageSize) {
+                slideLoading.value = false
+            }
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
 
 /**
  * 获取商品列表
@@ -62,7 +125,12 @@ const productsPageFu = () => {
  * @param id 
  */
 const showPopupFu = (data: any) => {
-    const arr = [...useManufacturer.orderCard]
+    let arr
+    if (selectProductType.value == 'orderCard') {
+        arr = [...useManufacturer.orderCard]
+    } else {
+        arr = [...shareCradList.value]
+    }
     const index = arr.findIndex((item: any) => item.id === data.id)
     if (index === -1) {
         data.productColorsList.map((item: any) => {
@@ -73,10 +141,17 @@ const showPopupFu = (data: any) => {
         data.isAdded = true
     } else {
         arr.splice(index, 1)
-        data.isAdded = false
+        if (selectProductType.value == 'orderCard') {
+            data.isAdded = false
+        }
     }
-    useManufacturer.setOrderCardFu(arr)
-    popupProductDetail.value.isAdded = true
+    if (selectProductType.value == 'orderCard') {
+        useManufacturer.setOrderCardFu(arr)
+    } else {
+        popupProductDetail.value = data
+        shareCradList.value = arr
+        popupRef.value.open('bottom');
+    }
 }
 
 /**
@@ -86,6 +161,61 @@ const viewOrderCardDetailFu = () => {
     uni.navigateTo({
         url: '/manufacturer/orderCard/index?id=123456'
     })
+}
+
+// 关闭弹窗
+const closePopupFu = () => {
+    popupRef.value.close();
+}
+
+/**
+ * 加入订货单
+ */
+const addToCartFu = () => {
+    const arr = [...useManufacturer.shoppingCart]
+    const index = arr.findIndex((item: any) => item.id === popupProductDetail.value.id)
+    if (index === -1) {
+        arr.push(popupProductDetail.value)
+    } else {
+        arr[index] = popupProductDetail.value
+    }
+    useManufacturer.setShoppingCartFu(arr)
+    popupProductDetail.value.isAdded = true
+    popupRef.value.close()
+}
+
+/**
+ * 添加商品
+ */
+const addProductFu = () => {
+    if (!shareCradList.value.length) {
+        return proxy.$Toast({ title: '请选择商品' })
+    }
+    shareCradList.value.map((item) => {
+        addProductParams.value.cardProductsParams.push({
+            productId: item.id,
+            productsDetailParams: item.productColorsList.map((color: any) => {
+                return {
+                    colorName: color.colorName,
+                    handNum: color.handNum
+                }
+            })
+        })
+    })
+    addProductApi(addProductParams.value).then((res: any) => {
+        const { code, data, msg } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data);
+            proxy.$Toast({ title: '添加成功' })
+            uni.navigateBack() // 返回上一页
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
 }
 
 /**
@@ -104,7 +234,7 @@ const scrolltolower = () => {
 <template>
     <view class="container flex_column">
         <view class="bg"></view>
-        <com-header header-title="立即订货" :backColor="false" :titleColor="true"></com-header>
+        <com-header :header-title="headerTitle" :backColor="false" :titleColor="true"></com-header>
         <view class="search_con ">
             <com-searchInput placeholder="搜索商品"></com-searchInput>
         </view>
@@ -126,13 +256,31 @@ const scrolltolower = () => {
                 </view>
             </scroll-view>
         </view>
-        <view class="order_fixed" @click="viewOrderCardDetailFu">
+        <view v-if="selectProductType == 'orderCard'" class="order_fixed" @click="viewOrderCardDetailFu">
             <uni-badge class="uni-badge-left-margin" :text="shoppingCartNum" absolute="rightTop" :offset="[3, 3]"
                 size="small">
                 <image class="order_fixed_img" :src="order_fixed"></image>
             </uni-badge>
         </view>
+        <view v-if="selectProductType == 'shareCrad'" class="footer_con">
+            <button class="button_defalut" @click="addProductFu">添加商品</button>
+        </view>
     </view>
+
+    <uni-popup ref="popupRef" :safe-area="false">
+        <view class="popup_content flex_cloumn">
+            <view class="popup_header flex_align flex_between">
+                <text>加入订货单</text>
+                <image class="off_icon" :src="off_icon" @click="closePopupFu"></image>
+            </view>
+            <com-orderTable ref="orderTableRef" orderType="handleOrder"
+                :productDetail="popupProductDetail"></com-orderTable>
+            <view class="popup_footer flex_align">
+                <button class="button_cancel" @click="closePopupFu">取消</button>
+                <button class="button_defalut flex_1" @click="addToCartFu">加入订货单</button>
+            </view>
+        </view>
+    </uni-popup>
 </template>
 
 <style lang="scss" scoped>

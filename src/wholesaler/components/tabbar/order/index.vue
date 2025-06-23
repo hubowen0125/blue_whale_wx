@@ -9,7 +9,7 @@ const { proxy } = getCurrentInstance() as any;
 const stateList = [
     {
         title: '全部',
-        key: 0,
+        key: '',
     },
     {
         title: '未发货',
@@ -30,7 +30,7 @@ const stateList = [
 ]
 
 const tabBarIndex = inject("tabBarIndex") as Ref<number>
-const activeState = ref(0)
+const activeState = ref<string | number>('')
 const isLoad = ref(false) // 是否加载
 const slideLoading = ref(true) // 是否需要滑动加载
 const paramsPage = reactive({
@@ -49,17 +49,22 @@ watch(() => tabBarIndex.value, (newVal) => {
     }
 })
 
+/**
+ * 获取订单列表
+ */
 const getOrderPageFu = () => {
     proxy.$Loading()
-    getOrderPageApi(paramsPage).then((res: any) => {
+    getOrderPageApi({ status: activeState.value }, paramsPage).then((res: any) => {
         const { code, data, msg, token } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
             console.log(data, '0000');
             if (data.datas && data.datas.length > 0) {
                 orderList.value = [...orderList.value, ...data.datas]
-            }
-            if (data.datas.length < paramsPage.pageSize) {
+                if (data.datas.length < paramsPage.pageSize) {
+                    slideLoading.value = false
+                }
+            } else {
                 slideLoading.value = false
             }
         } else {
@@ -99,8 +104,8 @@ const scrolltolower = () => {
                 lower-threshold="50"
                 @scrolltolower="scrolltolower">
                 <view class="order_list flex_column">
-                    <template v-for="item in 10" :key="item">
-                        <orderItem></orderItem>
+                    <template v-for="item in orderList" :key="item.id">
+                        <orderItem :orderData="item"></orderItem>
                     </template>
                 </view>
             </scroll-view>

@@ -16,10 +16,7 @@ const createParams = reactive<any>({
     cardProductsParams: []
 })
 const orderNo = ref('CD202506211459020318')
-
-onMounted(() => {
-    // popupRef.value.open('center')
-})
+const editInformationRef = ref()
 
 /**
  * 删除商品
@@ -69,11 +66,15 @@ const createAddFu = async () => {
  * 分享
  */
 const shareFu = async () => {
-    // popupRef.value.open('center')
+    if (!useUser.userInfo.dept.address) {
+        editInformationRef.value.showPopupFu()
+        return
+    }
     await createAddFu()
 }
 
-const formSubmit = (e: any) => {
+const editInformationFu = async () => {
+    await createAddFu()
 }
 
 </script>
@@ -105,34 +106,7 @@ const formSubmit = (e: any) => {
             <button class="share_btn" @click="shareFu">选择微信好友立即发送</button>
         </view>
     </view>
-    <uni-popup ref="popupRef">
-        <view class="popup_content">
-            <view class="popup_header flex_align flex_between">
-                <view>
-                    <text>提示</text>
-                    <text class="popup_header_desc">(请先完善信息)</text>
-                </view>
-                <image class="off_icon" :src="off_icon"></image>
-            </view>
-            <form @submit="formSubmit">
-                <view class="form_item">
-                    <view class="form_label">名称</view>
-                    <input class="input_item" type="text" placeholder="请输入名称">
-                </view>
-                <view class="form_item">
-                    <view class="收货地址">名称</view>
-                    <view class="select_list">
-
-                    </view>
-                </view>
-                <view class="form_item">
-                    <view class="form_label">详细地址</view>
-                    <input class="input_item" type="text" placeholder="请输入详细地址">
-                </view>
-                <button class="form_btn">确定</button>
-            </form>
-        </view>
-    </uni-popup>
+    <com-editInformation ref="editInformationRef" type="manufacturer" @editInformationFu="editInformationFu"></com-editInformation>
 </template>
 
 <style lang="scss" scoped>
@@ -183,64 +157,6 @@ const formSubmit = (e: any) => {
                 }
             }
         }
-    }
-}
-
-.popup_content {
-    width: 632rpx;
-    background: #FFFFFF;
-    border-radius: 24rpx;
-    padding: 36rpx 28rpx;
-    box-sizing: border-box;
-
-    .popup_header {
-        font-weight: bold;
-        font-size: 36rpx;
-        color: #202020;
-
-        .popup_header_desc {
-            font-weight: 500;
-            font-size: 24rpx;
-            margin-left: 16rpx;
-            color: #FF840C;
-        }
-
-        .off_icon {
-            width: 28rpx;
-            height: 28rpx;
-        }
-    }
-
-    .form_item {
-        margin-top: 40rpx;
-        font-weight: 500;
-        font-size: 28rpx;
-        color: #202020;
-
-        .form_label {
-            margin-bottom: 20rpx;
-        }
-
-        .input_item {
-            width: 576rpx;
-            height: 96rpx;
-            background: #F7F8FA;
-            border-radius: 12rpx;
-            padding: 0 32rpx;
-            box-sizing: border-box;
-        }
-    }
-
-    .form_btn {
-        width: 576rpx;
-        height: 96rpx;
-        background: linear-gradient(90deg, #0D5DFF 0%, #00AAFF 100%);
-        border-radius: 48rpx;
-        font-weight: 500;
-        font-size: 30rpx;
-        color: #FFFFFF;
-        line-height: 96rpx;
-        margin: 40rpx 0;
     }
 }
 </style>
