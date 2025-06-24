@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { infoApi, getOrderStatisticsApi } from "@/manufacturer/http/manufacturer"
 import { getOrderPageApi } from "@/http/api/order";
+import { infoApi, getOrderStatisticsApi } from "@/manufacturer/http/manufacturer"
 import position_1 from "@/static/images/position_1.png"
 import arrow_right_1 from "@/static/images/arrow_right_1.png"
 import long_arrow from "@/static/images/long_arrow.png"
@@ -16,15 +16,15 @@ const orderType = reactive(
     [
         {
             title: '今日订单',
-            value: computed(() => statisticsDetail.value.orderToday),
+            value: computed(() => statisticsDetail.value.orderToday || 0),
         },
         {
             title: '在库订单',
-            value: computed(() => statisticsDetail.value.orderNotShipped),
+            value: computed(() => statisticsDetail.value.orderNotShipped || 0),
         },
         {
             title: '总订单',
-            value: computed(() => statisticsDetail.value.orderTotal),
+            value: computed(() => statisticsDetail.value.orderNum || 0),
         },
     ]
 )
@@ -50,12 +50,17 @@ const params = reactive({
     pageNum: 1,
     pageSize: 10,
 })
-const orderList = ref([])
+const orderList = ref<Array<any>>([])
 const statisticsDetail = ref({
     orderNotShipped: 0,
     orderToday: 0,
-    orderTotal: 0,
+    orderNum: 0,
 })
+const paramsPage = reactive({
+    pageNum: 1,
+    pageSize: 10,
+})
+const slideLoading = ref(true) // 是否需要滑动加载
 
 onMounted(() => {
     // popupCom.value.showPopup()
@@ -68,8 +73,36 @@ watch(() => tabBarIndex.value, (newVal) => {
     if (newVal == 0) {
         console.log('213213');
         getOrderStatisticsFu()
+        getOrderPageFu()
     }
 })
+
+/**
+ * 获取订单列表
+ */
+const getOrderPageFu = () => {
+    proxy.$Loading()
+    getOrderPageApi({ status: '' }, paramsPage).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data, '0000');
+            if (data.datas && data.datas.length > 0) {
+                orderList.value = [...orderList.value, ...data.datas]
+                if (data.datas.length < paramsPage.pageSize) {
+                    slideLoading.value = false
+                }
+            } else {
+                slideLoading.value = false
+            }
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
 
 /**
  * 获取订单统计数据
@@ -87,27 +120,6 @@ const getOrderStatisticsFu = () => {
         proxy.$Toast({ title: req.msg })
     }))
 }
-
-/**
- * 分页查询订单
- */
-const orderPageFu = () => {
-    proxy.$Loading();
-    getOrderPageApi({}, params).then((res: any) => {
-        const { code, data, msg } = res
-        proxy.$CloseLoading();
-        if (code == proxy.$successCode) {
-            console.log(data, 'datadata');
-            orderList.value = data.datas
-            console.log(orderList.value, 'orderList');
-        } else {
-            proxy.$Toast({ title: msg })
-        }
-    }, (req => {
-        proxy.$Toast({ title: req.msg })
-    }))
-}
-
 
 /**
  * 滑动加载

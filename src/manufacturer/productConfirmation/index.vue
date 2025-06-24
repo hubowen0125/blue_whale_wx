@@ -54,7 +54,7 @@ const handleOrderFu = () => {
 <template>
     <view class="container flex_column">
         <view class="bg"></view>
-        <com-header header-title="订货卡详情" :backColor="false" :titleColor="true"></com-header>
+        <com-header header-title="商品确认" :backColor="false" :titleColor="true"></com-header>
         <view class="main_con flex_1">
             <view class="product_list flex_column">
                 <template v-for="item in shoppingCart" :key="item.id">

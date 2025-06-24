@@ -66,6 +66,12 @@ const selectSubmitFu = (e: any) => {
     createParams.packagingId = e.packagingId
 }
 
+const selectProductFu = () => {
+    uni.navigateTo({
+        url: '/wholesaler/selectProduct/index'
+    })
+}
+
 /**
  * 创建订单
  */
@@ -116,7 +122,7 @@ const createAddFu = async () => {
                         <view class="select_station flex_1">{{ packagingStationData.packagingName || '请选择' }}</view>
                         <image class="arrow_right" :src="arrow_right"></image>
                     </view>
-                    <button class="add_goods_btn">添加商品</button>
+                    <button class="add_goods_btn" @click="selectProductFu">添加商品</button>
                 </template>
             </view>
         </view>

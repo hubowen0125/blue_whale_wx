@@ -116,7 +116,7 @@ const getInfoFu = () => {
  */
 const handleOrderFu = () => {
     uni.navigateTo({
-        url: `/wholesaler/orderConfirmation/index?type=share&cardNo=${cardNo.value}`
+        url: `/wholesaler/orderCardInformation/index?type=share&cardNo=${cardNo.value}`
     })
 }
 

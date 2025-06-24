@@ -4,6 +4,8 @@ import card_2 from "@/static/images/wholesaler/orderCard/card_2.png"
 import arrow_right from "@/static/images/arrow_right.png"
 import { useUserStore } from '@/store/modules/user';
 
+const emit = defineEmits(['setTabBarIndex'])
+
 const useUser = useUserStore()
 const { proxy } = getCurrentInstance() as any;
 
@@ -33,7 +35,9 @@ const tabBarIndex = inject("tabBarIndex") as Ref<number>
 const toPageFu = (item: { path: string, key: number }) => {
     const { path, key } = item
     console.log(path, 'path');
-    if (!path) return
+    if (!path) {
+        return emit('setTabBarIndex', 3)
+    }
     if (key === 1) {
         if (!useUser.userInfo.dept.address) {
             editInformationRef.value.showPopupFu()

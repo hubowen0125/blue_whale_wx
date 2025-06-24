@@ -10,7 +10,11 @@ const props = defineProps({
             totalNum: number,
             totalAmount: number,
             createTime: string,
-            statusMsg: string
+            statusMsg: string,
+            paymentStatusMsg: string
+            wholesale: {
+                deptName: string
+            }
         },
         default: () => ({})
     }
@@ -21,7 +25,7 @@ const props = defineProps({
 const viewOrderDetailFu = () => {
     console.log('查看订单详情')
     uni.navigateTo({
-        url: '/manufacturer/orderDetails/index?order_id=GuLang008'
+        url: `/manufacturer/orderDetails/index?orderNo=${props.orderData.orderNo}`
     })
 }
 
@@ -31,12 +35,12 @@ const viewOrderDetailFu = () => {
 <template>
     <view class="order_item flex_column" @click="viewOrderDetailFu">
         <view class="order_item_title flex_align">
-            <view class="order_unpaid">未付清</view>
+            <view class="order_unpaid">{{ orderData.paymentStatusMsg }}</view>
             <view class="flex_1">订单号: {{ orderData.orderNo }}</view>
             <view class="order_item_status">{{ orderData.statusMsg }}</view>
         </view>
         <view class="order_item_info flex">
-            <view>陈冠希</view>
+            <view>{{ orderData?.wholesale?.deptName }}</view>
             <view class="flex_1 order_item_info_address">上海</view>
             <view>{{ orderData.totalHandNum }}手</view>
         </view>
@@ -45,7 +49,7 @@ const viewOrderDetailFu = () => {
             <view class="order_item_price_old">¥{{ formatNumber(orderData.totalAmount) }}</view>
             <view class="flex_align">
                 <text>已收:</text>
-                <text class="order_item_price_new">¥{{ formatNumber(100)}}</text>
+                <text class="order_item_price_new">¥{{ formatNumber(100) }}</text>
             </view>
         </view>
     </view>

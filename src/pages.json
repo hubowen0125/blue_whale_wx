@@ -90,7 +90,13 @@
                     }
                 },
                 {
-                    "path": "orderCardDetails/index",
+                    "path": "productConfirmation/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "orderCardInformation/index",
                     "style": {
                         "navigationStyle": "custom"
                     }
@@ -179,13 +185,7 @@
                     }
                 },
                 {
-                    "path": "orderNow/index",
-                    "style": {
-                        "navigationStyle": "custom"
-                    }
-                },
-                {
-                    "path": "orderCardDetails/index",
+                    "path": "productConfirmation/index",
                     "style": {
                         "navigationStyle": "custom"
                     }
@@ -274,9 +274,7 @@
         "navigationBarTextStyle": "black",
         "navigationBarBackgroundColor": "#ffffff",
         "backgroundColor": "#ffffff",
-        "usingComponents": {
-            "van-popup": "/wxcomponents/vant-weapp/popup/index"
-        }
+        "usingComponents": {}
     },
     "easycom": {
         "autoscan": true,

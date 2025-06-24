@@ -6,6 +6,8 @@ import long_arrow from "@/static/images/long_arrow.png"
 import orderItem from "../../orderItem/idnex.vue"
 import { useUserStore } from '@/store/modules/user';
 
+const emit = defineEmits(['setTabBarIndex'])
+
 const useUser = useUserStore()
 const { proxy } = getCurrentInstance() as any;
 
@@ -88,6 +90,13 @@ const getOrderPageFu = () => {
 }
 
 /**
+ * 查看全部订单
+ */
+const viewAllOrderFu = () => {
+    emit('setTabBarIndex', 1)
+}
+
+/**
  * 滑动加载
  */
 const scrolltolower = () => {
@@ -119,7 +128,7 @@ const confirmPopupFu = () => {
         </view>
         <view class="flex_align flex_between order_all_con">
             <view>全部订单</view>
-            <view class="order_all_btn flex_align">
+            <view class="order_all_btn flex_align" @click="viewAllOrderFu">
                 <view>查看全部</view>
                 <image class="arrow_right" :src="arrow_right_1"></image>
             </view>

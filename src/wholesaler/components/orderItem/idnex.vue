@@ -10,11 +10,17 @@ const props = defineProps({
     }
 })
 
+const viewDetailFu = () => {
+    uni.navigateTo({
+        url: `/wholesaler/orderDetails/index?orderNo=${props.orderData.orderNo}`
+    })
+}
+
 </script>
 
 
 <template>
-    <view class="order_item flex_column">
+    <view class="order_item flex_column" @click="viewDetailFu">
         <view class="order_item_title flex_align flex_between">
             <view>订单号: {{ orderData?.orderNo }}</view>
             <view class="order_item_status">{{ orderData?.statusMsg }}</view>

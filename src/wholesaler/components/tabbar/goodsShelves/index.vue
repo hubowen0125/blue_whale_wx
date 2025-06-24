@@ -1,7 +1,9 @@
-<script lang="ts" setup>
+x<script lang="ts" setup>
 import { wholesaleListApi } from '@/wholesaler/http/wholesaler';
 import { useUserStore } from '@/store/modules/user';
+import { useWholesalerStore } from "@/wholesaler/store/wholesaler"
 
+const useWholesaler = useWholesalerStore()
 const useUser = useUserStore()
 const { proxy } = getCurrentInstance() as any;
 
@@ -53,9 +55,11 @@ const wholesaleListFu = () => {
 /**
  * 立即订货
  */
-const handleBuyFu = () => {
+const handleBuyFu = (items: any) => {
+    useWholesaler.setShoppingCartFu([])
+    useWholesaler.setShoppingManufacturerFu(items.dept)
     uni.navigateTo({
-        url: '/wholesaler/orderNow/index'
+        url: `/wholesaler/selectProduct/index?manufacturerId=${items.dept.deptId}`
     })
 }
 
@@ -71,7 +75,7 @@ const handleBuyFu = () => {
                 <view class="companys_item flex_column" v-for="(items, index) in shelfList" :key="index">
                     <view class="companys_item_title flex_align flex_between">
                         <view>{{ items.dept.deptName }}</view>
-                        <button class="btn_buy" @click="handleBuyFu">立即订货</button>
+                        <button class="btn_buy" @click="handleBuyFu(items)">立即订货</button>
                     </view>
                     <view class="product_list flex_column">
                         <template v-for="item in items.productsList" :key="item.id">

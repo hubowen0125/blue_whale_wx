@@ -14,7 +14,11 @@ const props = defineProps({
             styleNumber: '',
             price: 0
         })
-    }
+    },
+    orderType: {
+        type: String,  // show 展示   handleOrder 下单  handleRefund 退款
+        default: 'show'
+    },
 });
 
 /**
@@ -36,7 +40,7 @@ const viewDetailsFu = () => {
         <view class="flex_column flex_1">
             <view>{{ productDetail.productName }}</view>
             <view class="flex_1 order_number">款号: {{ productDetail.styleNumber }}</view>
-            <view class="order_price">
+            <view class="order_price" v-if="orderType !== 'handleRefund'">
                 <text class="order_price_icon">¥</text>
                 <text>{{ productDetail.price }}</text>
             </view>

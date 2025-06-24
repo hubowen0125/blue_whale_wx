@@ -75,13 +75,13 @@ provide('tabBarIndex', tabBarIndex);
     <view class="container flex_column">
         <view class="tabbar_main container_defalut_bg flex_1">
             <view :class="[tabBarIndex == 0 ? 'opacity1' : 'opacity0']">
-                <home_com></home_com>
+                <home_com @setTabBarIndex="setTabBarIndex"></home_com>
             </view>
             <view :class="[tabBarIndex == 1 ? 'opacity1' : 'opacity0']">
                 <order_com></order_com>
             </view>
             <view :class="[tabBarIndex == 2 ? 'opacity1' : 'opacity0']">
-                <order_card_com></order_card_com>
+                <order_card_com @setTabBarIndex="setTabBarIndex"></order_card_com>
             </view>
             <view :class="[tabBarIndex == 3 ? 'opacity1' : 'opacity0']">
                 <goods_shelves_com></goods_shelves_com>

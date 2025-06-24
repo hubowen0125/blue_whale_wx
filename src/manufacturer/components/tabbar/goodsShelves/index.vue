@@ -1,7 +1,10 @@
 <script lang="ts" setup>
-import { productsPageApi } from '@/manufacturer/http/manufacturer';
+import { productsPageApi, getShelfStatisticsApi } from '@/manufacturer/http/manufacturer';
 import { useUserStore } from '@/store/modules/user';
+import { useManufacturerStore } from "@/manufacturer/store/manufacturer";
 
+
+const useManufacturer = useManufacturerStore()
 const useUser = useUserStore()
 const { proxy } = getCurrentInstance() as any;
 
@@ -9,15 +12,15 @@ const { proxy } = getCurrentInstance() as any;
 const inventoryType = [
     {
         title: '总款数',
-        value: '100',
+        value: computed(() => statisticsDetail.value.totalCount || 0),
     },
     {
         title: '总销量(件)',
-        value: '80',
+        value: computed(() => statisticsDetail.value.totalSales || 0),
     },
     {
         title: '总库存',
-        value: '20',
+        value: computed(() => statisticsDetail.value.totalStock || 0),
     },
 ]
 
@@ -29,12 +32,18 @@ const paramsPage = reactive({
 const productList = ref<any[]>([])
 const isLoad = ref(false) // 是否加载
 const slideLoading = ref(true) // 是否需要滑动加载
+const statisticsDetail = ref({
+    totalCount: 0,
+    totalSales: 0,
+    totalStock: 0,
+})
 
 watch(() => tabBarIndex.value, (newVal) => {
     if (newVal == 3 && !isLoad.value) {
         console.log('213213');
         isLoad.value = true
         productsPageFu()
+        getShelfStatisticsFu()
     }
 })
 
@@ -63,10 +72,25 @@ const productsPageFu = () => {
     }))
 }
 
+const getShelfStatisticsFu = () => {
+    getShelfStatisticsApi().then((res: any) => {
+        const { code, data, msg } = res
+        if (code == proxy.$successCode) {
+            console.log(data, 'data');
+            statisticsDetail.value = data
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
 /**
  * 创建订单
  */
 const createOrderFu = () => {
+    useManufacturer.setShoppingCartFu([])
     uni.navigateTo({
         url: "/manufacturer/createOrder/index"
     })
@@ -110,7 +134,7 @@ const scrolltolower = () => {
     <view class="goods_shelves_con flex_column">
         <view class="goods_shelves_title">货架</view>
         <view class="search_input">
-            <com-searchInput placeholder="搜索厂家"></com-searchInput>
+            <com-searchInput placeholder="搜索商品"></com-searchInput>
         </view>
         <view class="inventory_type_con flex">
             <view class="inventory_type_item flex_column flex_align flex_center flex_1" v-for="item in inventoryType"
@@ -121,11 +145,12 @@ const scrolltolower = () => {
         </view>
         <view class="main_con flex_1 flex_column">
             <scroll-view class="scroll_con" scroll-y="true" lower-threshold="50" @scrolltolower="scrolltolower">
-                <view class="product_lsit flex_column">
+                <view class="product_lsit flex_column" v-if="productList.length > 0">
                     <view v-for="item in productList" :key="item.id">
                         <com-orderInfo :productDetail="item" @viewDetailsFu="viewDetailsFu"></com-orderInfo>
                     </view>
                 </view>
+                <com-no_data v-else :noDataText="'暂无订单'"></com-no_data>
             </scroll-view>
         </view>
         <view class="footer_con flex">

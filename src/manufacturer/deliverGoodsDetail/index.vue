@@ -1,7 +1,6 @@
 <script lang="ts" setup>
-import checkbox from "@/static/images/checkbox.png"
+import { getByOrderNoApi, orderShipRecordShipApi } from "@/http/api/order";
 import checkbox_active from "@/static/images/checkbox_active.png"
-import hint_icon from "@/static/images/hint_icon.png"
 import deliverGoodsInfo from "../components/deliverGoodsInfo/index.vue"
 
 const { proxy } = getCurrentInstance() as any;
@@ -23,12 +22,53 @@ const popupCom = ref()
 // 全选
 const selectAll = ref(false)
 const isRefund = ref(false)
+const orderNo = ref('')
+const orderDetails = ref<any>({})
+const shipParams = reactive<any>({
+    orderNo: '',
+    productsParams: []
+})
+
+onLoad((e: any) => {
+    if (e.orderNo) {
+        orderNo.value = e.orderNo
+        shipParams.orderNo = e.orderNo
+        getByOrderNoFu()
+    }
+})
+
+/**
+ * 获取订单详情
+ */
+const getByOrderNoFu = () => {
+    proxy.$Loading()
+    getByOrderNoApi({ orderNo: orderNo.value }).then((res: any) => {
+        const { code, data, msg } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data);
+            data.orderProductsList.map((item: any) => {
+                item.orderProductsDetailList.map((items: any) => {
+                    return items.returnNum = 0
+                })
+                item.productColorsList = item.orderProductsDetailList
+                return item
+            })
+            orderDetails.value = data
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
 
 /**
  * 全选
  */
-const selectAllFu = () => {
-    selectAll.value = !selectAll.value
+const selectAllFu = (data: boolean) => {
+    selectAll.value = data
 }
 
 /**
@@ -41,16 +81,33 @@ const selectIsRefundFu = (item: boolean) => {
 // 立即发货
 const deliverGoodsFu = () => {
     console.log('立即发货')
-}
-
-/**
- * 滑动加载
- */
-const scrolltolower = () => {
-    // if (!slideLoading.value) return
-    console.log('++++++++');
-    // manageDevicesParams.value.page += 1
-    // resetManageDevicesParams()
+    orderDetails.value.orderProductsList.map((item: any) => {
+        const obj: any = {
+            orderProductId: item.productId,
+            productsDetailParams: []
+        }
+        item.orderProductsDetailList.map((items: any) => {
+            obj.productsDetailParams.push({
+                orderProductDetailId: items.id,
+                handNum: items.returnNum,
+            })
+        })
+        shipParams.productsParams.push(obj)
+    })
+    proxy.$Loading()
+    orderShipRecordShipApi(shipParams).then((res: any) => {
+        const { code, data, msg } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data);
+            uni.navigateBack()
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
 }
 
 // 确认弹窗
@@ -68,30 +125,34 @@ const confirmPopupFu = () => {
         <view class="order_info flex_align flex_between">
             <view class="flex_align order_info_con">
                 <view class="flex_column order_info_item">
-                    <view>2手/10件</view>
+                    <view>{{ orderDetails.totalHandNum }}手/{{ orderDetails.totalNum }}件</view>
                     <view class="order_info_title">总件数</view>
                 </view>
                 <view class="flex_column order_info_item">
-                    <view>2手/10件</view>
+                    <view>{{ orderDetails.unSendHandNum }}手/{{ orderDetails.unSendNum }}件</view>
                     <view class="order_info_title">未发货</view>
                 </view>
             </view>
-            <view class="flex_align" @click="selectAllFu">
+            <view class="flex_align" @click="selectAllFu(!selectAll)">
                 <image class="checkbox" :src="selectAll ? checkbox_active : ''"></image>
                 <text class="checkbox_text">全选</text>
             </view>
         </view>
         <view class="mian_con flex_1">
             <scroll-view class="scroll_con " scroll-y="true"
-                lower-threshold="50"
-                @scrolltolower="scrolltolower">
+                lower-threshold="50">
                 <view class="order_list flex_column">
-                    <template v-for="item in 10" :key="item">
+                    <template v-for="item in orderDetails.orderProductsList" :key="item.id">
                         <view class="order_item">
-                            <com-orderTable orderType="handleRefund"></com-orderTable>
+                            <com-orderTable
+                                orderType="handleRefund"
+                                :productDetail="item"
+                                :selectAll="selectAll" 
+                                @deselectAllFu="selectAllFu">
+                            </com-orderTable>
                         </view>
                     </template>
-                    <deliverGoodsInfo></deliverGoodsInfo>
+                    <deliverGoodsInfo :deliverInfo="orderDetails.packaging"></deliverGoodsInfo>
                 </view>
             </scroll-view>
         </view>

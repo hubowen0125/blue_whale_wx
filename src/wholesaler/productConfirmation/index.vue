@@ -1,12 +1,47 @@
 <script lang="ts" setup>
+import { formatNumber } from "@/utils/utils";
+import { useWholesalerStore } from "@/wholesaler/store/wholesaler"
+
+const useWholesaler = useWholesalerStore()
+const { proxy } = getCurrentInstance() as any;
 
 
+const shoppingCart = ref<Array<any>>([...useWholesaler.shoppingCart])
+
+const totalAmount = computed(() => {
+    let total = 0
+    for (let i = 0; i < shoppingCart.value.length; i++) {
+        for (let j = 0; j < shoppingCart.value[i].productColorsList.length; j++) {
+            total += shoppingCart.value[i].price * shoppingCart.value[i].productColorsList[j].handNum
+        }
+    }
+    return total
+})
+const totalHandNum = computed(() => {
+    let total = 0
+    for (let i = 0; i < shoppingCart.value.length; i++) {
+        for (let j = 0; j < shoppingCart.value[i].productColorsList.length; j++) {
+            total += shoppingCart.value[i].productColorsList[j].handNum
+        }
+    }
+    return total
+})
+const totalNum = computed(() => {
+    let total = 0
+    for (let i = 0; i < shoppingCart.value.length; i++) {
+        for (let j = 0; j < shoppingCart.value[i].productColorsList.length; j++) {
+            total += shoppingCart.value[i].unitQuantity * shoppingCart.value[i].productColorsList[j].handNum
+        }
+    }
+    return total
+})
 
 /**
  * 立即下单
  */
 const handleOrderFu = () => {
     console.log('立即下单')
+    useWholesaler.setShoppingCartFu(shoppingCart.value)
     uni.navigateTo({
         url: '/wholesaler/orderConfirmation/index'
     })
@@ -20,9 +55,11 @@ const handleOrderFu = () => {
         <com-header header-title="订货卡详情" :backColor="false" :titleColor="true"></com-header>
         <view class="main_con flex_1">
             <view class="product_list flex_column">
-                <template v-for="item in 10" :key="item">
+                <template v-for="item in shoppingCart" :key="item.id">
                     <view class="product_item">
-                        <com-orderTable orderType="handleOrder"></com-orderTable>
+                        <com-orderTable
+                            orderType="handleOrder"
+                            :productDetail="item"></com-orderTable>
                     </view>
                 </template>
             </view>
@@ -31,9 +68,9 @@ const handleOrderFu = () => {
             <view>
                 <view>
                     <text class="price_icon">¥</text>
-                    <text>80</text>
+                    <text>{{ formatNumber(totalAmount) }}</text>
                 </view>
-                <view class="unit_info">2手/10件</view>
+                <view class="unit_info">{{ totalHandNum }}手/{{ totalNum }}件</view>
             </view>
             <button class="button_defalut" @click="handleOrderFu">立即下单</button>
         </view>

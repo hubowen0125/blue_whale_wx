@@ -134,7 +134,8 @@ const scrolltolower = () => {
                 lower-threshold="50"
                 @scrolltolower="scrolltolower">
                 <view class="record_list flex_column">
-                    <template v-if="activeState == 0" v-for="item in shipmentRecord" :key="item.id">
+                    <template v-if="activeState == 0 && shipmentRecord.length > 0" v-for="item in shipmentRecord"
+                        :key="`shipment_${item.id}`">
                         <view class="record_item flex_column">
                             <view>{{ item.userName }}</view>
                             <view class="flex_between flex_align">
@@ -148,7 +149,8 @@ const scrolltolower = () => {
                             </view>
                         </view>
                     </template>
-                    <template v-if="activeState == 1" v-for="item in cashierRecord" :key="item.id">
+                    <template v-else-if="activeState == 1 && cashierRecord.length > 0" v-for="item in cashierRecord"
+                        :key="`cashier_${item.id}`">
                         <view class="record_item cashier_record flex_align">
                             <image class="cashier_img"></image>
                             <view class="flex_column flex_1 cashier_record_content">
@@ -163,7 +165,8 @@ const scrolltolower = () => {
                             </view>
                         </view>
                     </template>
-                    <template v-if="activeState == 2" v-for="item in otherRecords" :key="item.id">
+                    <template v-else-if="activeState == 2 && otherRecords.length > 0" v-for="item in otherRecords"
+                        :key="`other_${item.id}`">
                         <view class="record_item flex_column">
                             <view class="flex_between flex_align">
                                 <view>{{ item.userName }}</view>
@@ -172,6 +175,7 @@ const scrolltolower = () => {
                             <view class="record_item_time">{{ dateStrToDateFormat(item.createTime, '') }}</view>
                         </view>
                     </template>
+                    <com-no_data v-else noDataText="暂无记录"></com-no_data>
                 </view>
             </scroll-view>
         </view>
@@ -237,6 +241,10 @@ const scrolltolower = () => {
         .record_list {
             padding: 0 30rpx 30rpx;
             gap: 20rpx;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            position: relative;
 
             .record_item {
                 font-weight: bold;

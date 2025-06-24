@@ -45,9 +45,21 @@ const backFu = () => {
         if (len > 1) {
             uni.navigateBack()
         } else {
-            uni.reLaunch({
-                url: '/pages/tabbar/index'
-            })
+            if (useUser.miniRole == 'manufacturer') {
+                uni.redirectTo({
+                    url: '/manufacturer/home/index'
+                })
+            }
+            if (useUser.miniRole == 'wholesale') {
+                uni.redirectTo({
+                    url: '/wholesaler/home/index'
+                })
+            }
+            if (useUser.miniRole == 'packaging') {
+                uni.redirectTo({
+                    url: '/packagingStation/home/index'
+                })
+            }
         }
     }
 }

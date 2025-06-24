@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { getByOrderNoApi } from "@/http/api/order";
+import { getByOrderNoApi, delByOrderNoApi } from "@/http/api/order";
 import wait_icon from "@/static/images/wait_icon.png";
 import del_icon from "@/static/images/del_icon.png";
 import deliverGoodsInfo from "../components/deliverGoodsInfo/index.vue"
@@ -64,6 +64,11 @@ const orderDetails = ref<any>({})
 onLoad((e: any) => {
     if (e.orderNo) {
         orderNo.value = e.orderNo
+    }
+})
+
+onShow(() => {
+    if (orderNo.value) {
         getByOrderNoFu()
     }
 })
@@ -83,6 +88,30 @@ const getByOrderNoFu = () => {
                 return item
             })
             orderDetails.value = data
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+
+const showPopupFu = () => {
+    popupCom.value.showPopup()
+}
+
+/**
+ * 作废订单
+ */
+const delByOrderNoFu = () => {
+    delByOrderNoApi({ orderNo: orderNo.value }).then((res: any) => {
+        const { code, data, msg } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data);
+            getByOrderNoFu
         } else {
             proxy.$Toast({ title: msg })
         }
@@ -115,11 +144,6 @@ const cashOnDeliveryFu = () => {
     })
 }
 
-// 确认弹窗
-const confirmPopupFu = () => {
-    console.log('1111');
-
-}
 
 </script>
 
@@ -132,9 +156,9 @@ const confirmPopupFu = () => {
             <view class="wait_con">
                 <view class="flex_align flex_center">
                     <image class="wait_icon" :src="wait_icon"></image>
-                    <text>待配送</text>
+                    <text>{{ orderDetails.statusMsg }}</text>
                 </view>
-                <view class="wait_num">已发货0/60</view>
+                <view class="wait_num">已发货{{ orderDetails.unSendHandNum }}/{{ orderDetails.unSendNum }}</view>
             </view>
             <view class="order_details">
                 <view class="order_details_item flex_align flex_between" v-for="item, index in orderText"
@@ -154,7 +178,7 @@ const confirmPopupFu = () => {
                 <view class="table_con flex_column">
                     <template v-for="item in orderDetails.orderProductsList" :key="item.id">
                         <com-orderTable
-                            orderType="show"
+                            orderType="detail"
                             :productDetail="item">
                         </com-orderTable>
                     </template>
@@ -162,16 +186,16 @@ const confirmPopupFu = () => {
             </view>
         </view>
         <view class="footer_con flex_align flex_between">
-            <view class="del_btn flex_column flex_align">
+            <view class="del_btn flex_column flex_align" v-if="orderDetails.status == 1" @click="showPopupFu">
                 <image class="del_icon" :src="del_icon"></image>
-                <text>删除</text>
+                <text>作废</text>
             </view>
             <button class="records_btn" @click="viewRecordsFu">操作记录</button>
             <button class="deliver_goods_btn" @click="deliverGoodsFu">发货</button>
-            <button class="button_defalut" @click="cashOnDeliveryFu">收银</button>
+            <button v-if="orderDetails.paymentStatus == 1" class="button_defalut" @click="cashOnDeliveryFu">收银</button>
         </view>
     </view>
-    <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="confirmPopupFu"></com-popup_com>
+    <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="delByOrderNoFu"></com-popup_com>
 </template>
 
 

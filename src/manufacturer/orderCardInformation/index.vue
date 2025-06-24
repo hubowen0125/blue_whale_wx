@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { manufacturerWholesalePageApi, packagingWholesalePageApi } from "../http/manufacturer"
+import { getByCardNoApi, createOrderApi } from "@/http/api/all"
+import { manufacturerWholesalePageApi } from "../http/manufacturer"
 import arrow_right from "@/static/images/arrow_right.png"
 import off_icon from "@/static/images/off_icon.png"
 import position_1 from "@/static/images/position_1.png"
@@ -9,7 +10,6 @@ import deliverGoodsInfo from "../components/deliverGoodsInfo/index.vue"
 import { useManufacturerStore } from "@/manufacturer/store/manufacturer";
 import { formatNumber } from "@/utils/utils"
 import { useUserStore } from "@/store/modules/user"
-import { createOrderApi } from "@/http/api/order"
 
 const useUser = useUserStore()
 const useManufacturer = useManufacturerStore()
@@ -18,8 +18,8 @@ const { proxy } = getCurrentInstance() as any;
 const orderTextList = reactive([
     {
         title: '批发商',
-        value: computed(() => wholesaleDetail.value?.wholesaleName || '选择批发商'),
-        value1: computed(() => wholesaleDetail.value?.wholesalePhone || ''),
+        value: computed(() => orderDetails.value?.wholesale?.address || '选择批发商'),
+        value1: computed(() => orderDetails.value?.wholesale?.phone || ''),
         type: 'select'
     },
     {
@@ -36,77 +36,44 @@ const orderTextList = reactive([
 const wholesalerRef = ref();
 const popupRef = ref();
 const orderDetails = ref<any>({
-    totalHandNum: computed(() => {
-        let total = 0
-        const list = useManufacturer.shoppingCart
-        if (list.length > 0) {
-            for (let i = 0; i < list.length; i++) {
-                for (let j = 0; j < list[i].productColorsList.length; j++) {
-                    total += list[i].productColorsList[j].handNum
-                }
-            }
-        }
-        return total
-    }),
-    totalNum: computed(() => {
-        let total = 0
-        const list = useManufacturer.shoppingCart
-        if (list.length > 0) {
-            for (let i = 0; i < list.length; i++) {
-                for (let j = 0; j < list[i].productColorsList.length; j++) {
-                    total += list[i].unitQuantity * list[i].productColorsList[j].handNum
-                }
-            }
-        }
-        return total
-    }),
-    totalAmount: computed(() => {
-        let total = 0
-        const list = useManufacturer.shoppingCart
-        if (list.length > 0) {
-            for (let i = 0; i < list.length; i++) {
-                for (let j = 0; j < list[i].productColorsList.length; j++) {
-                    total += list[i].price * list[i].productColorsList[j].handNum
-                }
-            }
-        }
-        return total
-    }),
-    packagingId: '',
-    wholesaleId: '',
-    paymentType: '',
-    viewInventory: 0,
-    remark: '',
-    orderProductsParams: useManufacturer.shoppingCart
+    totalHandNum: 0,
+    totalNum: 0,
+    totalAmount: 0,
+    packaging: {},
+    remark: ''
 })
 const type = ref('')
-const wholesaleList = ref<any[]>([])
-const wholesaleDetail = ref<any>({})
-const packagingList = ref<any[]>([])
-const packagingDetail = ref<any>({})
 
 
-onLoad(() => {
-    manufacturerWholesalePageFu()
-    packagingWholesalePageFu()
+onLoad((e: any) => {
+    if (e.type == 'share') {
+        type.value = e.type;
+        getByCardNoFu(e.cardNo)
+    } else {
+        manufacturerWholesalePageFu()
+    }
 })
 
+// onMounted(() => {
+//     console.log('mounted');
+//     manufacturerWholesalePageFu()
+// })
 
 /**
- * 获取批发商列表
+ * 获取订单详情
  */
-const manufacturerWholesalePageFu = () => {
-    manufacturerWholesalePageApi({}).then((res: any) => {
+const getByCardNoFu = (cardNo: string) => {
+    getByCardNoApi({ cardNo }).then((res: any) => {
         const { code, data, msg, token } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
             console.log(data, '0000');
-            if (data && data.length > 0) {
-                data.forEach((item: any) => {
-                    item.active = false
-                })
-                wholesaleList.value = data;
-            }
+            data.cardProductsList.map((item: { productColorsList: any; cardProductsDetailList: any; id: any; productId: any; }) => {
+                item.productColorsList = item.cardProductsDetailList
+                item.id = item.productId
+                return item
+            })
+            orderDetails.value = data
         } else {
             proxy.$Toast({ title: msg })
         }
@@ -114,6 +81,36 @@ const manufacturerWholesalePageFu = () => {
         proxy.$CloseLoading();
         proxy.$Toast({ title: req.msg })
     }))
+}
+
+
+/**
+ * 
+ */
+const manufacturerWholesalePageFu = () => {
+    manufacturerWholesalePageApi({}).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data, '0000');
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+// 显示弹窗
+const showPopup = () => {
+    console.log('显示弹窗');
+    popupRef.value.open('bottom')
+}
+
+// 关闭弹窗
+const closePopupFu = () => {
+    popupRef.value.close();
 }
 
 // 显示批发商弹窗
@@ -122,102 +119,14 @@ const showWholesalerFu = () => {
     wholesalerRef.value.open('bottom')
 }
 
-/**
- * 选择批发商
- * @param item 
- */
-const selectWholesalerFu = (item: any) => {
-    // wholesaleDetail.value = item;
-    wholesaleList.value.forEach((item: any) => {
-        item.active = false
-    })
-    item.active = true
-}
-
-const submitWholesalerFu = () => {
-    const obj = wholesaleList.value.find((item: any) => item.active)
-    wholesaleDetail.value = obj;
-    if (!wholesaleDetail.value?.wholesaleId) {
-        return proxy.$Toast({ title: '请选择批发商' })
-    }
-    orderDetails.value.wholesaleId = wholesaleDetail.value.wholesaleId;
-    packagingWholesalePageFu()
-    closeWholesalerFu();
-}
 // 关闭弹窗
 const closeWholesalerFu = () => {
     wholesalerRef.value.close();
 }
 
-/**
- * 获取打包站列表
- */
-const packagingWholesalePageFu = () => {
-    // wholesaleId: wholesaleDetail.value.wholesaleId 
-    packagingWholesalePageApi({}).then((res: any) => {
-        const { code, data, msg, token } = res
-        proxy.$CloseLoading();
-        if (code == proxy.$successCode) {
-            console.log(data, '0000');
-            if (data.datas && data.datas.length > 0) {
-                data.datas.forEach((item: any) => {
-                    item.active = false
-                })
-                packagingList.value = data.datas;
-            }
-        } else {
-            proxy.$Toast({ title: msg })
-        }
-    }, (req => {
-        proxy.$CloseLoading();
-        proxy.$Toast({ title: req.msg })
-    }))
-}
-
-
-// 显示弹窗
-const showPopup = () => {
-    // if (!wholesaleDetail.value?.wholesaleId) {
-    //     return proxy.$Toast({ title: '请选择批发商' })
-    // }
-    console.log('显示弹窗');
-    popupRef.value.open('bottom')
-}
-
-const selectPackagingFu = (item: any) => {
-    packagingList.value.forEach((item: any) => {
-        item.active = false
-    })
-    item.active = true
-}
-
-const submitPackagingFu = () => {
-    const obj = packagingList.value.find((item: any) => item.active)
-    packagingDetail.value = obj;
-    if (!packagingDetail.value?.packagingId) {
-        return proxy.$Toast({ title: '请选择打包站' })
-    }
-    orderDetails.value.packagingId = packagingDetail.value.packagingId;
-    closePopupFu();
-}
-
-// 关闭弹窗
-const closePopupFu = () => {
-    popupRef.value.close();
-}
-
 const createOrderFu = () => {
     proxy.$Loading();
-    orderDetails.value.orderProductsParams.map((item: any) => {
-        item.productsDetailParams = item.productColorsList.map((item: any) => {
-            return {
-                colorName: item.colorName,
-                handNum: item.handNum,
-            }
-        })
-        item.productId = item.id
-        return 
-    })
+    orderDetails.value.manufacturerId = useUser.userInfo.userId
     createOrderApi(orderDetails.value).then((res: any) => {
         const { code, data, msg, token } = res
         proxy.$CloseLoading();
@@ -258,9 +167,14 @@ const createOrderFu = () => {
                     </image>
                 </view>
             </view>
-            <deliverGoodsInfo :deliverInfo="packagingDetail" :edit="true"
-                @selectPackagingFu="showPopup">
+            <deliverGoodsInfo :deliverInfo="orderDetails.packaging" :edit="type == 'share' ? false : true">
                 <template #input>
+                    <view class="flex_align pay_way_item">
+                        <view>付款方式</view>
+                        <view class="flex_1 pay_way_value">请选择</view>
+                        <image class="arrow_right" :src="arrow_right">
+                        </image>
+                    </view>
                     <view class="flex_align flex_between deliver_info_item">
                         <view>备注</view>
                         <input class="deliver_info_item_input" type="text" placeholder="请输入备注内容"
@@ -269,7 +183,7 @@ const createOrderFu = () => {
                 </template>
             </deliverGoodsInfo>
             <view class="product_list flex_column">
-                <template v-for="item in orderDetails.orderProductsParams" :key="item.id">
+                <template v-for="item in orderDetails.cardProductsList" :key="item.id">
                     <view class="product_item">
                         <com-orderTable orderType="show"
                             :productDetail="item"></com-orderTable>
@@ -296,23 +210,22 @@ const createOrderFu = () => {
                 <image class="off_icon" :src="off_icon" @click="closePopupFu"></image>
             </view>
             <view class="packaging_station_list flex_column flex_1">
-                <template v-for="item in packagingList" :key="item.packagingId">
+                <template v-for="item in 10" :key="item">
                     <view class="packaging_station_item flex_align flex_between"
-                        :class="{ 'packaging_station_item_active': item.active }"
-                        @click="selectPackagingFu(item)">
+                        :class="{ 'packaging_station_item_active': item % 2 === 0 }">
                         <view class="flex_column">
                             <view class="flex_align packaging_station_info">
                                 <image class="position_icon" :src="position_1"></image>
-                                <view class="packaging_station_name">{{ item.packagingName }}</view>
+                                <view class="packaging_station_name">新村路打包站</view>
                             </view>
-                            <view>{{ item.packagingAddress }}</view>
-                            <view>{{ item.packagingPhone }}</view>
+                            <view>上海市普陀区甘泉路280号</view>
+                            <view>15618257147</view>
                         </view>
-                        <image class="checkbox_icon" :src="item.active ? checkbox_active : checkbox"></image>
+                        <image class="checkbox_icon" :src="checkbox"></image>
                     </view>
                 </template>
             </view>
-            <button class="button_defalut" @click="submitPackagingFu">确认</button>
+            <button class="button_defalut">确认</button>
         </view>
     </uni-popup>
 
@@ -324,24 +237,22 @@ const createOrderFu = () => {
                 <image class="off_icon" :src="off_icon" @click="closeWholesalerFu"></image>
             </view>
             <view class="packaging_station_list flex_column flex_1">
-                <template v-for="item in wholesaleList" :key="item.id">
+                <template v-for="item in 10" :key="item">
                     <view class="packaging_station_item flex_align flex_between"
-                        :class="{ 'packaging_station_item_active': item.active }"
-                        @click="selectWholesalerFu(item)">
+                        :class="{ 'packaging_station_item_active': item % 2 === 0 }">
                         <view class="flex_column">
                             <view class="flex_align packaging_station_info">
                                 <image class="position_icon" :src="position_1"></image>
-                                <view class="packaging_station_name">{{ item.wholesaleName }}</view>
+                                <view class="packaging_station_name">上海春之都店</view>
                             </view>
-                            <view>{{ item.address }}</view>
-                            <view>{{ item.wholesalePhone }}</view>
+                            <view>上海市普陀区甘泉路280号</view>
+                            <view>15618257147</view>
                         </view>
-                        <image class="checkbox_icon"
-                            :src="item.active ? checkbox_active : checkbox"></image>
+                        <image class="checkbox_icon" :src="checkbox"></image>
                     </view>
                 </template>
             </view>
-            <button class="button_defalut" @click="submitWholesalerFu">确认</button>
+            <button class="button_defalut">确认</button>
         </view>
     </uni-popup>
 </template>
@@ -497,14 +408,12 @@ const createOrderFu = () => {
 
         .packaging_station_item {
             background: #F7F8FA;
-            border: 2rpx solid F7F8FA;
             border-radius: 24rpx;
             padding: 32rpx;
             font-weight: 400;
             font-size: 24rpx;
             color: #7C8191;
             gap: 12rpx;
-            box-sizing: border-box;
 
             .packaging_station_info {
                 margin-bottom: 8rpx;
@@ -530,6 +439,7 @@ const createOrderFu = () => {
 
         .packaging_station_item_active {
             border: 2rpx solid rgba(1, 163, 255, 1);
+            border-radius: 24rpx;
             background: #FFFFFF;
         }
     }

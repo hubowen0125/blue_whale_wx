@@ -116,7 +116,7 @@ const getByOrderNoFu = () => {
  */
 const viewRecordsFu = () => {
     uni.navigateTo({
-        url: '/wholesaler/operationRecord/index'
+        url: `/wholesaler/operationRecord/index?orderNo=${orderNo.value}`
     })
 }
 
@@ -165,7 +165,7 @@ const confirmPopupFu = () => {
                 <view class="table_con flex_column">
                     <template v-for="item in orderDetails.orderProductsList" :key="item.id">
                         <com-orderTable
-                            orderType="show"
+                            orderType="detail"
                             :productDetail="item">
                         </com-orderTable>
                     </template>

@@ -1,9 +1,11 @@
 <script lang="ts" setup>
+import { getSalesStatisticsApi } from "@/manufacturer/http/manufacturer"
 import { getInfoApi } from "@/http/api/all"
 import arrow_right_1 from "@/static/images/arrow_right_1.png"
 import left_icon from "@/manufacturer/images/left_icon.png"
 import right_icon from "@/manufacturer/images/right_icon.png"
 import { useUserStore } from '@/store/modules/user';
+import { createDateShifter } from "@/utils/utils"
 
 const useUser = useUserStore()
 const { proxy } = getCurrentInstance() as any;
@@ -46,26 +48,36 @@ const popupData = {
 const reportList = [
     {
         title: '订单数',
-        value: '100',
+        value: () => statisticsDetail.value.orderNum || 0,
     },
     {
         title: '销售量',
-        value: '80',
+        value: () => `${statisticsDetail.value.handNum || 0}手/${statisticsDetail.value.num || 0}件`,
     },
     {
         title: '销售额',
-        value: '20',
+        value: () => `¥${statisticsDetail.value.amount || 0}`,
     },
 ]
+const dateShift = createDateShifter() // 默认从今天开始
+
 
 const tabBarIndex = inject("tabBarIndex") as Ref<number>
 const popupCom = ref()
 const infoDetails = ref<any>({})
+const date = ref(dateShift.get())
+const statisticsDetail = ref({
+    orderNum: 0,
+    handNum: 0,
+    num: 0,
+    amount: 0,
+})
 
 
 onMounted(() => {
     // popupCom.value.showPopup()
     getInfoFu()
+    getSalesStatisticsFu()
 })
 
 watch(() => tabBarIndex.value, (newVal) => {
@@ -86,7 +98,7 @@ const getInfoFu = () => {
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
             console.log(data);
-            infoDetails.value = {...infoDetails.value ,...data}
+            infoDetails.value = { ...infoDetails.value, ...data }
         } else {
             proxy.$Toast({ title: msg })
         }
@@ -96,6 +108,29 @@ const getInfoFu = () => {
     }))
 }
 
+const getSalesStatisticsFu = () => {
+    getSalesStatisticsApi({ date: date.value }).then((res: any) => {
+        const { code, data, msg } = res
+        if (code == proxy.$successCode) {
+            console.log(data);
+            statisticsDetail.value = data
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+const reduceTimeFu = () => {
+    date.value = dateShift.prev()
+    getSalesStatisticsFu()
+}
+
+const addTimeFu = () => {
+    date.value = dateShift.next()
+    getSalesStatisticsFu()
+}
 
 /**
  * 设置页面跳转
@@ -129,19 +164,20 @@ const renewFu = () => {
 <template>
     <view class="my_con flex_column">
         <view class="bg"></view>
-        <com-myHeader :userRole="'manufacturer'" :infoDetails="infoDetails" @editInformationFu="getInfoFu"></com-myHeader>
+        <com-myHeader :userRole="'manufacturer'" :infoDetails="infoDetails"
+            @editInformationFu="getInfoFu"></com-myHeader>
         <view class="daily_report">
             <view>日报表</view>
             <view class="select_time flex_align">
-                <image class="select_time_icon" :src="left_icon"></image>
-                <view class="flex_1">5月14日</view>
-                <image class="select_time_icon" :src="right_icon"></image>
+                <image class="select_time_icon" :src="left_icon" @click="reduceTimeFu"></image>
+                <view class="flex_1">{{ date }}</view>
+                <image class="select_time_icon" :src="right_icon" @click="addTimeFu"></image>
             </view>
             <view class="report_con flex">
                 <view class="report_item flex_column flex_align flex_center flex_1"
                     v-for="item in reportList"
                     :key="item.title">
-                    <view>{{ item.value }}</view>
+                    <view>{{ item.value() }}</view>
                     <view class="report_item_title">{{ item.title }}</view>
                 </view>
             </view>
@@ -259,7 +295,7 @@ const renewFu = () => {
                 border: 1rpx solid #CDE1FF;
                 height: 142rpx;
                 font-weight: 500;
-                font-size: 40rpx;
+                font-size: 30rpx;
                 color: #0C62FF;
                 gap: 10rpx;
 

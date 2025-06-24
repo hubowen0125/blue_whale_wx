@@ -42,8 +42,6 @@ const orderList = ref<any[]>([])
 
 watch(() => tabBarIndex.value, (newVal) => {
     if (newVal == 1 && !isLoad.value) {
-        // useDataBoard.setConditionIndex(0)
-        console.log('111111');
         isLoad.value = true
         getOrderPageFu()
     }
@@ -76,6 +74,18 @@ const getOrderPageFu = () => {
     }))
 }
 
+/**
+ * 选择状态
+ * @param key 
+ */
+const selectStateFu = (key: string | number) => {
+    activeState.value = key
+    paramsPage.pageNum = 1
+    orderList.value = []
+    slideLoading.value = true
+    getOrderPageFu()
+}
+
 
 /**
  * 滑动加载
@@ -95,7 +105,7 @@ const scrolltolower = () => {
         <com-header header-title="全部订单" :back="false" :titleColor="true"></com-header>
         <view class="order_state_list flex_align flex_center">
             <view :class="['order_state_item', activeState == item.key ? 'order_state_item_active' : '']"
-                v-for="item in stateList" :key="item.key" @click="activeState = item.key">
+                v-for="item in stateList" :key="item.key" @click="selectStateFu(item.key)">
                 <view>{{ item.title }}</view>
             </view>
         </view>
@@ -103,11 +113,12 @@ const scrolltolower = () => {
             <scroll-view class="scroll_con " scroll-y="true"
                 lower-threshold="50"
                 @scrolltolower="scrolltolower">
-                <view class="order_list flex_column">
+                <view class="order_list flex_column" v-if="orderList.length > 0">
                     <template v-for="item in orderList" :key="item.id">
                         <orderItem :orderData="item"></orderItem>
                     </template>
                 </view>
+                <com-no_data v-else :noDataText="'暂无订单'"></com-no_data>
             </scroll-view>
         </view>
     </view>

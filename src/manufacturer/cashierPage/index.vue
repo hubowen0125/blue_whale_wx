@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { paymentTypeApi, getPaymentInfoApi } from "@/http/api/order"
 import checkbox from "@/static/images/checkbox.png"
 import checkbox_active from "@/static/images/checkbox_active.png"
 import pay_1 from "@/static/images/payMethod/pay_1.png"
@@ -6,6 +7,9 @@ import pay_2 from "@/static/images/payMethod/pay_2.png"
 import pay_3 from "@/static/images/payMethod/pay_3.png"
 import pay_4 from "@/static/images/payMethod/pay_4.png"
 import pay_5 from "@/static/images/payMethod/pay_5.png"
+import { formatNumber } from "@/utils/utils"
+
+const { proxy } = getCurrentInstance() as any;
 
 const payMathodList = [
     {
@@ -39,6 +43,62 @@ const payMathodList = [
         select: false
     }
 ]
+const payParams = reactive({
+    orderNo: '',
+    amount: '',
+    type: '',
+})
+const paymentInfo = ref({
+    wholesaleName: '',
+    totalDebt: '',
+    orderAmount: '',
+    orderRemainAmount: '',
+    orderPaymentAmount: '',
+})
+
+onLoad((e: any) => {
+    if (e.orderNo) {
+        paymentTypeFu()
+        getPaymentInfoFu(e.orderNo)
+    }
+})
+
+/**
+ * 获取支付方式
+ */
+const paymentTypeFu = () => {
+    paymentTypeApi().then((res: any) => {
+        const { code, data, msg } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data);
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+/**
+ * 获取支付信息
+ */
+const getPaymentInfoFu = (orderNo: string) => {
+    getPaymentInfoApi({ orderNo }).then((res: any) => {
+        const { code, data, msg } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data);
+            paymentInfo.value = data
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
 
 </script>
 
@@ -51,20 +111,20 @@ const payMathodList = [
             <view class="customer_info">
                 <view class="customer_info_item flex_align flex_between">
                     <view>客户名称</view>
-                    <view class="customer_info_item_content flex_1">上海-陈冠希</view>
+                    <view class="customer_info_item_content flex_1">{{ paymentInfo.wholesaleName }}</view>
                 </view>
                 <view class="customer_info_item flex_align flex_between">
                     <view>累计欠款</view>
                     <view class="flex_1">
-                        <text class="price">0.00 </text>
-                        <text class="debt_price">(含本单:350.00)</text>
+                        <text class="price">{{ formatNumber(paymentInfo.totalDebt) }}</text>
+                        <text class="debt_price">(含本单:{{ formatNumber(paymentInfo.orderRemainAmount) }})</text>
                     </view>
                 </view>
                 <view class="customer_info_item flex_align flex_between">
                     <view>本单金额</view>
                     <view class="flex_1">
-                        <text class="price">350.00 </text>
-                        <text class="received_price">(已收:350.00) </text>
+                        <text class="price">{{ formatNumber(paymentInfo.orderAmount) }}</text>
+                        <text class="received_price">(已收:{{ formatNumber(paymentInfo.orderPaymentAmount) }}) </text>
                     </view>
                 </view>
             </view>

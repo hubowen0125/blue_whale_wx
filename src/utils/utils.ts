@@ -101,6 +101,8 @@ export function phoneFu(data: any) {
  * @returns 
  */
 export const handleInput = (value: string): Promise<string | number> => {
+    console.log(value, 'valuevaluevaluevalue');
+
     return new Promise<number | string>((resolve) => {
         let input;
         // 允许输入的格式：整数且不能为0
@@ -409,4 +411,38 @@ export const deepCopy = (obj: any): any => {
         }
     }
     return newObj;
+}
+
+/**
+ * 获取当前时间的前后几天的日期
+ * @param baseDateStr 
+ * @returns 
+ */
+export const createDateShifter = (baseDateStr?: string) => {
+    let current = baseDateStr ? new Date(baseDateStr) : new Date()
+
+    const format = (date: Date) => {
+        const y = date.getFullYear()
+        const m = String(date.getMonth() + 1).padStart(2, '0')
+        const d = String(date.getDate()).padStart(2, '0')
+        return `${y}-${m}-${d}`
+    }
+
+    return {
+        next() {
+            current.setDate(current.getDate() + 1)
+            return format(current)
+        },
+        prev() {
+            current.setDate(current.getDate() - 1)
+            return format(current)
+        },
+        reset() {
+            current = new Date()
+            return format(current)
+        },
+        get() {
+            return format(current)
+        }
+    }
 }

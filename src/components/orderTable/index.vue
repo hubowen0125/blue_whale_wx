@@ -2,20 +2,28 @@
 import checkbox from "@/static/images/checkbox.png"
 import checkbox_active from "@/static/images/checkbox_active.png"
 import { handleInput, formatNumber } from "@/utils/utils"
+import { useUserStore } from "@/store/modules/user"
 
+const emit = defineEmits(['deselectAllFu'])
+
+const useUser = useUserStore()
 
 const props = defineProps({
     orderType: {
-        type: String,  // show 展示   handleOrder 下单  handleRefund 退款
+        type: String,  // show 展示   handleOrder 下单  handleRefund 退款 detail 详情
         default: 'show'
     },
     productDetail: {
         type: Object,
         default: {}
+    },
+    selectAll: {
+        type: Boolean,
+        default: false
     }
 })
 
-const columns = [
+const columns = reactive([
     {
         title: '颜色',
         key: 'colorName'
@@ -32,7 +40,10 @@ const columns = [
         title: '待发货',
         key: 'handNum'
     }
-]
+])
+const selectTitle = computed(() => {
+    return useUser.miniRole == 'manufacturer' ? '剩余全发' : '剩余全退'
+})
 
 const tableDetail = computed(() => {
     return props.productDetail
@@ -59,12 +70,41 @@ const totalNum = computed(() => {
     return total
 })
 
+watch(() => props.selectAll, (newVal) => {
+    try {
+        selectItemFu(newVal)
+    } catch (error) {
+
+    }
+}, { immediate: true })
+
+watch(() => props.orderType, (newVal) => {
+    if (['handleRefund', 'detail'].includes(props.orderType)) {
+        columns[columns.length - 1].key = 'unsentHandNum'
+        if (props.orderType == 'handleRefund') {
+            columns.push({
+                title: '操作',
+                key: 'returnNum'
+            })
+        }
+    }
+}, { immediate: true })
+
+
 // 单个选择
 const selectItem = ref(false)
 
 
-const selectItemFu = () => {
-    selectItem.value = !selectItem.value
+const selectItemFu = (data: boolean) => {
+    if (!data) {
+        emit('deselectAllFu', data)
+    }
+    selectItem.value = data
+    if (data) {
+        tableDetail.value.productColorsList.forEach((item: { returnNum: any; handNum: any }) => {
+            item.returnNum = item.handNum
+        })
+    }
 }
 
 /**
@@ -73,36 +113,53 @@ const selectItemFu = () => {
  * @param item 
  * @param key 
  */
-const inputValueFu = async (e: any, item: any,) => {
+const inputValueFu = async (e: any, item: any, key: string) => {
     const value = e.target.value
     const result = await handleInput(value) as string;
     console.log(result, 'resultresultresult');
     if (result) {
-        item.handNum = parseInt(result, 10)
+        const num = parseInt(result, 10)
+        if (props.orderType == 'handleOrder' && num > item.stockNum) {
+            // uni.showToast({
+            //     title: '超过库存',
+            //     icon: 'none'
+            // })
+            item[key] = item.stockNum
+        } else if (props.orderType == 'handleRefund' && num > item.unsentHandNum) {
+            // uni.showToast({
+            //     title: '超过退款数量',
+            //     icon: 'none'
+            // })
+            item[key] = item.unsentHandNum
+        } else {
+            item[key] = num
+        }
     } else {
-        item.handNum = 1
+        item[key] = 0
     }
 }
 
 /**
  * 减少数量
  */
-const reduceFu = (item: any) => {
-    if (item.handNum == 1) {
+const reduceFu = (item: any, key: string) => {
+    if (item[key] == 0) {
         return
     } else {
-        item.handNum = item.handNum - 1
+        item[key] = item[key] - 1
     }
 }
 
 /**
  * 增加数量
  */
-const addFu = (item: any) => {
-    if (item.handNum == item.stockNum) {
+const addFu = (item: any, key: string) => {
+    if (props.orderType == 'handleOrder' && item[key] == item.stockNum) {
+        return
+    } else if (props.orderType == 'handleRefund' && item[key] == item.unsentHandNum) {
         return
     } else {
-        item.handNum = item.handNum + 1
+        item[key] = item[key] + 1
     }
 }
 
@@ -116,10 +173,10 @@ defineExpose({
 
 <template>
     <view class="order_table">
-        <com-orderInfo :productDetail="tableDetail">
+        <com-orderInfo :productDetail="tableDetail" :orderType="orderType">
             <template #button>
                 <template v-if="orderType == 'handleOrder'">
-                    <view class="order_unit">1手/{{ tableDetail.unitQuantity }}件</view>
+                    <button class="order_unit">1手/{{ tableDetail.unitQuantity }}件</button>
                     <view class="order_unit_price">¥{{ formatNumber(totalAmount) }}</view>
                 </template>
                 <template v-if="orderType == 'show'">
@@ -129,10 +186,13 @@ defineExpose({
                     </view>
                 </template>
                 <template v-if="orderType == 'handleRefund'">
-                    <view class="flex_align order_refund_btn" @click="selectItemFu">
-                        <image class="checkbox"
-                            :src="selectItem ? checkbox_active : checkbox"></image>
-                        <text :class="[selectItem ? 'checkbox_active' : '']">剩余全退</text>
+                    <view class="flex_column flex_between">
+                        <view class="flex_align order_refund_btn" @click="selectItemFu(!selectItem)">
+                            <image class="checkbox"
+                                :src="selectItem ? checkbox_active : checkbox"></image>
+                            <text :class="[selectItem ? 'checkbox_active' : '']">{{ selectTitle }}</text>
+                        </view>
+                        <button class="order_unit">1手/{{ tableDetail.unitQuantity }}件</button>
                     </view>
                 </template>
             </template>
@@ -141,7 +201,7 @@ defineExpose({
             <!-- 表头 -->
             <view class="table_row table_header">
                 <view
-                    :class="['table_cell', orderType == 'handleOrder' && col.key == 'handNum' ? 'table_cell_input' : '']"
+                    :class="['table_cell', (orderType == 'handleOrder' && col.key == 'handNum') || (orderType == 'handleRefund' && col.key == 'returnNum') ? 'table_cell_input' : '']"
                     v-for="(col, index) in columns" :key="index">
                     {{ col.title }}
                 </view>
@@ -149,14 +209,15 @@ defineExpose({
             <!-- 表格数据 -->
             <view class="table_row" v-for="(row, rowIndex) in tableDetail.productColorsList" :key="rowIndex">
                 <template v-for="(col, colIndex) in columns" :key="colIndex">
-                    <view class="table_cell table_cell_input" v-if="orderType == 'handleOrder' && col.key == 'handNum'">
-                        <view class="flex_align flex_center table_cell_input_con">
-                            <view class="table_cell_btn table_cell_btn_minus" @click="reduceFu(row)">-</view>
+                    <view class="table_cell table_cell_input"
+                        v-if="(orderType == 'handleOrder' && col.key == 'handNum') || (orderType == 'handleRefund' && col.key == 'returnNum')">
+                        <view class="flex_align flex_center table_cell_input_con" :class="{ 'pointer': selectItem }">
+                            <view class="table_cell_btn table_cell_btn_minus" @click="reduceFu(row, col.key)">-</view>
                             <input class="tabler_cell_input"
                                 type="number"
-                                @input="(e: any) => inputValueFu(e, row)"
-                                :value="row.handNum">
-                            <view class="table_cell_btn table_cell_btn_plus" @click="addFu(row)">+</view>
+                                @input="(e: any) => inputValueFu(e, row, col.key)"
+                                :value="row[col.key]">
+                            <view class="table_cell_btn table_cell_btn_plus" @click="addFu(row, col.key)">+</view>
                         </view>
                     </view>
                     <view :class="['table_cell', orderType == 'show' && col.key == 'handNum' ? 'table_cell_color' : '']"
@@ -172,7 +233,8 @@ defineExpose({
 
 <style lang="scss" scoped>
 .order_unit {
-    padding: 12rpx 16rpx;
+    min-width: 124rpx;
+    height: 48rpx;
     background: rgba(12, 104, 255, 0.03);
     border-radius: 12rpx;
     border: 1rpx solid #CDE1FF;
@@ -180,6 +242,8 @@ defineExpose({
     font-size: 26rpx;
     color: #0C62FF;
     margin-bottom: 8px;
+    line-height: 48rpx;
+    box-sizing: border-box;
 }
 
 .order_unit_price {
@@ -203,6 +267,7 @@ defineExpose({
     font-weight: 500;
     font-size: 26rpx;
     color: #202020;
+    margin-bottom: 30rpx;
 
     .checkbox_active {
         color: #0C62FF;

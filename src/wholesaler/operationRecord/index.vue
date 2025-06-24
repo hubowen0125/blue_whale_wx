@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { orderShipRecordListApi, orderPaymentRecordListApi, orderOperationRecordListApi } from "@/http/api/order";
+import { dateStrToDateFormat, formatNumber } from "@/utils/utils";
 
 
 const { proxy } = getCurrentInstance() as any;
@@ -18,7 +20,91 @@ const stateList = [
     },
 ]
 const activeState = ref(0)
+const orderNo = ref('')
+const shipmentRecord = ref<Array<any>>([])
+const cashierRecord = ref<Array<any>>([])
+const otherRecords = ref<Array<any>>([])
 
+onLoad((e: any) => {
+    if (e.orderNo) {
+        orderNo.value = e.orderNo
+        orderShipRecordListFu()
+    }
+})
+
+/**
+ * 获取发货记录
+ */
+const orderShipRecordListFu = () => {
+    proxy.$Loading()
+    orderShipRecordListApi({ orderNo: orderNo.value }).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            if (data && data.length > 0) {
+                shipmentRecord.value = data
+            }
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+/**
+ * 获取收银记录
+ */
+const orderPaymentRecordListFu = () => {
+    proxy.$Loading()
+    orderPaymentRecordListApi({ orderNo: orderNo.value }).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            if (data && data.length > 0) {
+                cashierRecord.value = data
+            }
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+/**
+ * 查询订单操作记录
+ */
+const orderOperationRecordListFu = () => {
+    proxy.$Loading()
+    orderOperationRecordListApi({ orderNo: orderNo.value }).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            if (data && data.length > 0) {
+                otherRecords.value = data
+            }
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+const selectActiveStateFu = (key: number) => {
+    activeState.value = key
+    if (key == 0) {
+        orderShipRecordListFu()
+    } else if (key == 1) {
+        orderPaymentRecordListFu()
+    } else if (key == 2) {
+        orderOperationRecordListFu()
+    }
+}
 
 /**
  * 滑动加载
@@ -38,7 +124,7 @@ const scrolltolower = () => {
         <com-header header-title="操作记录" :backColor="false" :titleColor="true"></com-header>
         <view class="record_state_list flex_align flex_around">
             <view :class="['record_state_item', activeState == item.key ? 'record_state_item_active' : '']"
-                v-for="item in stateList" :key="item.key" @click="activeState = item.key">
+                v-for="item in stateList" :key="item.key" @click="selectActiveStateFu(item.key)">
                 <view>{{ item.title }}</view>
             </view>
         </view>
@@ -47,39 +133,44 @@ const scrolltolower = () => {
                 lower-threshold="50"
                 @scrolltolower="scrolltolower">
                 <view class="record_list flex_column">
-                    <template v-if="activeState == 0" v-for="item in 10" :key="item">
+                    <template v-if="activeState == 0 && shipmentRecord.length > 0" v-for="item in shipmentRecord"
+                        :key="`shipment_${item.id}`">
                         <view class="record_item flex_column">
-                            <view>陈冠希</view>
+                            <view>{{ item.userName }}</view>
                             <view class="flex_between flex_align">
-                                <view class="record_item_time">2025-05-05 11:26</view>
-                                <view class="record_item_content">2手/10件</view>
+                                <view class="record_item_time">{{ dateStrToDateFormat(item.createTime, '') }}</view>
+                                <view class="record_item_content">{{ item.handNum }}手/{{ item.num }}件</view>
                             </view>
                         </view>
                     </template>
-                    <template v-if="activeState == 1" v-for="item in 10" :key="item">
+                    <template v-else-if="activeState == 1 && cashierRecord.length > 0" v-for="item in cashierRecord"
+                        :key="`cashier_${item.id}`">
                         <view class="record_item cashier_record flex_align">
                             <image class="cashier_img"></image>
                             <view class="flex_column flex_1 cashier_record_content">
-                                <view>陈冠希</view>
+                                <view>{{ item.payUserName }}</view>
                                 <view class="flex_between flex_align">
-                                    <view class="record_item_time">2025-05-05 11:26</view>
+                                    <view class="record_item_time">{{ dateStrToDateFormat(item.payTime, '') }}
+                                    </view>
                                     <view class="cashier_record_price">
                                         <text class="cashier_record_price_icon">¥</text>
-                                        <text>20.00</text>
+                                        <text>{{ formatNumber(item.amount) }}</text>
                                     </view>
                                 </view>
                             </view>
                         </view>
                     </template>
-                    <template v-if="activeState == 2" v-for="item in 10" :key="item">
+                    <template v-else-if="activeState == 2 && otherRecords.length > 0" v-for="item in otherRecords"
+                        :key="`other_${item.id}`">
                         <view class="record_item flex_column">
                             <view class="flex_between flex_align">
-                                <view>陈冠希</view>
-                                <view class="record_item_status">修改订单</view>
+                                <view>{{ item.userName }}</view>
+                                <view class="record_item_status">{{ item.message }}</view>
                             </view>
-                            <view class="record_item_time">2025-05-05 11:26</view>
+                            <view class="record_item_time">{{ dateStrToDateFormat(item.createTime, '') }}</view>
                         </view>
                     </template>
+                    <com-no_data v-else noDataText="暂无记录"></com-no_data>
                 </view>
             </scroll-view>
         </view>
@@ -145,6 +236,10 @@ const scrolltolower = () => {
         .record_list {
             padding: 0 30rpx 30rpx;
             gap: 20rpx;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            position: relative;
 
             .record_item {
                 font-weight: bold;

@@ -135,7 +135,7 @@ const handleOrderFu = () => {
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
             uni.navigateTo({
-                url: `/manufacturer/orderConfirmation/index?type=share&cardNo=${cardNo.value}`
+                url: `/manufacturer/orderCardInformation/index?type=share&cardNo=${cardNo.value}`
             })
         } else {
             proxy.$Toast({ title: msg })

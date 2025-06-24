@@ -105,8 +105,12 @@ const addToCartFu = () => {
  * 跳转到订货卡详情页
  */
 const viewOrderCardDetailFu = () => {
+    if(shoppingCartNum.value == 0){
+        proxy.$Toast({ title: '请先加入订货单' })
+        return
+    }
     uni.navigateTo({
-        url: '/manufacturer/orderCardDetails/index?id=123456'
+        url: '/manufacturer/productConfirmation/index'
     })
 }
 

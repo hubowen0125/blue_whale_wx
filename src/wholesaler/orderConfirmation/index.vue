@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { getByCardNoApi, createOrderApi } from "@/http/api/all"
+import { createOrderApi } from "@/http/api/order";
 import { packagingWholesalePageApi } from "../http/wholesaler";
 import arrow_right from "@/static/images/arrow_right.png"
 import off_icon from "@/static/images/off_icon.png"
@@ -8,8 +8,11 @@ import checkbox from "@/static/images/checkbox.png"
 import checkbox_active from "@/static/images/checkbox_active.png"
 import { formatNumber } from "@/utils/utils";
 import { useUserStore } from "@/store/modules/user"
+import { useWholesalerStore } from "@/wholesaler/store/wholesaler"
+
 
 let timer: any
+const useWholesaler = useWholesalerStore()
 const useUser = useUserStore()
 const { proxy } = getCurrentInstance() as any;
 
@@ -44,7 +47,7 @@ const orderDetails = reactive([
 const popupRef = ref();
 const cardNo = ref('');
 const productDetail = ref<any>({
-    cardProductsList: [],
+    orderProductsParams: [],
     paymentAmount: 0,
     manufacturerId: '',
     viewInventory: 0,
@@ -57,13 +60,12 @@ const paramsPage = reactive({
 const packagingStationList = ref<Array<any>>([])
 const packaginhStationActive = ref<any>({})
 const slideLoading = ref(true) // 是否需要滑动加载
-const type = ref('')
 const createParams = reactive<any>({
-    manufacturerId: computed(() => productDetail.value.manufacturerId),
+    manufacturerId: computed(() => productDetail.value.manufacturer.deptId),
     packagingId: '',
     totalHandNum: computed(() => {
         let total = 0
-        const list = productDetail.value.cardProductsList
+        const list = productDetail.value.orderProductsParams
         if (list.length > 0) {
             for (let i = 0; i < list.length; i++) {
                 for (let j = 0; j < list[i].productColorsList.length; j++) {
@@ -75,7 +77,7 @@ const createParams = reactive<any>({
     }),
     totalNum: computed(() => {
         let total = 0
-        const list = productDetail.value.cardProductsList
+        const list = productDetail.value.orderProductsParams
         if (list.length > 0) {
             for (let i = 0; i < list.length; i++) {
                 for (let j = 0; j < list[i].productColorsList.length; j++) {
@@ -87,7 +89,7 @@ const createParams = reactive<any>({
     }),
     totalAmount: computed(() => {
         let total = 0
-        const list = productDetail.value.cardProductsList
+        const list = productDetail.value.orderProductsParams
         if (list.length > 0) {
             for (let i = 0; i < list.length; i++) {
                 for (let j = 0; j < list[i].productColorsList.length; j++) {
@@ -98,44 +100,17 @@ const createParams = reactive<any>({
         return total
     }),
     remark: '',
-    cardProductsList: [],
+    orderProductsParams: [],
     viewInventory: computed(() => productDetail.value.viewInventory),
-     cardNo: computed(() => cardNo.value),
-     status:1
+    status: 1
 })
 
 onLoad((e: any) => {
-    if (e.type == 'share') {
-        type.value = e.type
-        cardNo.value = e.cardNo
-        getByCardNoFu()
-        packagingWholesalePageFu()
-    }
+    packagingWholesalePageFu()
+    productDetail.value.manufacturer = useWholesaler.shoppingManufacturer
+    productDetail.value.orderProductsParams = useWholesaler.shoppingCart
+    createParams.orderProductsParams = useWholesaler.shoppingCart
 })
-
-/**
- * 获取分享订单详情
- */
-const getByCardNoFu = () => {
-    getByCardNoApi({ cardNo: cardNo.value }).then((res: any) => {
-        const { code, data, msg } = res
-        proxy.$CloseLoading();
-        if (code == proxy.$successCode) {
-            console.log(data);
-            createParams.cardProductsList = data.cardProductsList
-            data.cardProductsList.map((item: { productColorsList: any; cardProductsDetailList: any; }) => {
-                item.productColorsList = item.cardProductsDetailList
-                return item
-            })
-            productDetail.value = data
-        } else {
-            proxy.$Toast({ title: msg })
-        }
-    }, (req => {
-        proxy.$CloseLoading();
-        proxy.$Toast({ title: req.msg })
-    }))
-}
 
 /**
  * 获取打包站列表
@@ -197,14 +172,6 @@ const submitPackagingStationFu = () => {
     createParams.packagingId = packaginhStationActive.value.packagingId
     popupRef.value.close();
 }
-
-const handleOrderFu = () => {
-    console.log('立即下单');
-    if (type.value == 'share') {
-        createOrderFu()
-    }
-}
-
 
 /**
  * 创建订单
@@ -289,7 +256,7 @@ onUnmounted(() => {
                 </view>
             </view>
             <view class="product_list flex_column">
-                <template v-for="item in productDetail.cardProductsList" :key="item.id">
+                <template v-for="item in productDetail.orderProductsParams" :key="item.id">
                     <view class="product_item">
                         <com-orderTable orderType="show" :productDetail="item"></com-orderTable>
                     </view>
@@ -304,7 +271,7 @@ onUnmounted(() => {
                 </view>
                 <view class="unit_info">{{ createParams.totalHandNum }}手/{{ createParams.totalNum }}件</view>
             </view>
-            <button class="button_defalut" @click="handleOrderFu">立即下单</button>
+            <button class="button_defalut" @click="createOrderFu">立即下单</button>
         </view>
     </view>
 
