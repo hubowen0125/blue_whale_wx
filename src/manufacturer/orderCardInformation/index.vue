@@ -43,6 +43,10 @@ const orderDetails = ref<any>({
     remark: ''
 })
 const type = ref('')
+const paramsPage = reactive({
+    pageNum: 1,
+    pageSize: 10,
+})
 
 
 onLoad((e: any) => {
@@ -88,7 +92,7 @@ const getByCardNoFu = (cardNo: string) => {
  * 
  */
 const manufacturerWholesalePageFu = () => {
-    manufacturerWholesalePageApi({}).then((res: any) => {
+    manufacturerWholesalePageApi({}, paramsPage).then((res: any) => {
         const { code, data, msg, token } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
@@ -383,7 +387,7 @@ const createOrderFu = () => {
 
 .popup_content {
     background-color: #fff;
-    padding: 40rpx 24rpx env(safe-area-inset-bottom);
+    padding: 40rpx 24rpx calc(26rpx + env(safe-area-inset-bottom));
     border-radius: 32rpx 32rpx 0 0;
     height: 60vh;
     overflow: hidden;

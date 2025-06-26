@@ -179,19 +179,13 @@
                     }
                 },
                 {
+                    "path": "selectManufacturer/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
                     "path": "selectProduct/index",
-                    "style": {
-                        "navigationStyle": "custom"
-                    }
-                },
-                {
-                    "path": "productConfirmation/index",
-                    "style": {
-                        "navigationStyle": "custom"
-                    }
-                },
-                {
-                    "path": "orderConfirmation/index",
                     "style": {
                         "navigationStyle": "custom"
                     }

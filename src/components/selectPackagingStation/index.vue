@@ -74,7 +74,7 @@ defineExpose({
             </view>
             <view class="mian_con flex_1">
                 <scroll-view class="scroll_con" scroll-y="true" lower-threshold="50" @scrolltolower="scrolltolower">
-                    <view class="packaging_station_list flex_column">
+                    <view class="packaging_station_list flex_column" v-if="packagingStationList.length > 0">
                         <template v-for="item in packagingStationList" :key="item">
                             <view class="packaging_station_item flex_align flex_between"
                                 :class="{ 'packaging_station_item_active': item.id == selectData.id }"
@@ -92,6 +92,7 @@ defineExpose({
                             </view>
                         </template>
                     </view>
+                    <com-no_data v-else noDataText="暂无数据" noDataDescText="请立即联系打包站进行信息完善"></com-no_data>
                 </scroll-view>
             </view>
             <button class="button_defalut" @click="submitFu">确认</button>
@@ -103,7 +104,7 @@ defineExpose({
 <style lang="scss" scoped>
 .popup_content {
     background-color: #fff;
-    padding: 40rpx 24rpx env(safe-area-inset-bottom);
+    padding: 40rpx 24rpx calc(26rpx + env(safe-area-inset-bottom));
     border-radius: 32rpx 32rpx 0 0;
     height: 60vh;
     overflow: hidden;

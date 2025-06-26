@@ -129,7 +129,7 @@ defineExpose({
 <style lang="scss" scoped>
 .popup_main {
     background-color: #fff;
-    padding: 40rpx 24rpx env(safe-area-inset-bottom);
+    padding: 40rpx 24rpx calc(26rpx + env(safe-area-inset-bottom));
     border-radius: 32rpx 32rpx 0 0;
     height: 60vh;
     overflow: hidden;

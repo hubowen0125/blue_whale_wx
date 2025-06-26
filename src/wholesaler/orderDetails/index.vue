@@ -123,7 +123,7 @@ const viewRecordsFu = () => {
 // 未发货退单
 const refundOrderFu = () => {
     uni.navigateTo({
-        url: '/wholesaler/returnOrder/index'
+        url: `/wholesaler/returnOrder/index?orderNo=${orderNo.value}`
     })
 }
 
@@ -146,7 +146,7 @@ const confirmPopupFu = () => {
                     <image class="wait_icon" :src="wait_icon"></image>
                     <text>{{ detailTitle }}</text>
                 </view>
-                <view class="wait_num">已发货0/60</view>
+                <view class="wait_num">已发货{{ orderDetails.unSendHandNum }}/{{ orderDetails.unSendNum }}</view>
             </view>
             <view class="order_details">
                 <view class="order_details_item flex_align flex_between" v-for="item, index in orderText"

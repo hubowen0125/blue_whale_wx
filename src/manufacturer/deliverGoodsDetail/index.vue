@@ -71,13 +71,6 @@ const selectAllFu = (data: boolean) => {
     selectAll.value = data
 }
 
-/**
- * 选择是否退款
- */
-const selectIsRefundFu = (item: boolean) => {
-    isRefund.value = item
-}
-
 // 立即发货
 const deliverGoodsFu = () => {
     console.log('立即发货')

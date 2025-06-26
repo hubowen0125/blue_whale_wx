@@ -20,6 +20,11 @@ const wholesalerDetails = [
     },
 ]
 const wholesalerList = ref<Array<any>>([])
+const slideLoading = ref(true) // 是否需要滑动加载
+const paramsPage = reactive({
+    pageNum: 1,
+    pageSize: 10,
+})
 
 onMounted(() => {
     wholesalePageFu()
@@ -29,12 +34,19 @@ onMounted(() => {
  * 获取批发商信息
  */
 const wholesalePageFu = () => {
-    manufacturerWholesalePageApi({}).then((res: any) => {
+    manufacturerWholesalePageApi({}, paramsPage).then((res: any) => {
         const { code, data, msg } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
             console.log(data);
-            // infoDetails.value = data
+            if (data && data.length > 0) {
+                wholesalerList.value = [...wholesalerList.value, ...data]
+                if (data.length < paramsPage.pageSize) {
+                    slideLoading.value = false
+                }
+            } else {
+                slideLoading.value = false
+            }
         } else {
             proxy.$Toast({ title: msg })
         }
@@ -53,6 +65,16 @@ const addWholesalerFu = () => {
     })
 }
 
+/**
+ * 滑动加载
+ */
+const scrolltolower = () => {
+    // if (!slideLoading.value) return
+    console.log('++++++++');
+    // manageDevicesParams.value.page += 1
+    // resetManageDevicesParams()
+}
+
 </script>
 
 <template>
@@ -68,22 +90,26 @@ const addWholesalerFu = () => {
             </view>
         </view>
         <view class="main_con flex_1">
-            <view class="wholesaler_list flex_column" v-if="wholesalerList.length > 0">
-                <view class="wholesaler_item flex_column" v-for="item in 20" :key="item">
-                    <view>
-                        <text>陈冠希</text>
-                        <text class="wholesaler_item_address">上海</text>
-                    </view>
-                    <view class="flex_align flex_between wholesaler_item_order">
-                        <text>总订单: 1000手</text>
-                        <view class="wholesaler_item_order_price">
-                            <text>¥</text>
-                            <text class="price_num">200</text>
+            <scroll-view class="scroll_con " scroll-y="true"
+                lower-threshold="50"
+                @scrolltolower="scrolltolower">
+                <view class="wholesaler_list flex_column" v-if="wholesalerList.length > 0">
+                    <view class="wholesaler_item flex_column" v-for="item in wholesalerList" :key="item.id">
+                        <view>
+                            <text>{{ item.wholesaleName }}</text>
+                            <text class="wholesaler_item_address">{{ item.province }}</text>
+                        </view>
+                        <view class="flex_align flex_between wholesaler_item_order">
+                            <text>总订单: {{item.storageNum}}手</text>
+                            <view class="wholesaler_item_order_price">
+                                <text>¥</text>
+                                <text class="price_num">200</text>
+                            </view>
                         </view>
                     </view>
                 </view>
-            </view>
-            <com-no_data v-else noDataText="暂无批发商"></com-no_data>
+                <com-no_data v-else noDataText="暂无批发商"></com-no_data>
+            </scroll-view>
         </view>
         <view class="footer_con"><button class="button_defalut" @click="addWholesalerFu">添加批发商</button></view>
     </view>

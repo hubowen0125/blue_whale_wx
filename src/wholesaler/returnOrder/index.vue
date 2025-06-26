@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { getByOrderNoApi } from "@/http/api/order";
 import checkbox from "@/static/images/checkbox.png"
 import checkbox_active from "@/static/images/checkbox_active.png"
 import hint_icon from "@/static/images/hint_icon.png"
@@ -22,12 +23,56 @@ const popupCom = ref()
 // 全选
 const selectAll = ref(false)
 const isRefund = ref(false)
+const orderDetails = ref<any>({})
+const orderNo = ref('')
+const returnParams = reactive<any>({
+    orderNo: '',
+    productsParams: []
+})
+
+
+
+onLoad((e: any) => {
+    if (e.orderNo) {
+        orderNo.value = e.orderNo
+        returnParams.orderNo = e.orderNo
+        getByOrderNoFu()
+    }
+})
+
+/**
+ * 获取订单详情
+ */
+const getByOrderNoFu = () => {
+    proxy.$Loading()
+    getByOrderNoApi({ orderNo: orderNo.value }).then((res: any) => {
+        const { code, data, msg } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data);
+            data.orderProductsList.map((item: any) => {
+                item.orderProductsDetailList.map((items: any) => {
+                    return items.returnNum = 0
+                })
+                item.productColorsList = item.orderProductsDetailList
+                return item
+            })
+            orderDetails.value = data
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
 
 /**
  * 全选
  */
-const selectAllFu = () => {
-    selectAll.value = !selectAll.value
+const selectAllFu = (data: boolean) => {
+    selectAll.value = data
 }
 
 /**
@@ -76,21 +121,26 @@ const confirmPopupFu = () => {
                     <view class="order_info_title">未发货</view>
                 </view>
             </view>
-            <view class="flex_align" @click="selectAllFu">
+            <view class="flex_align" @click="selectAllFu(!selectAll)">
                 <image class="checkbox" :src="selectAll ? checkbox_active : ''"></image>
                 <text class="checkbox_text">全选</text>
             </view>
         </view>
         <view class="mian_con flex_1">
             <scroll-view class="scroll_con " scroll-y="true"
-                lower-threshold="50"
-                @scrolltolower="scrolltolower">
+                lower-threshold="50">
                 <view class="order_list flex_column">
-                    <template v-for="item in 10" :key="item">
+                    <template v-for="item in orderDetails.orderProductsList" :key="item.id">
                         <view class="order_item">
-                            <com-orderTable orderType="handleRefund"></com-orderTable>
+                            <com-orderTable
+                                orderType="handleRefund"
+                                :productDetail="item"
+                                :selectAll="selectAll"
+                                @deselectAllFu="selectAllFu">
+                            </com-orderTable>
                         </view>
                     </template>
+                    <deliverGoodsInfo :deliverInfo="orderDetails.packaging"></deliverGoodsInfo>
                 </view>
             </scroll-view>
         </view>

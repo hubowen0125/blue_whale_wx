@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 declare const wx: any;
+import { generatePrintCommands } from '@/utils/escpos';
 
 type PrintContent =
     | { type: 'text'; text: string; align?: 'left' | 'center' | 'right'; bold?: boolean }
@@ -26,6 +27,8 @@ const content: PrintContent[] = [
     { type: 'text', text: '请扫码付款', align: 'center' }
 ]
 
+const canvasWidth = ref(384);
+const canvasHeight = ref(300); // Adjust height as needed for the content.
 
 onMounted(() => {
 
@@ -263,58 +266,173 @@ const generatePrintCommand = (data: PrintContent[]): ArrayBuffer => {
 /**
  * 发送打印数据
  */
-const printReceipt = () => {
+// const printReceipt = () => {
+//     try {
+//         const buffer = generatePrintCommand(content)
+//         const maxChunkSize = 20
+//         const chunks: Array<ArrayBuffer> = []
+//         for (let i = 0; i < buffer.byteLength; i += maxChunkSize) {
+//             chunks.push(buffer.slice(i, i + maxChunkSize))
+//         }
+//         let index = 0
+//         const maxRetryCount = 3
+//         let retryCount = 0
+//         const sendChunk = () => {
+//             if (index >= chunks.length) {
+//                 console.log('打印数据发送完成')
+//                 return
+//             }
+//             console.log(chunks[index], 'chunks[index]chunks[index]chunks[index]');
+//             index++
+
+//             // wx.writeBLECharacteristicValue({
+//             //     deviceId: deviceId.value,
+//             //     serviceId: serviceId.value,
+//             //     characteristicId: characteristicId.value,
+//             //     value: chunks[index],
+//             //     success: () => {
+//             //         console.log(`第 ${index + 1} 包发送成功`)
+//             //         index++
+//             //         retryCount = 0 // 成功后清零重试次数
+//             //         setTimeout(sendChunk, 20)
+//             //     },
+//             //     fail: (err: any) => {
+//             //         console.warn(`第 ${index + 1} 包发送失败`, err)
+//             //         if (retryCount < maxRetryCount) {
+//             //             retryCount++
+//             //             console.warn(`重试第 ${index + 1} 包，第 ${retryCount} 次`)
+//             //             setTimeout(sendChunk, 100) // 稍作延时再试
+//             //         } else {
+//             //             console.error(`第 ${index + 1} 包发送失败，已重试 ${maxRetryCount} 次，跳过`)
+//             //             index++
+//             //             retryCount = 0
+//             //             setTimeout(sendChunk, 20)
+//             //         }
+//             //     }
+//             // })
+//         }
+
+//         sendChunk()
+//     } catch (error) {
+//         console.log(error, 'error');
+
+//     }
+// }
+
+const printReceipt = async () => {
+    status.value = '正在生成打印数据...';
+
     try {
-        const buffer = generatePrintCommand(content)
-        const maxChunkSize = 20
-        const chunks: Array<ArrayBuffer> = []
-        for (let i = 0; i < buffer.byteLength; i += maxChunkSize) {
-            chunks.push(buffer.slice(i, i + maxChunkSize))
-        }
-        let index = 0
-        const maxRetryCount = 3
-        let retryCount = 0
-        const sendChunk = () => {
-            if (index >= chunks.length) {
-                console.log('打印数据发送完成')
-                return
-            }
-            console.log(chunks[index], 'chunks[index]chunks[index]chunks[index]');
-            index++
+        const ctx = uni.createCanvasContext('labelCanvas');
 
-            // wx.writeBLECharacteristicValue({
-            //     deviceId: deviceId.value,
-            //     serviceId: serviceId.value,
-            //     characteristicId: characteristicId.value,
-            //     value: chunks[index],
-            //     success: () => {
-            //         console.log(`第 ${index + 1} 包发送成功`)
-            //         index++
-            //         retryCount = 0 // 成功后清零重试次数
-            //         setTimeout(sendChunk, 20)
-            //     },
-            //     fail: (err: any) => {
-            //         console.warn(`第 ${index + 1} 包发送失败`, err)
-            //         if (retryCount < maxRetryCount) {
-            //             retryCount++
-            //             console.warn(`重试第 ${index + 1} 包，第 ${retryCount} 次`)
-            //             setTimeout(sendChunk, 100) // 稍作延时再试
-            //         } else {
-            //             console.error(`第 ${index + 1} 包发送失败，已重试 ${maxRetryCount} 次，跳过`)
-            //             index++
-            //             retryCount = 0
-            //             setTimeout(sendChunk, 20)
-            //         }
-            //     }
-            // })
-        }
+        // Background
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvasWidth.value, canvasHeight.value);
 
-        sendChunk()
-    } catch (error) {
-        console.log(error, 'error');
+        // --- Draw Content ---
+        ctx.fillStyle = '#000000';
 
+        // Title
+        ctx.font = 'bold 24px sans-serif';
+        ctx.setTextAlign('center');
+        ctx.fillText('杭盛打包站', canvasWidth.value / 2, 40);
+
+        // Line
+        ctx.setStrokeStyle('#000000');
+        ctx.setLineWidth(1);
+        ctx.moveTo(10, 60);
+        ctx.lineTo(canvasWidth.value - 10, 60);
+        ctx.stroke();
+
+        // Table-like structure
+        ctx.font = '18px sans-serif';
+        ctx.setTextAlign('left');
+
+        const startY = 90;
+        const lineHeight = 30;
+        const paddingLeft = 20;
+
+        ctx.fillText('客户: 云南, 潘石屹', paddingLeft, startY);
+        ctx.fillText('厂家: 木童巷多多', paddingLeft, startY + lineHeight);
+        ctx.fillText('数量: 135手', paddingLeft, startY + lineHeight * 2);
+
+        // Vertical line for the table
+        const verticalLineX = canvasWidth.value * 0.6;
+        ctx.moveTo(verticalLineX, 60);
+        ctx.lineTo(verticalLineX, startY + lineHeight * 2.5);
+        ctx.stroke();
+
+        // Right side of the table
+        ctx.fillText('仓位:', verticalLineX + 10, startY);
+        ctx.font = 'bold 48px sans-serif';
+        ctx.fillText('B38', verticalLineX + 10, startY + 55);
+
+        // Reset font for footer
+        ctx.font = '14px sans-serif';
+
+        // Horizontal line
+        ctx.moveTo(10, startY + lineHeight * 3);
+        ctx.lineTo(canvasWidth.value - 10, startY + lineHeight * 3);
+        ctx.stroke();
+
+        // Print time
+        ctx.setTextAlign('center');
+        ctx.fillText('打印时间: 2024年12月28日 19:36', canvasWidth.value / 2, startY + lineHeight * 3 + 20);
+
+        // Draw on canvas
+        await new Promise(resolve => ctx.draw(false, resolve));
+
+        status.value = '正在将Canvas转为图片...';
+
+        // Get image path
+        const { tempFilePath } = await uni.canvasToTempFilePath({
+            canvasId: 'labelCanvas',
+            fileType: 'png',
+            quality: 1
+        });
+
+        status.value = '正在生成打印指令...';
+        const commands = await generatePrintCommands(tempFilePath, canvasWidth.value);
+
+        status.value = '正在发送数据...';
+        await writeData(commands);
+
+        status.value = '打印完成';
+        uni.showToast({ title: '打印指令已发送', icon: 'success' });
+
+    } catch (err: any) {
+        status.value = `打印失败: ${err.message || err.errMsg}`;
+        uni.showToast({ title: `打印失败: ${err.message || err.errMsg}`, icon: 'none' });
+    } finally {
     }
-}
+};
+
+const writeData = async (data: ArrayBuffer) => {
+    if (!deviceId || !serviceId || !characteristicId) {
+        throw new Error('Not connected to a device or service/characteristic not found.');
+    }
+
+    const len = data.byteLength;
+    console.log(`Writing data of length: ${len}`);
+
+    for (let i = 0; i < len; i += 20) {
+        const chunk = data.slice(i, i + 20);
+        try {
+            await wx.writeBLECharacteristicValue({
+                deviceId: deviceId.value,
+                serviceId: serviceId.value,
+                characteristicId: characteristicId.value,
+                value: chunk,
+            });
+            // A small delay might be needed for some printers
+            await new Promise(resolve => setTimeout(resolve, 20));
+        } catch (err) {
+            console.error('Failed to write chunk:', err);
+            throw err;
+        }
+    }
+};
+
 
 </script>
 
@@ -329,6 +447,11 @@ const printReceipt = () => {
             </view>
             <view class="status">状态: {{ status }}</view>
         </view>
+        <canvas canvas-id="labelCanvas" id="labelCanvas"
+            :style="{ width: canvasWidth + 'px', height: canvasHeight + 'px', position: 'absolute', left: '-9999px' }"></canvas>
+
+        <canvas canvas-id="imageProcessorCanvas" id="imageProcessorCanvas"
+            :style="{ width: canvasWidth + 'px', height: canvasHeight + 'px', position: 'absolute', left: '-9999px' }"></canvas>
         <view class="footer_con"><button class="button_defalut" @click="printReceipt">打印</button></view>
     </view>
 </template>

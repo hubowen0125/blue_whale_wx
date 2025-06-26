@@ -3,9 +3,11 @@ import card_1 from "@/static/images/wholesaler/orderCard/card_1.png"
 import card_2 from "@/static/images/wholesaler/orderCard/card_2.png"
 import arrow_right from "@/static/images/arrow_right.png"
 import { useUserStore } from '@/store/modules/user';
+import { useWholesalerStore } from "@/wholesaler/store/wholesaler"
 
 const emit = defineEmits(['setTabBarIndex'])
 
+const useWholesaler = useWholesalerStore()
 const useUser = useUserStore()
 const { proxy } = getCurrentInstance() as any;
 
@@ -44,6 +46,8 @@ const toPageFu = (item: { path: string, key: number }) => {
             return
         }
     }
+    useWholesaler.setManufacturerIdFu('')
+    useWholesaler.setShoppingCartFu([])
     uni.navigateTo({
         url: path
     })

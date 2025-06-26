@@ -121,12 +121,13 @@ const scrolltolower = () => {
 
 <template>
     <view class="container flex_column">
-        <view class="bg"></view>
-        <com-header header-title="操作记录" :backColor="false" :titleColor="true"></com-header>
-        <view class="record_state_list flex_align flex_around">
-            <view :class="['record_state_item', activeState == item.key ? 'record_state_item_active' : '']"
-                v-for="item in stateList" :key="item.key" @click="selectActiveStateFu(item.key)">
-                <view>{{ item.title }}</view>
+        <view class="bg">
+            <com-header header-title="操作记录" :backColor="false" :titleColor="true"></com-header>
+            <view class="record_state_list flex_align flex_around">
+                <view :class="['record_state_item', activeState == item.key ? 'record_state_item_active' : '']"
+                    v-for="item in stateList" :key="item.key" @click="selectActiveStateFu(item.key)">
+                    <view>{{ item.title }}</view>
+                </view>
             </view>
         </view>
         <view class="main_con flex_1">
@@ -190,13 +191,7 @@ const scrolltolower = () => {
     background: #F2F1F5;
 
     .bg {
-        width: 750rpx;
-        height: 282rpx;
         background: linear-gradient(136deg, #0D5DFF 0%, #00AAFF 100%);
-        transform: scaleY(-1);
-        position: fixed;
-        left: 0;
-        top: 0;
     }
 
     .record_state_list {
@@ -204,6 +199,7 @@ const scrolltolower = () => {
         margin-top: 30rpx;
         position: relative;
         gap: 60rpx;
+        margin-bottom: 20rpx;
 
         .record_state_item {
             font-weight: 400;

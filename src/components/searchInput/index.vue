@@ -1,19 +1,48 @@
 <script lang="ts" setup>
-import search_icon from "@/static/images/search_icon.png"
+
+const emit = defineEmits(['onBlur'])
 
 const props = defineProps({
     placeholder: {
         type: String,
         default: ''
+    },
+    // 可选：自定义防抖时间（默认 300ms）
+    debounceTime: {
+        type: Number,
+        default: 300
     }
 })
+
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
+
+const inputValue = ref('')
+
+const onClick = () => {
+    //     uni.navigateTo({
+    //         url: '/pages/search/index'
+    //     })
+}
+
+const onBlur = () => {
+    // 清除之前的计时器
+    if (debounceTimer) {
+        clearTimeout(debounceTimer)
+    }
+    // 设置新的计时器，在 debounceTime 后触发
+    debounceTimer = setTimeout(() => {
+        emit('onBlur', inputValue.value)
+        debounceTimer = null
+    }, props.debounceTime)
+}
 
 </script>
 
 <template>
     <view class="search_con flex_align">
-        <image class="search_icon" :src="search_icon"></image>
-        <input class="flex_1" type="text" :placeholder="props.placeholder">
+        <uni-easyinput prefixIcon="search" v-model="inputValue" :placeholder="placeholder" @iconClick="onClick"
+            trim="all" @blur="onBlur" @clear="onBlur"
+            :inputBorder="false"></uni-easyinput>
     </view>
 </template>
 

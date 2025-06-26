@@ -4,12 +4,14 @@ import position_1 from "@/static/images/position_1.png"
 import arrow_right from "@/static/images/arrow_right.png"
 import { useUserStore } from '@/store/modules/user';
 import { createAddApi } from "@/http/api/all";
+import { useWholesalerStore } from "@/wholesaler/store/wholesaler"
 
-
+const useWholesaler = useWholesalerStore()
 const useUser = useUserStore();
 const { proxy } = getCurrentInstance() as any;
 
 
+const shoppingCart = ref<Array<any>>([...useWholesaler.shoppingCart])
 const paramsPage = reactive({
     pageNum: 1,
     pageSize: 10,
@@ -22,7 +24,6 @@ const createParams = reactive<any>({
     cardProductsParams: [],
     packagingId: ''
 })
-const orderNo = ref('')
 
 onMounted(() => {
     packagingWholesalePageFu()
@@ -32,7 +33,8 @@ onMounted(() => {
  * 获取打包站列表
  */
 const packagingWholesalePageFu = () => {
-    packagingWholesalePageApi({}, paramsPage).then((res: any) => {
+    // wholesaleId: wholesaleDetail.value.wholesaleId
+    packagingWholesalePageApi({ wholesaleId: useUser.userInfo.userId }, paramsPage).then((res: any) => {
         const { code, data, msg, token } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
@@ -67,9 +69,15 @@ const selectSubmitFu = (e: any) => {
 }
 
 const selectProductFu = () => {
-    uni.navigateTo({
-        url: '/wholesaler/selectProduct/index'
-    })
+    if (useWholesaler.manufacturerId) {
+        uni.navigateTo({
+            url: `/wholesaler/selectProduct/index?manufacturerId=${useWholesaler.manufacturerId}`
+        })
+    } else {
+        uni.navigateTo({
+            url: '/wholesaler/selectManufacturer/index'
+        })
+    }
 }
 
 /**
@@ -79,17 +87,19 @@ const createAddFu = async () => {
     if (!createParams.packagingId) {
         return proxy.$Toast({ title: '请选择打包站' })
     }
-    // createParams.cardProductsParams = cartList.value.map((item) => {
-    //     return {
-    //         productsDetailParams: item.productColorsList,
-    //         productId: item.id,
-    //     }
-    // })
+    createParams.cardProductsParams = shoppingCart.value.map((item) => {
+        return {
+            productsDetailParams: item.productColorsList,
+            productId: item.id,
+        }
+    })
     await createAddApi(createParams).then((res: any) => {
         const { code, data, msg } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
-            orderNo.value = data
+            // useUser.setShareParamFu({
+            //     path: `/pages/loading/index?type=manufacturer&cardNo=${data}`,
+            // })
         } else {
             proxy.$Toast({ title: msg })
         }
@@ -125,8 +135,18 @@ const createAddFu = async () => {
                     <button class="add_goods_btn" @click="selectProductFu">添加商品</button>
                 </template>
             </view>
+            <view class="product_list flex_column">
+                <template v-for="item in shoppingCart" :key="item.id">
+                    <view class="product_item">
+                        <com-orderTable
+                            orderType="handleOrder"
+                            :productDetail="item"></com-orderTable>
+                    </view>
+                </template>
+            </view>
         </view>
         <view class="footer_con">
+            <!-- open-type="share" -->
             <button class="share_btn" @click="createAddFu">选择微信好友立即发送</button>
         </view>
     </view>
@@ -151,6 +171,16 @@ const createAddFu = async () => {
         padding: 24rpx;
         position: relative;
         gap: 20rpx;
+
+        .product_list {
+            gap: 20rpx;
+
+            .product_item {
+                background: #FFFFFF;
+                border-radius: 24rpx;
+                padding: 36rpx 28rpx;
+            }
+        }
 
         .information_con {
             padding: 36rpx 28rpx;

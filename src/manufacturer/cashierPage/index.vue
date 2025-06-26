@@ -1,49 +1,13 @@
 <script lang="ts" setup>
-import { paymentTypeApi, getPaymentInfoApi } from "@/http/api/order"
+import { paymentTypeApi, getPaymentInfoApi, paymentApi } from "@/http/api/order"
 import checkbox from "@/static/images/checkbox.png"
 import checkbox_active from "@/static/images/checkbox_active.png"
-import pay_1 from "@/static/images/payMethod/pay_1.png"
-import pay_2 from "@/static/images/payMethod/pay_2.png"
-import pay_3 from "@/static/images/payMethod/pay_3.png"
-import pay_4 from "@/static/images/payMethod/pay_4.png"
-import pay_5 from "@/static/images/payMethod/pay_5.png"
-import { formatNumber } from "@/utils/utils"
+import { formatNumber, handleInput } from "@/utils/utils"
 
 const { proxy } = getCurrentInstance() as any;
 
-const payMathodList = [
-    {
-        name: "银联支付",
-        text: '由网易支付提供服务',
-        icon: pay_1,
-        select: false
-    },
-    {
-        name: "支付宝",
-        text: '支付宝安全支付',
-        icon: pay_2,
-        select: false
-    },
-    {
-        name: "微信支付",
-        text: '亿万用户的选择，更快更安全',
-        icon: pay_3,
-        select: false
-    },
-    {
-        name: "信用卡支付",
-        text: '信用卡安全支付',
-        icon: pay_4,
-        select: false
-    },
-    {
-        name: "现金",
-        text: '现金支付',
-        icon: pay_5,
-        select: false
-    }
-]
-const payParams = reactive({
+const payMathodList = ref<Array<any>>([])
+const payParams = reactive<any>({
     orderNo: '',
     amount: '',
     type: '',
@@ -60,6 +24,7 @@ onLoad((e: any) => {
     if (e.orderNo) {
         paymentTypeFu()
         getPaymentInfoFu(e.orderNo)
+        payParams.orderNo = e.orderNo
     }
 })
 
@@ -71,7 +36,7 @@ const paymentTypeFu = () => {
         const { code, data, msg } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
-            console.log(data);
+            payMathodList.value = data
         } else {
             proxy.$Toast({ title: msg })
         }
@@ -100,6 +65,49 @@ const getPaymentInfoFu = (orderNo: string) => {
     }))
 }
 
+const inputValueFu = async (e: any) => {
+    const value = e.target.value
+    const result = await handleInput(value) as string;
+    if (result) {
+        const num = parseInt(result, 10)
+        console.log(num, 'numnumnumnum');
+        payParams.amount = num.toString()
+    } else {
+        payParams.amount = 0
+    }
+}
+
+const selectPayMethod = (item: any) => {
+    payParams.type = item.type
+}
+
+const paymentFu = () => {
+    const {amount, type } = payParams
+    if (!amount) {
+        proxy.$Toast({ title: '请输入收款金额' })
+        return
+    }
+    if (!type) {
+        proxy.$Toast({ title: '请选择支付方式' })
+        return
+    }
+    proxy.$Loading()
+    paymentApi(payParams).then((res: any) => {
+        const { code, data, msg } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            proxy.$Toast({ title: '收款成功' })
+            setTimeout(() => {
+                uni.navigateBack()
+            }, 1000)
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
 </script>
 
 
@@ -128,21 +136,30 @@ const getPaymentInfoFu = (orderNo: string) => {
                     </view>
                 </view>
             </view>
+            <view class="customer_info">
+                <view class="customer_info_item flex_align flex_between">
+                    <view>收款金额</view>
+                    <input class="flex_1" type="number" placeholder="请输入收款金额" v-model="payParams.amount"
+                        @blur="inputValueFu">
+                </view>
+            </view>
             <view class="pay_method_con">
                 <view>选择支付方式</view>
-                <view class="flex_align pay_item" v-for="item in payMathodList" :key="item.name">
+                <view class="flex_align pay_item" v-for="item in payMathodList" :key="item.name"
+                    @click="selectPayMethod(item)">
                     <image class="pay_item_icon" :src="item.icon"></image>
                     <view class="flex_align pay_item_content flex_between flex_1">
                         <view>
                             <view class="pay_item_name">{{ item.name }}</view>
-                            <view>{{ item.text }}</view>
+                            <view>{{ item.description }}</view>
                         </view>
-                        <image class="pay_item_select" :src="item.select ? checkbox_active : checkbox"></image>
+                        <image class="pay_item_select" :src="item.type == payParams.type ? checkbox_active : checkbox">
+                        </image>
                     </view>
                 </view>
             </view>
         </view>
-        <view class="footer_con"><button class="button_defalut">确认收款 ¥350</button></view>
+        <view class="footer_con"><button class="button_defalut" @click="paymentFu">确认收款 ¥350</button></view>
     </view>
 </template>
 

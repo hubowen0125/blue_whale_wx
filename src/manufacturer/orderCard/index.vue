@@ -88,7 +88,7 @@ const editInformationFu = async () => {
                 <view>是否允许批发商查看库存</view>
                 <switch color="#0C61FD" :checked="!createParams.viewInventory" @change="switchChangeFu"></switch>
             </view>
-            <view class="product_lsit flex_column">
+            <view class="product_lsit flex_column" v-if="cartList.length > 0">
                 <view v-for="item in cartList" :key="item.id">
                     <com-orderInfo :productDetail="item">
                         <template #button>
@@ -101,12 +101,14 @@ const editInformationFu = async () => {
                     </com-orderInfo>
                 </view>
             </view>
+            <com-no_data v-else :noDataText="'暂无商品'"></com-no_data>
         </view>
         <view class="footer_con">
             <button class="share_btn" @click="shareFu">选择微信好友立即发送</button>
         </view>
     </view>
-    <com-editInformation ref="editInformationRef" type="manufacturer" @editInformationFu="editInformationFu"></com-editInformation>
+    <com-editInformation ref="editInformationRef" type="manufacturer"
+        @editInformationFu="editInformationFu"></com-editInformation>
 </template>
 
 <style lang="scss" scoped>

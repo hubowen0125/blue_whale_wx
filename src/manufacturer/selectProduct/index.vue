@@ -32,6 +32,9 @@ const shareProductParams = ref({
     manufacturerName: useUser.userInfo.nickName,
     cardNo: ""
 })
+const getProductParams = ref({
+    productName: '',
+})
 
 
 const shoppingCartNum = computed(() => {
@@ -43,11 +46,19 @@ onLoad((e: any) => {
         selectProductType.value = e.type
         if (e.type == 'orderCard') {
             headerTitle.value = '立即订货'
-            productsPageFu()
         } else {
             headerTitle.value = '选择商品'
             addProductParams.value.cardNo = e.cardNo
             shareProductParams.value.cardNo = e.cardNo
+        }
+    }
+})
+
+onShow(() => {
+    if (selectProductType.value) {
+        if (selectProductType.value == 'orderCard') {
+            productsPageFu()
+        } else {
             productListFu()
         }
     }
@@ -74,8 +85,10 @@ const productListFu = () => {
                 })
                 productList.value = [...productList.value, ...data.datas]
                 console.log(productList.value, '00000');
-            }
-            if (data.datas.length < paramsPage.pageSize) {
+                if (data.datas.length < paramsPage.pageSize) {
+                    slideLoading.value = false
+                }
+            } else {
                 slideLoading.value = false
             }
         } else {
@@ -92,7 +105,7 @@ const productListFu = () => {
  */
 const productsPageFu = () => {
     proxy.$Loading()
-    productsPageApi({}, paramsPage).then((res: any) => {
+    productsPageApi(getProductParams.value, paramsPage).then((res: any) => {
         const { code, data, msg, token } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
@@ -107,8 +120,10 @@ const productsPageFu = () => {
                 })
                 productList.value = [...productList.value, ...data.datas]
                 console.log(productList.value, '00000');
-            }
-            if (data.datas.length < paramsPage.pageSize) {
+                if (data.datas.length < paramsPage.pageSize) {
+                    slideLoading.value = false
+                }
+            } else {
                 slideLoading.value = false
             }
         } else {
@@ -218,6 +233,20 @@ const addProductFu = () => {
     }))
 }
 
+const searchInputBlur = (e: string) => {
+    productList.value = []
+    shareCradList.value = []
+    paramsPage.pageNum = 1
+    if (selectProductType.value == 'orderCard') {
+        getProductParams.value.productName = e
+        paramsPage.pageNum = 1
+        productsPageFu()
+    } else {
+        shareProductParams.value.productName = e
+        productListFu()
+    }
+}
+
 /**
  * 滑动加载
  */
@@ -233,14 +262,15 @@ const scrolltolower = () => {
 
 <template>
     <view class="container flex_column">
-        <view class="bg"></view>
-        <com-header :header-title="headerTitle" :backColor="false" :titleColor="true"></com-header>
-        <view class="search_con ">
-            <com-searchInput placeholder="搜索商品"></com-searchInput>
+        <view class="bg">
+            <com-header :header-title="headerTitle" :backColor="false" :titleColor="true"></com-header>
+            <view class="search_con ">
+                <com-searchInput placeholder="搜索商品" @onBlur="searchInputBlur"></com-searchInput>
+            </view>
         </view>
         <view class="main_con flex_1">
             <scroll-view class="scroll_con" scroll-y="true" lower-threshold="50" @scrolltolower="scrolltolower">
-                <view class="product_lsit flex_column">
+                <view class="product_lsit flex_column" v-if="productList.length > 0">
                     <view v-for="item in productList" :key="item.id">
                         <com-orderInfo :productDetail="item" @viewDetailsFu="showPopupFu(item)">
                             <template #button>
@@ -254,6 +284,7 @@ const scrolltolower = () => {
                         </com-orderInfo>
                     </view>
                 </view>
+                <com-no_data v-else noDataText="暂无数据"></com-no_data>
             </scroll-view>
         </view>
         <view v-if="selectProductType == 'orderCard'" class="order_fixed" @click="viewOrderCardDetailFu">
@@ -288,12 +319,7 @@ const scrolltolower = () => {
     background: #F2F1F5;
 
     .bg {
-        width: 750rpx;
-        height: 318rpx;
         background: linear-gradient(136deg, #0D5DFF 0%, #00AAFF 100%);
-        position: fixed;
-        left: 0;
-        top: 0;
     }
 
     .search_con {
@@ -353,7 +379,7 @@ const scrolltolower = () => {
 
 .popup_content {
     background-color: #fff;
-    padding: 40rpx 24rpx env(safe-area-inset-bottom);
+    padding: 40rpx 24rpx calc(26rpx + env(safe-area-inset-bottom));
     border-radius: 32rpx 32rpx 0 0;
 
     .popup_header {

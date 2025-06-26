@@ -160,11 +160,11 @@ export function getByIdApi(params: any) {
  * @param data
  * @returnsF
  */
-export function manufacturerWholesalePageApi(data: any) {
+export function manufacturerWholesalePageApi(data: any , params: any) {
     return new Promise((resolve, reject) => {
         resolve(
             request({
-                url: `api/business/manufacturerWholesale/page`,
+                url: `api/business/manufacturerWholesale/page?${splicingObjects(params)}`,
                 method: "POST",
                 data
             })

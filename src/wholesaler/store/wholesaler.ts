@@ -3,20 +3,20 @@ import { defineStore } from "pinia";
 export const useWholesalerStore = defineStore('wholesaler', () => {
 
     const shoppingCart = ref<Array<any>>([])
-    const shoppingManufacturer = ref<any>({})
+    const manufacturerId = ref('')
 
     const setShoppingCartFu = (data: any) => {
         shoppingCart.value = data
     }
 
-    const setShoppingManufacturerFu = (data: any) => {
-        shoppingManufacturer.value = data
+    const setManufacturerIdFu = (id: string) => {
+        manufacturerId.value = id
     }
     return {
-        setShoppingCartFu,
-        shoppingManufacturer,
-        setShoppingManufacturerFu,
         shoppingCart,
+        manufacturerId,
+        setShoppingCartFu,
+        setManufacturerIdFu
     }
 
 }, { persist: true, })

@@ -140,6 +140,6 @@ provide('tabBarIndex', tabBarIndex);
 }
 
 .tabbar_con {
-    height: calc(100rpx + env(safe-area-inset-bottom));
+    height: calc(100rpx + calc(26rpx + env(safe-area-inset-bottom)));
 }
 </style>

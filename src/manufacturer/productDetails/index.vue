@@ -98,7 +98,7 @@ const editProductFu = () => {
 <template>
     <view class="container flex_column">
         <view class="bg"></view>
-        <com-header header-title="订单确认" :backColor="false" :titleColor="true"></com-header>
+        <com-header header-title="商品详情" :backColor="false" :titleColor="true"></com-header>
         <view class="main_con flex_1 flex_column">
             <view class="product_img_con flex_column">
                 <view class="product_title">商品图片</view>

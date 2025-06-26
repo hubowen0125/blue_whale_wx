@@ -29,7 +29,7 @@ const columns = reactive([
         key: 'colorName'
     },
     {
-        title: '尺码',
+        title: '尺寸(库存)',
         key: 'sizeName'
     },
     {
@@ -215,8 +215,8 @@ defineExpose({
                             <view class="table_cell_btn table_cell_btn_minus" @click="reduceFu(row, col.key)">-</view>
                             <input class="tabler_cell_input"
                                 type="number"
-                                @input="(e: any) => inputValueFu(e, row, col.key)"
-                                :value="row[col.key]">
+                                @blur="(e: any) => inputValueFu(e, row, col.key)"
+                                v-model="row[col.key]">
                             <view class="table_cell_btn table_cell_btn_plus" @click="addFu(row, col.key)">+</view>
                         </view>
                     </view>
@@ -292,7 +292,7 @@ defineExpose({
         color: #202020;
 
         .table_cell {
-            padding: 16rpx;
+            padding: 16rpx 0;
             text-align: center;
             box-sizing: border-box;
             flex: 1;
@@ -344,7 +344,7 @@ defineExpose({
         }
 
         .table_cell_input {
-            width: 228rpx !important;
+            width: 200rpx !important;
             flex: none;
         }
     }

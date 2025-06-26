@@ -91,9 +91,10 @@ const selectStateFu = (key: string | number) => {
  * 滑动加载
  */
 const scrolltolower = () => {
-    // if (!slideLoading.value) return
+    if (!slideLoading.value) return
     console.log('++++++++');
-    // manageDevicesParams.value.page += 1
+    paramsPage.pageNum += 1
+    getOrderPageFu()
     // resetManageDevicesParams()
 }
 </script>

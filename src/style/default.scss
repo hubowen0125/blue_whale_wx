@@ -20,11 +20,6 @@
         line-height: 1;
     }
 
-    .scroll_con {
-        width: 100%;
-        height: 100%;
-    }
-
     .button_defalut {
         width: 702rpx;
         // width: 606rpx;
@@ -51,6 +46,11 @@
 
 .container_defalut_bg {
     background: linear-gradient(180deg, #E2ECFF 0%, #FFFFFF 100%);
+}
+
+.scroll_con {
+    width: 100%;
+    height: 100%;
 }
 
 .flex {

@@ -190,9 +190,10 @@ const cashOnDeliveryFu = () => {
                 <image class="del_icon" :src="del_icon"></image>
                 <text>作废</text>
             </view>
-            <button class="records_btn" @click="viewRecordsFu">操作记录</button>
-            <button class="deliver_goods_btn" @click="deliverGoodsFu">发货</button>
-            <button v-if="orderDetails.paymentStatus == 1" class="button_defalut" @click="cashOnDeliveryFu">收银</button>
+            <button class="records_btn flex_1" @click="viewRecordsFu">操作记录</button>
+            <button v-if="[1, 2].includes(orderDetails.status)" class="deliver_goods_btn flex_1"
+                @click="deliverGoodsFu">发货</button>
+            <button v-if="orderDetails.paymentStatus == 1" class="button_defalut flex_1" @click="cashOnDeliveryFu">收银</button>
         </view>
     </view>
     <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="delByOrderNoFu"></com-popup_com>
@@ -298,6 +299,7 @@ const cashOnDeliveryFu = () => {
         font-weight: 400;
         font-size: 20rpx;
         color: #7C8191;
+        gap: 20rpx;
 
         .del_btn {
             margin-right: 16rpx;

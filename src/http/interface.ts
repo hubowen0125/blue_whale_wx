@@ -32,7 +32,6 @@ const request = (requestData: any) => {
             dataType: 'json',
             timeout: 20000
         }).then(async (response: any) => {
-            console.log('9999999999999999999');
             const code = response.data.code
             if (code == '401') {
                 if (!useUser.jump401) {
@@ -47,7 +46,6 @@ const request = (requestData: any) => {
                 resolve(response.data)
             }
         }).catch((error) => {
-            console.log('777777777777777' , error);
             if (error.errMsg.includes('timeout')) {   // 判断请求异常信息中是否含有超时timeout字符串
                 error.msg = '请求超时，请稍后再试'
             }

@@ -64,6 +64,8 @@ const getOrderPageFu = () => {
                 if (data.datas.length < paramsPage.pageSize) {
                     slideLoading.value = false
                 }
+            } else {
+                slideLoading.value = false
             }
         } else {
             proxy.$Toast({ title: msg })
@@ -96,12 +98,13 @@ const scrolltolower = () => {
 
 <template>
     <view class="record_com flex_column">
-        <view class="bg"></view>
-        <com-header header-title="全部订单" :back="false" :titleColor="true"></com-header>
-        <view class="order_state_list flex_align flex_center">
-            <view :class="['order_state_item', activeState == item.key ? 'order_state_item_active' : '']"
-                v-for="item in stateList" :key="item.key" @click="selectStateFun(item.key)">
-                <view>{{ item.title }}</view>
+        <view class="bg">
+            <com-header header-title="全部订单" :back="false" :titleColor="true"></com-header>
+            <view class="order_state_list flex_align flex_center">
+                <view :class="['order_state_item', activeState == item.key ? 'order_state_item_active' : '']"
+                    v-for="item in stateList" :key="item.key" @click="selectStateFun(item.key)">
+                    <view>{{ item.title }}</view>
+                </view>
             </view>
         </view>
         <view class="main_con flex_1">
@@ -127,13 +130,7 @@ const scrolltolower = () => {
     background: #F2F1F5;
 
     .bg {
-        width: 750rpx;
-        height: 282rpx;
         background: linear-gradient(136deg, #0D5DFF 0%, #00AAFF 100%);
-        transform: scaleY(-1);
-        position: fixed;
-        left: 0;
-        top: 0;
     }
 
     .order_state_list {
@@ -141,6 +138,7 @@ const scrolltolower = () => {
         margin-top: 30rpx;
         position: relative;
         gap: 60rpx;
+        margin-bottom: 20rpx;
 
         .order_state_item {
             font-weight: 400;
@@ -172,8 +170,7 @@ const scrolltolower = () => {
 
     .main_con {
         overflow: hidden;
-        margin-top: 24rpx;
-        margin-top: 50rpx;
+        margin: 24rpx 0;
 
         .order_list {
             padding: 0 30rpx 30rpx;

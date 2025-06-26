@@ -9,7 +9,6 @@ const useUser = useUserStore()
 const { proxy } = getCurrentInstance() as any;
 
 
-const tabBarIndex = inject("tabBarIndex") as Ref<number>
 const isLoad = ref(false) // 是否加载
 const slideLoading = ref(true) // 是否需要滑动加载
 const paramsPage = reactive({
@@ -23,15 +22,9 @@ const getProductParams = ref({
 // 货架列表
 const shelfList = ref<Array<any>>([])
 
-
-watch(() => tabBarIndex.value, (newVal) => {
-    if (newVal == 3 && !isLoad.value) {
-        console.log('213213');
-        isLoad.value = true
-        wholesaleListFu()
-    }
+onMounted(() => {
+    wholesaleListFu()
 })
-
 /**
  * 获取货架列表
  */
@@ -73,7 +66,6 @@ const searchInputBlur = (e: string) => {
  */
 const handleBuyFu = (items: any) => {
     useWholesaler.setShoppingCartFu([])
-    useWholesaler.setManufacturerIdFu(items.dept.deptId)
     uni.navigateTo({
         url: `/wholesaler/selectProduct/index?manufacturerId=${items.dept.deptId}`
     })
@@ -93,9 +85,13 @@ const scrolltolower = () => {
 
 
 <template>
-    <view class="goods_shelves_con flex_column">
-        <view class="goods_shelves_title">货架</view>
-        <com-searchInput placeholder="搜索厂家" @onBlur="searchInputBlur"></com-searchInput>
+    <view class="container flex_column">
+        <view class="bg">
+            <com-header header-title="选择厂家" :backColor="false" :titleColor="true"></com-header>
+            <view class="search_con ">
+                <com-searchInput placeholder="搜索厂家" @onBlur="searchInputBlur"></com-searchInput>
+            </view>
+        </view>
         <view class="main_con flex_1 flex_column">
             <scroll-view class="scroll_con" scroll-y="true" lower-threshold="50" @scrolltolower="scrolltolower">
                 <view class="companys_list flex_column" v-if="shelfList.length > 0">
@@ -119,24 +115,21 @@ const scrolltolower = () => {
 
 
 <style lang="scss" scoped>
-.goods_shelves_con {
-    width: 100%;
-    height: 100%;
-    padding: v-bind('`${useUser.navHeight + (useUser.statusBarHeight / 2)}px`') 30rpx 30rpx 30rpx;
-    box-sizing: border-box;
-    gap: 32rpx;
+.container {
+    .bg {
+        background: linear-gradient(136deg, #0D5DFF 0%, #00AAFF 100%);
+    }
 
-    .goods_shelves_title {
-        font-weight: bold;
-        font-size: 48rpx;
-        color: #202020;
+    .search_con {
+        margin: 32rpx 24rpx 52rpx;
     }
 
     .main_con {
+        padding: 24rpx;
         gap: 20rpx;
-        padding-bottom: 24rpx;
         overflow-x: hidden;
         overflow-y: auto;
+        position: relative;
 
         .companys_list {
             gap: 20rpx;

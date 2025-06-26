@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { wholesaleListApi, productListApi } from '@/wholesaler/http/wholesaler';
+import { wholesaleListApi, wholesaleListByManufacturerIdApi } from '@/wholesaler/http/wholesaler';
 import off_icon from "@/static/images/off_icon.png"
 import order_fixed from "@/static/images/wholesaler/order_fixed.png"
 import { useWholesalerStore } from "@/wholesaler/store/wholesaler"
@@ -7,7 +7,6 @@ import { useWholesalerStore } from "@/wholesaler/store/wholesaler"
 const useWholesaler = useWholesalerStore()
 const { proxy } = getCurrentInstance() as any;
 
-const manufacturerId = ref('')
 const paramsPage = reactive({
     pageNum: 1,
     pageSize: 10,
@@ -20,8 +19,6 @@ const productsList = ref<any[]>([])
 const slideLoading = ref(true) // 是否需要滑动加载
 const popupRef = ref();
 const popupProductDetail = ref<any>({})
-const shareCradList = ref<Array<any>>([])
-
 
 const shoppingCartNum = computed(() => {
     return useWholesaler.shoppingCart.length
@@ -29,38 +26,29 @@ const shoppingCartNum = computed(() => {
 
 onLoad((e: any) => {
     if (e.manufacturerId) {
-        manufacturerId.value = e.manufacturerId
-        productListFu()
-    } else {
-        wholesaleListFu()
+        getProductParams.value.manufacturerId = e.manufacturerId
     }
+    wholesaleListByManufacturerIdFu()
 })
 
 /**
  * 获取货架列表
  */
-const wholesaleListFu = () => {
+const wholesaleListByManufacturerIdFu = () => {
     proxy.$Loading()
-    wholesaleListApi(getProductParams.value, paramsPage).then((res: any) => {
+    wholesaleListByManufacturerIdApi(getProductParams.value, paramsPage).then((res: any) => {
         const { code, data, msg, token } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
             console.log(data, '0000');
-            // if (data && data.length > 0) {
-            //     data.map((item: { productsList: { isAdded: boolean; }[]; }) => {
-            //         item.productsList.map((items: any) => {
-            //             if (useWholesaler.shoppingCart.some((cartItem: any) => cartItem.id === items.id)) {
-            //                 items.isAdded = true
-            //             } else {
-            //                 items.isAdded = false
-            //             }
-            //         })
-            //         productsList.value = productsList.value.concat(item.productsList)
-            //     })
-            // }
-            // if (data[0].productsList.length < paramsPage.pageSize) {
-            //     slideLoading.value = false
-            // }
+            if (data && data.datas && data.datas.length > 0) {
+                productsList.value = productsList.value.concat(data.datas)
+                if (data.datas.length < paramsPage.pageSize) {
+                    slideLoading.value = false
+                }
+            } else {
+                slideLoading.value = false
+            }
         } else {
             proxy.$Toast({ title: msg })
         }
@@ -70,35 +58,13 @@ const wholesaleListFu = () => {
     }))
 }
 
-const productListFu = () => {
-    proxy.$Loading()
-    productListApi(getProductParams.value).then((res: any) => {
-        const { code, data, msg, token } = res
-        proxy.$CloseLoading();
-        if (code == proxy.$successCode) {
-            console.log(data, '0000');
-            // if (data && data.length > 0) {
-            //     data.map((item: { productsList: { isAdded: boolean; }[]; }) => {
-            //         item.productsList.map((items: any) => {
-            //             if (useWholesaler.shoppingCart.some((cartItem: any) => cartItem.id === items.id)) {
-            //                 items.isAdded = true
-            //             } else {
-            //                 items.isAdded = false
-            //             }
-            //         })
-            //         productsList.value = productsList.value.concat(item.productsList)
-            //     })
-            // }
-            // if (data[0].productsList.length < paramsPage.pageSize) {
-            //     slideLoading.value = false
-            // }
-        } else {
-            proxy.$Toast({ title: msg })
-        }
-    }, (req => {
-        proxy.$CloseLoading();
-        proxy.$Toast({ title: req.msg })
-    }))
+
+const searchInputBlur = (e: string) => {
+    getProductParams.value.productName = e
+    paramsPage.pageNum = 1
+    productsList.value = []
+    slideLoading.value = true
+    wholesaleListByManufacturerIdFu()
 }
 
 /**
@@ -150,36 +116,49 @@ const addToCartFu = () => {
  */
 const viewOrderCardDetailFu = () => {
     uni.navigateTo({
-        url: '/wholesaler/productConfirmation/index'
+        url: '/wholesaler/orderCardInformation/index'
     })
+}
+
+/**
+ * 滑动加载
+ */
+const scrolltolower = () => {
+    console.log('滑动加载');
+    if (!slideLoading.value) return
+    paramsPage.pageNum += 1
+    wholesaleListByManufacturerIdFu()
 }
 
 </script>
 
 <template>
     <view class="container flex_column">
-        <view class="bg"></view>
-        <com-header header-title="选择商品" :backColor="false" :titleColor="true"></com-header>
-        <view class="search_con ">
-            <com-searchInput placeholder="搜索商品"></com-searchInput>
-        </view>
-        <view class="main_con flex_column flex_1">
-            <view class="order_info_list flex_column">
-                <view v-for="item in productsList" :key="item.id">
-                    <com-orderInfo :productDetail="item" @viewDetailsFu="showPopupFu(item)">
-                        <template #button>
-                            <template v-if="!item.isAdded">
-                                <button class="add_btn">加入订货单</button>
-                            </template>
-                            <template v-else>
-                                <button class="btn_after">已加入</button>
-                            </template>
-                        </template>
-                    </com-orderInfo>
-                </view>
+        <view class="bg">
+            <com-header header-title="选择商品" :backColor="false" :titleColor="true"></com-header>
+            <view class="search_con ">
+                <com-searchInput placeholder="搜索商品" @onBlur="searchInputBlur"></com-searchInput>
             </view>
         </view>
-
+        <view class="main_con flex_column flex_1">
+            <scroll-view class="scroll_con" scroll-y="true" lower-threshold="50" @scrolltolower="scrolltolower">
+                <view class="order_info_list flex_column" v-if="productsList.length > 0">
+                    <view v-for="item in productsList" :key="item.id">
+                        <com-orderInfo :productDetail="item" @viewDetailsFu="showPopupFu(item)">
+                            <template #button>
+                                <template v-if="!item.isAdded">
+                                    <button class="add_btn">加入订货单</button>
+                                </template>
+                                <template v-else>
+                                    <button class="btn_after">已加入</button>
+                                </template>
+                            </template>
+                        </com-orderInfo>
+                    </view>
+                </view>
+                <com-no_data v-else noDataText="暂无数据"></com-no_data>
+            </scroll-view>
+        </view>
         <view class="order_fixed" @click="viewOrderCardDetailFu">
             <uni-badge class="uni-badge-left-margin" :text="shoppingCartNum" absolute="rightTop" :offset="[3, 3]"
                 size="small">
@@ -208,12 +187,7 @@ const viewOrderCardDetailFu = () => {
     background: #F2F1F5;
 
     .bg {
-        width: 750rpx;
-        height: 318rpx;
         background: linear-gradient(136deg, #0D5DFF 0%, #00AAFF 100%);
-        position: fixed;
-        left: 0;
-        top: 0;
     }
 
     .search_con {
@@ -284,7 +258,7 @@ const viewOrderCardDetailFu = () => {
 
 .popup_content {
     background-color: #fff;
-    padding: 40rpx 24rpx env(safe-area-inset-bottom);
+    padding: 40rpx 24rpx calc(26rpx + env(safe-area-inset-bottom));
     border-radius: 32rpx 32rpx 0 0;
 
     .popup_header {

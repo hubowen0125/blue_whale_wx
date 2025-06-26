@@ -29,6 +29,9 @@ const paramsPage = reactive({
     pageNum: 1,
     pageSize: 10,
 })
+const getProductParams = ref({
+    productName: '',
+})
 const productList = ref<any[]>([])
 const isLoad = ref(false) // 是否加载
 const slideLoading = ref(true) // 是否需要滑动加载
@@ -52,15 +55,17 @@ watch(() => tabBarIndex.value, (newVal) => {
  */
 const productsPageFu = () => {
     proxy.$Loading()
-    productsPageApi({}, paramsPage).then((res: any) => {
+    productsPageApi(getProductParams.value, paramsPage).then((res: any) => {
         const { code, data, msg, token } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
             console.log(data, '0000');
             if (data.datas && data.datas.length > 0) {
                 productList.value = [...productList.value, ...data.datas]
-            }
-            if (data.datas.length < paramsPage.pageSize) {
+                if (data.datas.length < paramsPage.pageSize) {
+                    slideLoading.value = false
+                }
+            } else {
                 slideLoading.value = false
             }
         } else {
@@ -72,6 +77,9 @@ const productsPageFu = () => {
     }))
 }
 
+/**
+ * 获取货架统计
+ */
 const getShelfStatisticsFu = () => {
     getShelfStatisticsApi().then((res: any) => {
         const { code, data, msg } = res
@@ -115,6 +123,14 @@ const viewDetailsFu = (productDetail: any) => {
     })
 }
 
+const searchInputBlur = (e: string) => {
+    console.log('搜索输入框失去焦点');
+    getProductParams.value.productName = e
+    paramsPage.pageNum = 1
+    productList.value = []
+    slideLoading.value = true
+    productsPageFu()
+}
 
 
 /**
@@ -134,7 +150,7 @@ const scrolltolower = () => {
     <view class="goods_shelves_con flex_column">
         <view class="goods_shelves_title">货架</view>
         <view class="search_input">
-            <com-searchInput placeholder="搜索商品"></com-searchInput>
+            <com-searchInput placeholder="搜索商品" @onBlur="searchInputBlur"></com-searchInput>
         </view>
         <view class="inventory_type_con flex">
             <view class="inventory_type_item flex_column flex_align flex_center flex_1" v-for="item in inventoryType"
