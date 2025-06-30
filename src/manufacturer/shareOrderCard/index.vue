@@ -87,11 +87,13 @@ const selectByShareFu = () => {
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
             console.log(data);
-            data.cardProductsList.map((item: { productColorsList: any; cardProductsDetailList: any; id: any; productId: any; }) => {
-                item.productColorsList = item.cardProductsDetailList
-                item.id = item.productId
-                return item
-            })
+            if (data.cardProductsList && data.cardProductsList.length > 0) {
+                data.cardProductsList.map((item: { productColorsList: any; cardProductsDetailList: any; id: any; productId: any; }) => {
+                    item.productColorsList = item.cardProductsDetailList
+                    item.id = item.productId
+                    return item
+                })
+            }
             cardOrderDetail.value = data
         } else {
             proxy.$Toast({ title: msg })

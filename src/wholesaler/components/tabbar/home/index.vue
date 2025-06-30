@@ -38,7 +38,8 @@ const popupData = {
         },
     ],
     cancelText: '稍后处理',
-    confirmText: '立即续费'
+    confirmText: '立即续费',
+    caalBack:true
 }
 
 const popupCom = ref()
@@ -52,13 +53,13 @@ const slideLoading = ref(true) // 是否需要滑动加载
 
 onMounted(() => {
     popupCom.value.showPopup()
+    getOrderPageFu()
 })
 
 
 watch(() => tabBarIndex.value, (newVal) => {
     if (newVal == 0) {
-        console.log('213213');
-        getOrderPageFu()
+        // getOrderPageFu()
     }
 })
 

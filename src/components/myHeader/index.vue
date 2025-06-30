@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-
 import edit_icon from "@/static/images/edit_icon.png"
 import manufacturer_icon from "@/static/images/chooseIdentity/manufacturer_icon.png"
 import wholesale_icon from "@/static/images/chooseIdentity/wholesale_icon.png"

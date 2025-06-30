@@ -19,6 +19,7 @@ const productsList = ref<any[]>([])
 const slideLoading = ref(true) // 是否需要滑动加载
 const popupRef = ref();
 const popupProductDetail = ref<any>({})
+const type = ref('') // goodsShelves 商品架  shoppingCart 购物车
 
 const shoppingCartNum = computed(() => {
     return useWholesaler.shoppingCart.length
@@ -27,6 +28,9 @@ const shoppingCartNum = computed(() => {
 onLoad((e: any) => {
     if (e.manufacturerId) {
         getProductParams.value.manufacturerId = e.manufacturerId
+    }
+    if (e.type) {
+        type.value = e.type
     }
     wholesaleListByManufacturerIdFu()
 })
@@ -42,6 +46,15 @@ const wholesaleListByManufacturerIdFu = () => {
         if (code == proxy.$successCode) {
             console.log(data, '0000');
             if (data && data.datas && data.datas.length > 0) {
+                if (useWholesaler.shoppingCart.length > 0) {
+                    data.datas.map((item: any) => {
+                        const index = useWholesaler.shoppingCart.findIndex((cartItem: any) => cartItem.id === item.id)
+                        if (index !== -1) {
+                            item.isAdded = true
+                        }
+                        return item
+                    })
+                }
                 productsList.value = productsList.value.concat(data.datas)
                 if (data.datas.length < paramsPage.pageSize) {
                     slideLoading.value = false
@@ -81,10 +94,12 @@ const showPopupFu = (data: any) => {
             return item
         })
         arr.push(data)
-    } else {
-        arr.splice(index, 1)
+    } else {    
+        // arr.splice(index, 1)
+        data = arr[index]
     }
     popupProductDetail.value = data
+    console.log(data , 'sfsadsad');
     popupRef.value.open('bottom');
 }
 
@@ -115,9 +130,13 @@ const addToCartFu = () => {
  * 跳转到订货卡详情页
  */
 const viewOrderCardDetailFu = () => {
-    uni.navigateTo({
-        url: '/wholesaler/orderCardInformation/index'
-    })
+    if (type.value === 'shoppingCart') {
+        uni.navigateBack()
+    } else {
+        uni.navigateTo({
+            url: `/wholesaler/orderInformation/index?type=${type.value}`
+        })
+    }
 }
 
 /**

@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { storageInputPageApi } from "@/packagingStation/http/packagingStation";
 import arrow_bottom from "@/static/images/arrow_bottom.png"
 import long_arrow from "@/static/images/long_arrow.png"
 import search_icon from "@/static/images/search_icon.png"
@@ -23,24 +24,83 @@ const quertList = [
 ]
 
 const tabBarIndex = inject("tabBarIndex") as Ref<number>
+const paramsPage = reactive({
+    pageNum: 1,
+    pageSize: 10,
+})
+const recordParams = reactive({
+    wholesaleName: '',
+    manufacturerName: '',
+    storageNum: '',
+})
+const slideLoading = ref(true) // 是否需要滑动加载
+const recordList = ref<any[]>([]) // 入库记录列表
 
+onMounted(() => {
+    storageInputPageFu()
+})
 
 watch(() => tabBarIndex.value, (newVal) => {
     if (newVal == 1) {
         // useDataBoard.setConditionIndex(0)
+        storageInputPageFu()
         console.log('111111');
 
     }
 })
 
+const storageInputPageFu = () => {
+    storageInputPageApi(recordParams, paramsPage).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            if (data.datas && data.datas.length > 0) {
+                recordList.value = [...recordList.value, ...data.datas]
+                if (data.datas.length < paramsPage.pageSize) {
+                    slideLoading.value = false
+                }
+            } else {
+                slideLoading.value = false
+            }
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+/**
+ * 查看入库记录详情
+ * @param item 
+ */
+const viewRecordDetailFu = (item: any) => {
+    const { id } = item
+    if (id) {
+        uni.navigateTo({
+            url: `/packagingStation/inventoryDetails/index?id=${id}`
+        })
+    }
+}
+
+/**
+ * 滑动加载
+ */
+const scrolltolower = () => {
+    if (!slideLoading.value) return
+    console.log('++++++++');
+    // manageDevicesParams.value.page += 1
+    // resetManageDevicesParams()
+}
 </script>
 
 
 <template>
-    <view class="record_com flex_cloumn">
+    <view class="record_com flex_column">
         <view class="bg"></view>
         <view class="record_header">入库记录</view>
-        <view class="record_main flex_1">
+        <view class="record_main flex_1 flex_column">
             <view class="query_criteria">
                 <view class="flex_align time_desc">
                     <view class="flex_align">
@@ -68,20 +128,28 @@ watch(() => tabBarIndex.value, (newVal) => {
                 </view>
                 <button class="button_defalut">查询</button>
             </view>
-            <view class="record_list flex_column">
-                <view class="record_item">
-                    <view class="record_item_time flex_align flex_between">
-                        <view>2025-05-05 11:26</view>
-                        <view>仓位: A1</view>
+            <view class="flex_1 record_con">
+                <scroll-view class="scroll_con " scroll-y="true"
+                    lower-threshold="50"
+                    @scrolltolower="scrolltolower">
+                    <view class="record_list flex_column" v-if="recordList.length > 0">
+                        <view class="record_item" v-for="item in recordList" :key="item.id"
+                            @click="viewRecordDetailFu(item)">
+                            <view class="record_item_time flex_align flex_between">
+                                <view>{{ item.createTime }}</view>
+                                <view>仓位: {{ item.storageNum }}</view>
+                            </view>
+                            <view class="record_item_info flex_align">
+                                <view>{{ item.wholesaleName }}</view>
+                                <view class="record_item_position">{{ item.wholesaleAddress }}</view>
+                            </view>
+                            <view class="record_item_manufacturer">厂家: {{ item.manufacturerName }}</view>
+                            <view class="record_item_num">入库数量: {{ item.checkHandNum }}手</view>
+                            <button class="record_item_button">打印</button>
+                        </view>
                     </view>
-                    <view class="record_item_info flex_align">
-                        <view>陈冠希</view>
-                        <view class="record_item_position">上海</view>
-                    </view>
-                    <view class="record_item_manufacturer">厂家: 上海蓝鲸童装有限公司</view>
-                    <view class="record_item_num">入库数量: 1手</view>
-                    <button class="record_item_button">打印</button>
-                </view>
+                    <com-no_data v-else noDataText="暂无批发商数据"></com-no_data>
+                </scroll-view>
             </view>
         </view>
     </view>
@@ -120,6 +188,7 @@ watch(() => tabBarIndex.value, (newVal) => {
 
     .record_main {
         position: relative;
+        overflow: hidden;
 
         .query_criteria {
             width: 702rpx;
@@ -188,60 +257,64 @@ watch(() => tabBarIndex.value, (newVal) => {
             }
         }
 
-        .record_list {
+        .record_con {
+            overflow: hidden;
             margin-top: 20rpx;
-            gap: 20rpx;
 
-            .record_item {
-                background: #FFFFFF;
-                border-radius: 24rpx;
-                padding: 28rpx 28rpx 40rpx;
-                box-sizing: border-box;
-                font-weight: 400;
-                font-size: 26rpx;
-                color: #7C8191;
-                position: relative;
+            .record_list {
+                gap: 20rpx;
 
-                .record_item_time {
+                .record_item {
+                    background: #FFFFFF;
+                    border-radius: 24rpx;
+                    padding: 28rpx 28rpx 40rpx;
+                    box-sizing: border-box;
                     font-weight: 400;
                     font-size: 26rpx;
                     color: #7C8191;
-                    padding-bottom: 24rpx;
-                    border-bottom: 1rpx solid #EFEFEF;
-                }
+                    position: relative;
 
-                .record_item_info {
-                    font-weight: bold;
-                    font-size: 32rpx;
-                    color: #202020;
-                    margin-top: 20rpx;
-                    margin-bottom: 24rpx;
-
-                    .record_item_position {
+                    .record_item_time {
                         font-weight: 400;
                         font-size: 26rpx;
-                        color: #346BCF;
-                        margin-left: 12rpx;
+                        color: #7C8191;
+                        padding-bottom: 24rpx;
+                        border-bottom: 1rpx solid #EFEFEF;
                     }
-                }
 
-                .record_item_manufacturer {
-                    margin-bottom: 16rpx;
-                }
+                    .record_item_info {
+                        font-weight: bold;
+                        font-size: 32rpx;
+                        color: #202020;
+                        margin-top: 20rpx;
+                        margin-bottom: 24rpx;
 
-                .record_item_button {
-                    position: absolute;
-                    width: 184rpx;
-                    height: 88rpx;
-                    background: rgba(12, 104, 255, 0.05);
-                    border-radius: 44rpx;
-                    border: 1rpx solid #8CBAFF;
-                    font-weight: 500;
-                    font-size: 30rpx;
-                    color: #0C62FF;
-                    line-height: 88rpx;
-                    bottom: 28rpx;
-                    right: 40rpx;
+                        .record_item_position {
+                            font-weight: 400;
+                            font-size: 26rpx;
+                            color: #346BCF;
+                            margin-left: 12rpx;
+                        }
+                    }
+
+                    .record_item_manufacturer {
+                        margin-bottom: 16rpx;
+                    }
+
+                    .record_item_button {
+                        position: absolute;
+                        width: 184rpx;
+                        height: 88rpx;
+                        background: rgba(12, 104, 255, 0.05);
+                        border-radius: 44rpx;
+                        border: 1rpx solid #8CBAFF;
+                        font-weight: 500;
+                        font-size: 30rpx;
+                        color: #0C62FF;
+                        line-height: 88rpx;
+                        bottom: 28rpx;
+                        right: 40rpx;
+                    }
                 }
             }
         }

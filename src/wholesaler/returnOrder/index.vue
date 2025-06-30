@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { getByOrderNoApi } from "@/http/api/order";
+import { businessOrderApi } from "../http/wholesaler";
 import checkbox from "@/static/images/checkbox.png"
 import checkbox_active from "@/static/images/checkbox_active.png"
 import hint_icon from "@/static/images/hint_icon.png"
@@ -15,7 +16,8 @@ const popupData = {
         },
     ],
     cancelText: '取消',
-    confirmText: '确定'
+    confirmText: '确定',
+    callBack: true
 }
 
 const popupCom = ref()
@@ -88,19 +90,36 @@ const confirmModifyFu = () => {
     popupCom.value.showPopup()
 }
 
-/**
- * 滑动加载
- */
-const scrolltolower = () => {
-    // if (!slideLoading.value) return
-    console.log('++++++++');
-    // manageDevicesParams.value.page += 1
-    // resetManageDevicesParams()
-}
-
 // 确认弹窗
 const confirmPopupFu = () => {
     console.log('1111');
+    orderDetails.value.orderProductsList.map((item: any) => {
+        const obj: any = {
+            orderProductId: item.productId,
+            productsDetailParams: []
+        }
+        item.orderProductsDetailList.map((items: any) => {
+            obj.productsDetailParams.push({
+                orderProductDetailId: items.id,
+                handNum: items.returnNum,
+            })
+        })
+        returnParams.productsParams.push(obj)
+    })
+    proxy.$Loading()
+    businessOrderApi(returnParams).then((res: any) => {
+        const { code, data, msg } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data);
+            uni.navigateBack()
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
 }
 </script>
 

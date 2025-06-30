@@ -84,6 +84,12 @@
                     }
                 },
                 {
+                    "path": "orderShare/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
                     "path": "createOrder/index",
                     "style": {
                         "navigationStyle": "custom"
@@ -173,13 +179,19 @@
                     }
                 },
                 {
-                    "path": "orderCardInformation/index",
+                    "path": "orderInformation/index",
                     "style": {
                         "navigationStyle": "custom"
                     }
                 },
                 {
-                    "path": "selectManufacturer/index",
+                    "path": "orderShare/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "orderCardInformation/index",
                     "style": {
                         "navigationStyle": "custom"
                     }

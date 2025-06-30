@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { manufacturerWholesalePageApi, packagingWholesalePageApi } from "../http/manufacturer"
+import { manufacturerWholesalePageApi } from "../http/manufacturer"
+import { packagingWholesalePageApi } from "@/http/api/all"
 import arrow_right from "@/static/images/arrow_right.png"
 import off_icon from "@/static/images/off_icon.png"
 import position_1 from "@/static/images/position_1.png"
@@ -92,7 +93,6 @@ const paramsPage = reactive({
 
 onLoad(() => {
     manufacturerWholesalePageFu()
-    packagingWholesalePageFu()
 })
 
 
@@ -100,7 +100,7 @@ onLoad(() => {
  * 获取批发商列表
  */
 const manufacturerWholesalePageFu = () => {
-    manufacturerWholesalePageApi({} , paramsPage).then((res: any) => {
+    manufacturerWholesalePageApi({}, paramsPage).then((res: any) => {
         const { code, data, msg, token } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
@@ -157,17 +157,16 @@ const closeWholesalerFu = () => {
  * 获取打包站列表
  */
 const packagingWholesalePageFu = () => {
-    // wholesaleId: wholesaleDetail.value.wholesaleId 
-    packagingWholesalePageApi({}).then((res: any) => {
+    packagingWholesalePageApi({ wholesaleId: wholesaleDetail.value.wholesaleId }).then((res: any) => {
         const { code, data, msg, token } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
             console.log(data, '0000');
-            if (data.datas && data.datas.length > 0) {
-                data.datas.forEach((item: any) => {
+            if (data && data.length > 0) {
+                data.forEach((item: any) => {
                     item.active = false
                 })
-                packagingList.value = data.datas;
+                packagingList.value = data;
             }
         } else {
             proxy.$Toast({ title: msg })
@@ -181,9 +180,9 @@ const packagingWholesalePageFu = () => {
 
 // 显示弹窗
 const showPopup = () => {
-    // if (!wholesaleDetail.value?.wholesaleId) {
-    //     return proxy.$Toast({ title: '请选择批发商' })
-    // }
+    if (!wholesaleDetail.value?.wholesaleId) {
+        return proxy.$Toast({ title: '请选择批发商' })
+    }
     console.log('显示弹窗');
     popupRef.value.open('bottom')
 }
@@ -220,7 +219,7 @@ const createOrderFu = () => {
             }
         })
         item.productId = item.id
-        return 
+        return
     })
     createOrderApi(orderDetails.value).then((res: any) => {
         const { code, data, msg, token } = res

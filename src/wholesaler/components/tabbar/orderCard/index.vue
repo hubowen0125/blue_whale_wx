@@ -17,7 +17,7 @@ const roderCardList = [
         titleEn: 'Send the order card to the manufacturer',
         image: card_1,
         key: 1,
-        path: '/wholesaler/orderCardInformation/index'
+        path: '/wholesaler/orderInformation/index?type=shoppingCart'
     },
     {
         title: '选择货架商品进行订货',
@@ -40,14 +40,14 @@ const toPageFu = (item: { path: string, key: number }) => {
     if (!path) {
         return emit('setTabBarIndex', 3)
     }
+    useWholesaler.setManufacturerIdFu('')
+    useWholesaler.setShoppingCartFu([])
     if (key === 1) {
         if (!useUser.userInfo.dept.address) {
             editInformationRef.value.showPopupFu()
             return
         }
     }
-    useWholesaler.setManufacturerIdFu('')
-    useWholesaler.setShoppingCartFu([])
     uni.navigateTo({
         url: path
     })
@@ -55,7 +55,7 @@ const toPageFu = (item: { path: string, key: number }) => {
 
 const editInformationFu = () => {
     uni.navigateTo({
-        url: '/wholesaler/orderCardInformation/index'
+        url: '/wholesaler/orderInformation/index?type=shoppingCart'
     })
 }
 </script>

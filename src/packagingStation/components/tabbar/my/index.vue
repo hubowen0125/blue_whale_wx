@@ -47,7 +47,8 @@ const popupData = {
             text1: '进行续费'
         },
     ],
-    confirmText: '确定'
+    confirmText: '确定',
+    caalBack:true
 }
 
 const tabBarIndex = inject("tabBarIndex") as Ref<number>
@@ -106,7 +107,20 @@ const toPageFu = (item: any) => {
 // 确认弹窗
 const confirmPopupFu = () => {
     console.log('1111');
+}
 
+const logoutFu = () => {
+    uni.showModal({
+        content: '确定退出登录吗？',
+        success: (res) => {
+            if (res.confirm) {
+                useUser.resetState()
+                uni.reLaunch({
+                    url: `/pages/loading/index`
+                })
+            }
+        }
+    })
 }
 
 
@@ -124,7 +138,7 @@ const confirmPopupFu = () => {
                 <image class="arrow_right_1" :src="arrow_right_1"></image>
             </view>
         </view>
-        <button class="logout_btn">退出登录</button>
+        <button class="logout_btn" @click="logoutFu">退出登录</button>
     </view>
     <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="confirmPopupFu"></com-popup_com>
 </template>
@@ -133,6 +147,7 @@ const confirmPopupFu = () => {
 <style lang="scss" scoped>
 .my_con {
     width: 100%;
+    height: 100%;
     padding: v-bind('`${useUser.statusBarHeight + useUser.navHeight}px`') 24rpx 30rpx 24rpx;
     box-sizing: border-box;
     background: #F2F1F5;

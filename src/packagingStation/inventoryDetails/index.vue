@@ -1,41 +1,43 @@
 <script lang="ts" setup>
+import { getByIdApi, storageInputApi } from "../http/packagingStation";
 import arrow_right from "@/static/images/arrow_right.png"
+import { dateStrToDateFormat } from "@/utils/utils";
 
 
 const { proxy } = getCurrentInstance() as any;
 
-const inventoryDetail = [
+const inventoryDetail = reactive([
     {
         title: '订单号: ',
-        orderNo: 'GuLang008',
-        value: '2025-05-05 11:26',
+        orderNo: computed(() => inventoryDetails.value.orderNo),
+        value: computed(() => dateStrToDateFormat(inventoryDetails.value.createTime, '')),
         arrow: true
     },
     {
         title: '厂家',
-        value: '上海蓝鲸童装有限公司',
-        value1: '13601805978',
+        value: computed(() => inventoryDetails.value.manufacturerName),
+        value1: computed(() => inventoryDetails.value.manufacturerPhone),
     },
     {
         title: '批发商',
-        value: '陈冠希-上海',
-        value1: '15618257147',
+        value: computed(() => inventoryDetails.value.wholesaleName),
+        value1: computed(() => inventoryDetails.value.wholesalePhone),
     },
     {
         title: '客户仓位',
-        value: 'A1',
+        value: computed(() => inventoryDetails.value.storageNum),
     },
     {
         title: '订单数量(手)',
-        value: '20',
+        value: computed(() => inventoryDetails.value.orderHandNum),
     },
     {
         title: '核点数量(手)',
-        value: '30',
+        value: computed(() => inventoryDetails.value.checkHandNum),
         button: true
     },
-]
-const popupData = {
+])
+const popupData = reactive({
     popupTitle: '修改核点数量',
     pupupType: 'input',
     popupContent: [
@@ -47,23 +49,55 @@ const popupData = {
     cancelText: '取消',
     confirmText: '确认',
     placeholder: '请输入数量',
-}
+    callBack: true
+})
 const popupCom = ref()
+const inventoryDetails = ref<any>({})
+const inventoryId = ref('')
+
+onLoad((e: any) => {
+    if (e.id) {
+        inventoryId.value = e.id
+        getByIdFu(e.id)
+    }
+})
+
+const getByIdFu = (id: string) => {
+    proxy.$Loading()
+    getByIdApi({ id }).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            inventoryDetails.value = data
+            popupData.popupContent[0].desc = `${inventoryDetails.value.checkHandNum}手`
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
 
 const modifyFu = () => {
     popupCom.value.showPopup()
 }
 
-
 /**
  * 确认选择
  */
-const confirmPopupFu = () => {
-    console.log('324324');
-    // popupData.value = popupList[1]
-    // setTimeout(() => {
-    //     popupCom.value.showPopup()
-    // }, 200);
+const confirmPopupFu = (num: string | number) => {
+    storageInputApi({ id: inventoryId.value, checkHandNum: num }).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
 }
 
 </script>
@@ -93,20 +127,24 @@ const confirmPopupFu = () => {
             </view>
             <view class="operation_record">操作记录</view>
             <view class="operation_record_list flex_column">
-                <view class="operation_record_item flex_align" v-for="item in 10" :key="item">
-                    <view class="flex_column flex_1">
-                        <view>陈冠希</view>
-                        <view class="operation_record_item_color">2025-05-05 11:26</view>
+                <template v-if="inventoryDetails.records && inventoryDetails.records.length > 0">
+                    <view class="operation_record_item flex_align" v-for="item in inventoryDetails.records"
+                        :key="item.id">
+                        <view class="flex_column flex_1">
+                            <view>{{ item.createBy }}</view>
+                            <view class="operation_record_item_color">{{ dateStrToDateFormat(item.createTime) }}</view>
+                        </view>
+                        <view class="flex_column flex_align">
+                            <view>{{ item.originalNum }}</view>
+                            <view class="operation_record_item_color">原数据</view>
+                        </view>
+                        <view class="flex_column flex_align operation_record_item_modify">
+                            <view>{{ item.checkHandNum }}</view>
+                            <view class="operation_record_item_color">修改后</view>
+                        </view>
                     </view>
-                    <view class="flex_column flex_align">
-                        <view>20</view>
-                        <view class="operation_record_item_color">原数据</view>
-                    </view>
-                    <view class="flex_column flex_align operation_record_item_modify">
-                        <view>20</view>
-                        <view class="operation_record_item_color">修改后</view>
-                    </view>
-                </view>
+                </template>
+                <com-no_data v-else noDataText="暂无操作记录"></com-no_data>
             </view>
         </view>
         <view class="footer_con">
@@ -200,6 +238,8 @@ const confirmPopupFu = () => {
 
         .operation_record_list {
             gap: 20rpx;
+            min-height: 200rpx;
+            position: relative;
 
             .operation_record_item {
                 padding: 46rpx 28rpx;

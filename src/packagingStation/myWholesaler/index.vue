@@ -1,4 +1,5 @@
-?id=<script lang="ts" setup>
+<script lang="ts" setup>
+import { myWholesaleApi, wholesaleStatisticApi } from "../http/packagingStation";
 import search_icon from "@/static/images/search_icon.png"
 
 
@@ -6,19 +7,91 @@ const { proxy } = getCurrentInstance() as any;
 
 const wholesalerInfoList = [
     {
-        name: '批发商数',
-        value: '100'
+        title: '批发商数',
+        value: () => wholesaleStatistics.value.wholesaleNum || 0,
     },
     {
-        name: '总数量(手)',
-        value: '200'
+        title: '总数量(手)',
+        value: () => wholesaleStatistics.value.handNum || 0,
     },
     {
-        name: '大于7天',
-        name1: '未打包批发商',
-        value: '80'
+        title: '大于7天',
+        title1: '未打包批发商',
+        value: () => wholesaleStatistics.value.noPackagingNum || 0,
     }
 ]
+const wholesalerList = ref<Array<any>>([])
+const wholesalerParams = reactive({
+    pageNum: 1,
+    pageSize: 10,
+    wholesaleName: ''
+})
+const slideLoading = ref(true) // 是否需要滑动加载
+const wholesaleStatistics = ref<any>({
+    handNum: 0,
+    noPackagingNum: 0,
+    wholesaleNum: 0
+})
+
+onMounted(() => {
+    wholesaleStatisticFu()
+})
+
+onShow(() => {
+    // 获取批发商信息
+    wholesalerList.value = []
+    slideLoading.value = true
+    getWholesalerInfo()
+})
+
+// 获取批发商信息
+const getWholesalerInfo = () => {
+    myWholesaleApi(wholesalerParams).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            if (data.datas && data.datas.length > 0) {
+                wholesalerList.value = [...wholesalerList.value, ...data.datas]
+                if (data.datas.length < wholesalerParams.pageSize) {
+                    slideLoading.value = false
+                }
+            } else {
+                slideLoading.value = false
+            }
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+/**
+ * 批发商统计信息
+ */
+const wholesaleStatisticFu = () => {
+    wholesaleStatisticApi().then((res: any) => {
+        const { code, data, msg, token } = res
+        if (code == proxy.$successCode) {
+            console.log(data)
+            wholesaleStatistics.value = data
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+const searchInputBlur = (e: string) => {
+    console.log('搜索输入框失去焦点');
+    wholesalerParams.wholesaleName = e
+    wholesalerParams.pageNum = 1
+    wholesalerList.value = []
+    slideLoading.value = true
+    getWholesalerInfo()
+}
 
 // 添加批发商
 const addWholesalerFu = () => {
@@ -29,9 +102,9 @@ const addWholesalerFu = () => {
 }
 
 // 批发商详情
-const wholesalerDetailFu = () => {
+const wholesalerDetailFu = (id: string) => {
     uni.navigateTo({
-        url: '/packagingStation/wholesalerDetails/index'
+        url: `/packagingStation/wholesalerDetails/index?id=${id}`
     })
 }
 
@@ -40,7 +113,7 @@ const wholesalerDetailFu = () => {
  * 滑动加载
  */
 const scrolltolower = () => {
-    // if (!slideLoading.value) return
+    if (!slideLoading.value) return
     console.log('++++++++');
     // manageDevicesParams.value.page += 1
     // resetManageDevicesParams()
@@ -54,34 +127,35 @@ const scrolltolower = () => {
         <com-header header-title="我的批发商" :backColor="false" :titleColor="true"></com-header>
         <view class="mian_con flex_1 flex_column">
             <view class="wholesaler_info">
-                <view class="wholesaler_info_item flex_column flex_align flex_center" v-for="item in wholesalerInfoList"
-                    :key="item.value">
-                    <view class=" wholesaler_num">{{ item.value }}</view>
+                <view class="wholesaler_info_item flex_column flex_align flex_center"
+                    v-for="item in wholesalerInfoList"
+                    :key="item.title">
+                    <view class=" wholesaler_num">{{ item.value() }}</view>
                     <view class="wholesaler_name flex_column flex_align flex_center">
-                        <view>{{ item.name }}</view>
-                        <view v-if="item.name1">{{ item.name1 }}</view>
+                        <view>{{ item.title }}</view>
+                        <view v-if="item.title1">{{ item.title1 }}</view>
                     </view>
                 </view>
             </view>
-            <view class="search_con flex_align">
-                <image class="search_icon" :src="search_icon"></image>
-                <input class="flex_1" type="text" placeholder="请输入批发商名称进行查询" />
+            <view class="search_input">
+                <com-searchInput placeholder="请输入批发商名称进行查询" @onBlur="searchInputBlur"></com-searchInput>
             </view>
             <view class="wholesaler_con  flex_1">
                 <scroll-view class="scroll_con " scroll-y="true"
                     lower-threshold="50"
                     @scrolltolower="scrolltolower">
-                    <view class="wholesaler_list flex_column">
-                        <view class="wholesaler_item flex_column" v-for="item in 10" :key="item"
-                            @click="wholesalerDetailFu">
+                    <view class="wholesaler_list flex_column" v-if="wholesalerList.length > 0">
+                        <view class="wholesaler_item flex_column" v-for="item in wholesalerList" :key="item.id"
+                            @click="wholesalerDetailFu(item.id)">
                             <view class="wholesaler_item_name flex">
-                                <view>陈冠希</view>
-                                <view class="wholesaler_item_address">上海</view>
+                                <view>{{ item.wholesaleName }}</view>
+                                <view class="wholesaler_item_address">{{ item.wholesaleAddress }}</view>
                             </view>
-                            <view>总数量: 1000手</view>
-                            <view>未打包天数: 10</view>
+                            <view>总数量: {{ item.handNum }}手</view>
+                            <view>未打包天数: {{ item.unpackingDays }}</view>
                         </view>
                     </view>
+                    <com-no_data v-else noDataText="暂无批发商数据"></com-no_data>
                 </scroll-view>
             </view>
         </view>

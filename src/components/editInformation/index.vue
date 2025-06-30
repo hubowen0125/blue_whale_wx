@@ -39,12 +39,17 @@ onMounted(() => {
 })
 
 const sysRegionListFu = () => {
+    if (proxy.cascaderOptions.length > 0) {
+        cascaderOptions.value = proxy.cascaderOptions
+        return
+    }
     sysRegionListApi().then((res: any) => {
         const { code, data, msg } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
             console.log(data);
             cascaderOptions.value = areasMap(data);
+            proxy.cascaderOptions = cascaderOptions.value
         } else {
             proxy.$Toast({ title: msg })
         }
@@ -128,6 +133,8 @@ const formSubmit = async (e: any) => {
         }, (req => {
             proxy.$Toast({ title: req.msg })
         }))
+    } else if (props.type == 'packaging') {
+
     }
     getInfoFu()
     emit('editInformationFu')
@@ -142,7 +149,6 @@ const getInfoFu = () => {
         const { code, data, msg } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
-            console.log(data);
             useUser.userInfo.dept = { ...useUser.userInfo.dept, ...data }
         } else {
             proxy.$Toast({ title: msg })

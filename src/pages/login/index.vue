@@ -158,7 +158,7 @@ const viewProtocolFu = (key: any) => {
         <form @submit="formSubmit">
             <view class="input_con flex_align">
                 <view class="input_area_code">+86</view>
-                <input class="input" type="number" placeholder="请输入手机号" ref="phoneValue" maxlength="11" name="phone"
+                <input class="input flex_1" type="number" placeholder="请输入手机号" ref="phoneValue" maxlength="11" name="phone"
                     v-model.trim="loginParams.phone">
             </view>
             <view class="input_con flex_align">

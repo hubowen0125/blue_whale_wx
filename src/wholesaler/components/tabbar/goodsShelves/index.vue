@@ -75,7 +75,7 @@ const handleBuyFu = (items: any) => {
     useWholesaler.setShoppingCartFu([])
     useWholesaler.setManufacturerIdFu(items.dept.deptId)
     uni.navigateTo({
-        url: `/wholesaler/selectProduct/index?manufacturerId=${items.dept.deptId}`
+        url: `/wholesaler/selectProduct/index?manufacturerId=${items.dept.deptId}&type=goodsShelves`
     })
 }
 

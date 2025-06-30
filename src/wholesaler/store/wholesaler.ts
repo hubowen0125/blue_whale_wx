@@ -12,11 +12,17 @@ export const useWholesalerStore = defineStore('wholesaler', () => {
     const setManufacturerIdFu = (id: string) => {
         manufacturerId.value = id
     }
+
+    const resetState = () => {
+        shoppingCart.value = []
+        manufacturerId.value = ''
+    }
     return {
         shoppingCart,
         manufacturerId,
         setShoppingCartFu,
-        setManufacturerIdFu
+        setManufacturerIdFu,
+        resetState
     }
 
 }, { persist: true, })

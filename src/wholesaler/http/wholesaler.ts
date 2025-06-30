@@ -38,23 +38,6 @@ export function productListApi(data: any, ) {
 }
 
 /**
- * 分页查询打包站-批发商
- * @param params
- * @returnsF
- */
-export function packagingWholesalePageApi(data: any, params: any) {
-    return new Promise((resolve, reject) => {
-        resolve(
-            request({
-                url: `api/business/packagingWholesale/page?${splicingObjects(params)}`,
-                method: "POST",
-                data
-            })
-        )
-    })
-}
-
-/**
  * 分页查询商品信息(批发商)(厂家列表)
  * @param params
  * @returnsF
@@ -70,3 +53,23 @@ export function wholesaleListByManufacturerIdApi(data: any, params: any) {
         )
     })
 }
+
+/**
+ * 未发货退单
+ * @param params
+ * @returnsF
+ */
+export function businessOrderApi(data: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/order`,
+                method: "POST",
+                data
+            })
+        )
+    })
+}
+
+
+

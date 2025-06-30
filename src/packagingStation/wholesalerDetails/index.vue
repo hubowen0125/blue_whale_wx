@@ -1,37 +1,39 @@
 <script lang="ts" setup>
+import { wholesaleDetailApi } from '../http/packagingStation';
+import { dateStrToDateFormat } from '@/utils/utils';
 
 const { proxy } = getCurrentInstance() as any;
 
-const wholesalerDetailsList = [
+const wholesalerDetailsList = reactive([
     {
         title: '客户名称',
-        value: '上海-陈冠希'
+        value: computed(() => wholesaleDetails.value.wholesaleName)
     },
     {
         title: '仓位信息',
-        value: 'A1'
+        value: computed(() => wholesaleDetails.value.storageNum)
     },
     {
         title: '客户地区',
-        value: '上海'
+        value: computed(() => `${wholesaleDetails.value.wholesaleProvince}${wholesaleDetails.value.wholesaleCity}${wholesaleDetails.value.wholesaleDistrict}`)
     },
     {
         title: '客户地址',
-        value: '上海市普陀区甘泉路280号'
+        value: computed(() => wholesaleDetails.value.wholesaleAddress)
     },
     {
         title: '手机号',
-        value: '15618257147'
+        value: computed(() => wholesaleDetails.value.wholesalePhone)
     },
     {
         title: '总数量',
-        value: '1000手'
+        value: computed(() => `${wholesaleDetails.value.handNum}手`)
     },
     {
         title: '未打包天数',
-        value: '10天'
+        value: computed(() => `${wholesaleDetails.value.unpackingDays}天`)
     },
-]
+])
 const popupData = {
     popupTitle: '编辑仓位',
     pupupType: 'input',
@@ -44,9 +46,44 @@ const popupData = {
     cancelText: '取消',
     confirmText: '确认',
     placeholder: '请输入新仓位',
+    caalBack: true
 }
 const popupCom = ref()
 const activeTabs = ref(0)
+const wholesaleDetails = ref<any>({})
+const recordList = ref<any[]>([])
+
+onLoad((e: any) => {
+    if (e.id) {
+        wholesaleDetailFu(e.id)
+    }
+})
+
+/**
+ * 获取批发商详情
+ * @param id 
+ */
+const wholesaleDetailFu = (id: any) => {
+    wholesaleDetailApi({ id }).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data, '0000');
+            wholesaleDetails.value = data;
+            recordList.value = data.storageInputList || [];
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+const setActiveTabs = (index: number) => {
+    activeTabs.value = index
+    recordList.value = index == 1 ? wholesaleDetails.value.storageOrderList || [] : wholesaleDetails.value.storageInputList || []
+}
 
 /**
  * 确认选择
@@ -80,20 +117,28 @@ const modifyFu = () => {
                 </view>
             </view>
             <view class="tabs_list flex_align">
-                <view :class="['tabs_item', 'flex_1', activeTabs == 0 ? 'tab_active' : '']" @click="activeTabs = 0">入库记录
+                <view :class="['tabs_item', 'flex_1', activeTabs == 0 ? 'tab_active' : '']" @click="setActiveTabs(0)">
+                    入库记录
                 </view>
-                <view :class="['tabs_item', 'flex_1', activeTabs == 1 ? 'tab_active' : '']" @click="activeTabs = 1">
+                <view :class="['tabs_item', 'flex_1', activeTabs == 1 ? 'tab_active' : '']" @click="setActiveTabs(1)">
                     订单记录</view>
             </view>
             <view class="record_list flex_column">
-                <view class="record_item" v-for="item in 10" :key="item">
-                    <view>上海蓝鲸童装有限公司</view>
-                    <view class="flex_align record_item_info flex_between">
-                        <view>入库数量: 1手</view>
-                        <view>2025-05-05 11:26</view>
+                <template v-if="recordList.length > 0">
+                    <view class="record_item" v-for="item in recordList" :key="item.id">
+                        <view>{{ item.wholesaleName }}</view>
+                        <view class="flex_align record_item_info flex_between">
+                            <view>入库数量: {{ item.checkHandNum }}手</view>
+                            <view>{{ activeTabs == 1 ? `订单编号：${item.orderNo}` : dateStrToDateFormat(item.createTime, '')
+                            }}
+                            </view>
+                        </view>
+                        <view v-if="activeTabs == 1" class="record_item_info">{{ dateStrToDateFormat(item.createTime,
+                            '') }}
+                        </view>
                     </view>
-                    <view v-if="activeTabs == 1" class="record_item_info">2025-05-05 11:26</view>
-                </view>
+                </template>
+                <com-no_data v-else noDataText="暂无数据"></com-no_data>
             </view>
         </view>
         <view class="footer_con">
@@ -186,6 +231,8 @@ const modifyFu = () => {
         .record_list {
             gap: 20rpx;
             padding: 0 24rpx;
+            position: relative;
+            min-height: 200rpx;
 
             .record_item {
                 background: #FFFFFF;

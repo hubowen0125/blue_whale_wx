@@ -8,6 +8,7 @@ const { proxy } = getCurrentInstance() as any
 onLoad((e: any) => {
     proxy.$Loading()
     if (useUser.token) {
+        console.log(e.type, 'werwere');
         if (e.type) {
             console.log(e.type, 'werwere');
             if (e.type == 'manufacturer') {

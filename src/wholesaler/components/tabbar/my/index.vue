@@ -2,8 +2,10 @@
 import { getInfoApi } from "@/http/api/all"
 import arrow_right_1 from "@/static/images/arrow_right_1.png"
 import { useUserStore } from '@/store/modules/user';
+import { useWholesalerStore } from "@/wholesaler/store/wholesaler";
 
 const useUser = useUserStore()
+const useWholesaler = useWholesalerStore()
 const { proxy } = getCurrentInstance() as any;
 
 // 功能列表
@@ -35,7 +37,8 @@ const popupData = {
             text1: '进行续费'
         },
     ],
-    confirmText: '确定'
+    confirmText: '确定',
+    caalBack:true
 }
 
 const tabBarIndex = inject("tabBarIndex") as Ref<number>
@@ -46,6 +49,7 @@ const infoDetails = ref<any>({})
 onMounted(() => {
     // popupCom.value.showPopup()
     getInfoFu()
+    console.log('222');
 })
 
 watch(() => tabBarIndex.value, (newVal) => {
@@ -104,6 +108,14 @@ const renewFu = () => {
     })
 }
 
+const logoutFu = () => {
+    useUser.resetState()
+    useWholesaler.resetState()
+    uni.reLaunch({
+        url: `/pages/loading/index`
+    })
+}
+
 </script>
 
 
@@ -118,7 +130,7 @@ const renewFu = () => {
                 <image class="arrow_right_1" :src="arrow_right_1"></image>
             </view>
         </view>
-        <button class="logout_btn">退出登录</button>
+        <button class="logout_btn" @click="logoutFu">退出登录</button>
     </view>
     <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="confirmPopupFu"></com-popup_com>
 </template>

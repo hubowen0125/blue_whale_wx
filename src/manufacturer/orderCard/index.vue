@@ -2,6 +2,7 @@
 import { createAddApi } from "@/http/api/all";
 import del_icon from "@/static/images/del_icon.png"
 import off_icon from "@/static/images/off_icon.png"
+import hint_icon from "@/static/images/hint_icon.png"
 import { useManufacturerStore } from "@/manufacturer/store/manufacturer";
 import { useUserStore } from "@/store/modules/user";
 
@@ -15,7 +16,7 @@ const createParams = reactive<any>({
     viewInventory: 1,
     cardProductsParams: []
 })
-const orderNo = ref('CD202506211459020318')
+const orderNo = ref('')
 const editInformationRef = ref()
 
 /**
@@ -48,11 +49,18 @@ const createAddFu = async () => {
             productId: item.id,
         }
     })
+    if (!useUser.userInfo.dept.address) {
+        editInformationRef.value.showPopupFu()
+        return
+    }
+    proxy.$Loading()
     await createAddApi(createParams).then((res: any) => {
         const { code, data, msg } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
-            orderNo.value = data
+            uni.reLaunch({
+                url: `/manufacturer/orderShare/index?orderNo=${data}`
+            })
         } else {
             proxy.$Toast({ title: msg })
         }
@@ -60,17 +68,6 @@ const createAddFu = async () => {
         proxy.$CloseLoading();
         proxy.$Toast({ title: req.msg })
     }))
-}
-
-/**
- * 分享
- */
-const shareFu = async () => {
-    if (!useUser.userInfo.dept.address) {
-        editInformationRef.value.showPopupFu()
-        return
-    }
-    await createAddFu()
 }
 
 const editInformationFu = async () => {
@@ -104,7 +101,11 @@ const editInformationFu = async () => {
             <com-no_data v-else :noDataText="'暂无商品'"></com-no_data>
         </view>
         <view class="footer_con">
-            <button class="share_btn" @click="shareFu">选择微信好友立即发送</button>
+            <view class="hint_con flex_align">
+                <image class="hint_icon" :src="hint_icon"></image>
+                <view>创建完成可发送给微信好友</view>
+            </view>
+            <button class="button_defalut" @click="createAddFu">完成创建</button>
         </view>
     </view>
     <com-editInformation ref="editInformationRef" type="manufacturer"
@@ -159,6 +160,20 @@ const editInformationFu = async () => {
                 }
             }
         }
+    }
+}
+
+.hint_con {
+    font-weight: 400;
+    font-size: 26rpx;
+    color: #7C8191;
+    margin-bottom: 36rpx;
+    margin-top: 18rpx;
+
+    .hint_icon {
+        width: 26rpx;
+        height: 26rpx;
+        margin-right: 8px;
     }
 }
 </style>

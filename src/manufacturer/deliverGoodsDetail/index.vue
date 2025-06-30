@@ -14,7 +14,8 @@ const popupData = {
         },
     ],
     cancelText: '取消',
-    confirmText: '确定'
+    confirmText: '确定',
+    callBack: true
 }
 
 const popupCom = ref()
@@ -140,7 +141,7 @@ const confirmPopupFu = () => {
                             <com-orderTable
                                 orderType="handleRefund"
                                 :productDetail="item"
-                                :selectAll="selectAll" 
+                                :selectAll="selectAll"
                                 @deselectAllFu="selectAllFu">
                             </com-orderTable>
                         </view>

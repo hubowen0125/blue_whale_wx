@@ -1,12 +1,17 @@
 <script lang="ts" setup>
+import { sysRegionListApi } from "@/http/api/all";
+import { packagingWholesaleAddApi } from "../http/packagingStation";
 import arrow_bottom from "@/static/images/arrow_bottom.png"
+import { areasMap, checkStr } from "@/utils/utils";
+import { useUserStore } from "@/store/modules/user";
 
+const useUser = useUserStore()
 const { proxy } = getCurrentInstance() as any;
 
 const inputList = [
     {
         label: '批发商名称',
-        value: '',
+        value: 'wholesaleName',
         type: 'input',
         placeholder: '请输入批发商名称',
         maxlength: 20,
@@ -15,7 +20,7 @@ const inputList = [
     },
     {
         label: '批发商地区',
-        value: '',
+        value: 'areaDetail',
         type: 'select',
         placeholder: '请选择批发商地区',
         inputType: 'text',
@@ -24,7 +29,7 @@ const inputList = [
     },
     {
         label: '详细地址',
-        value: '',
+        value: 'address',
         type: 'input',
         placeholder: '请输入详情地址',
         maxlength: 100,
@@ -33,7 +38,7 @@ const inputList = [
     },
     {
         label: '批发商手机号',
-        value: '',
+        value: 'wholesalePhone',
         type: 'input',
         placeholder: '请输入批发商手机号',
         maxlength: 11,
@@ -42,7 +47,7 @@ const inputList = [
     },
     {
         label: '批发商仓位',
-        value: '',
+        value: 'storageNum',
         type: 'input',
         placeholder: '请输入批发商仓位',
         maxlength: 20,
@@ -50,9 +55,101 @@ const inputList = [
         disabled: false,
     },
 ]
+const addParams = reactive<any>({
+    wholesaleName: '',
+    province: '',
+    city: '',
+    district: '',
+    areaDetail: '',
+    address: '',
+    wholesalePhone: '',
+    storageNum: '',
+    packagingId: useUser.userInfo.deptId
+})
+const selectAreaRef = ref();
+const cascaderOptions = ref<any>([])
+
+
+onMounted(() => {
+    sysRegionListFu()
+})
+
+const sysRegionListFu = () => {
+    if (proxy.cascaderOptions.length > 0) {
+        cascaderOptions.value = proxy.cascaderOptions
+        return
+    }
+    sysRegionListApi().then((res: any) => {
+        const { code, data, msg } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data);
+            cascaderOptions.value = areasMap(data);
+            proxy.cascaderOptions = cascaderOptions.value
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+/**
+ * 显示选择收货地址弹窗
+ */
+const showSelectAreaFu = () => {
+    selectAreaRef.value.showPopupFu()
+}
+
+/**
+ * 选择收货地址
+ * @param e 
+ */
+const selectAreaFu = (e: any) => {
+    const { province, city, district, provinceCode, cityCode, districtCode } = e
+    addParams.areaDetail = `${province}${city}${district}`
+    addParams.province = provinceCode
+    addParams.city = cityCode
+    addParams.district = districtCode
+}
 
 const formSubmit = (e: any) => {
-    console.log(e, 'formSubmit');
+    const { wholesaleName, areaDetail, address, wholesalePhone, storageNum } = addParams
+    if (!wholesaleName) {
+        proxy.$Toast({ title: '请输入批发商名称' })
+        return
+    }
+    if (!areaDetail) {
+        proxy.$Toast({ title: '请选择批发商地区' })
+        return
+    }
+    if (!address) {
+        proxy.$Toast({ title: '请输入详情地址' })
+        return
+    }
+    if (!checkStr(wholesalePhone)) {
+        proxy.$Toast({ title: '请输入批发商手机号' })
+        return
+    }
+    if (!storageNum) {
+        proxy.$Toast({ title: '请输入批发商仓位' })
+        return
+    }
+    proxy.$Loading()
+    packagingWholesaleAddApi(addParams).then((res: any) => {
+        const { code, data, msg } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            proxy.$Toast({ title: '添加成功' })
+            uni.navigateBack()
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
 }
 
 </script>
@@ -65,16 +162,17 @@ const formSubmit = (e: any) => {
                 <view class="form_con flex_column">
                     <view class="form_item " v-for="item in inputList" :key="item.label">
                         <text class="form_label">{{ item.label }}</text>
-                        <view class="form_input flex_align">
+                        <view class="form_input flex_align" @click=" item.type === 'select' && showSelectAreaFu()">
                             <input class="flex_1" :placeholder="item.placeholder" :maxlength="item.maxlength"
-                                v-model.trim="item.value" :type="item.inputType" :disabled="item.disabled">
+                                v-model.trim="addParams[item.value]" :type="item.inputType" :disabled="item.disabled">
                             <image v-if="item.type === 'select'" class="arrow_bottom" :src="arrow_bottom"></image>
                         </view>
                     </view>
-                    <button class="button_defalut">确认添加</button>
+                    <button class="button_defalut" form-type="submit">确认添加</button>
                 </view>
             </form>
         </view>
+        <com-selectArea ref="selectAreaRef" :cascader="cascaderOptions" @selectAreaFu="selectAreaFu"></com-selectArea>
     </view>
 </template>
 

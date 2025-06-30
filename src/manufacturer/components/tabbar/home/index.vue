@@ -41,7 +41,8 @@ const popupData = {
         },
     ],
     cancelText: '稍后处理',
-    confirmText: '立即续费'
+    confirmText: '立即续费',
+    callBack: true
 }
 
 const popupCom = ref()

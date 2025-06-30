@@ -5,8 +5,10 @@ import arrow_right_1 from "@/static/images/arrow_right_1.png"
 import left_icon from "@/manufacturer/images/left_icon.png"
 import right_icon from "@/manufacturer/images/right_icon.png"
 import { useUserStore } from '@/store/modules/user';
+import { useManufacturerStore } from "@/manufacturer/store/manufacturer"
 import { createDateShifter } from "@/utils/utils"
 
+const useManufacturer = useManufacturerStore()
 const useUser = useUserStore()
 const { proxy } = getCurrentInstance() as any;
 
@@ -43,7 +45,8 @@ const popupData = {
             text1: '进行续费'
         },
     ],
-    confirmText: '确定'
+    confirmText: '确定',
+    callBakc:true
 }
 const reportList = [
     {
@@ -158,6 +161,23 @@ const renewFu = () => {
     })
 }
 
+const logoutFu = () => {
+
+    uni.showModal({
+        content: '确定退出登录吗？',
+        success: (res) => {
+            if (res.confirm) {
+                useUser.resetState()
+                useManufacturer.resetState()
+                uni.reLaunch({
+                    url: `/pages/loading/index`
+                })
+            }
+        }
+    })
+}
+
+
 </script>
 
 
@@ -189,7 +209,7 @@ const renewFu = () => {
                 <image class="arrow_right_1" :src="arrow_right_1"></image>
             </view>
         </view>
-        <button class="logout_btn">退出登录</button>
+        <button class="logout_btn" @click="logoutFu">退出登录</button>
     </view>
     <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="confirmPopupFu"></com-popup_com>
 </template>

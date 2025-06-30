@@ -14,11 +14,17 @@ export const useManufacturerStore = defineStore('manufacturer', () => {
     const setOrderCardFu = (data: any) => {
         orderCard.value = data
     }
+
+    const resetState = () => {
+        shoppingCart.value = []
+        orderCard.value = []
+    }
     return {
         orderCard,
         setOrderCardFu,
         shoppingCart,
         setShoppingCartFu,
+        resetState
     }
 
 }, { persist: true, })

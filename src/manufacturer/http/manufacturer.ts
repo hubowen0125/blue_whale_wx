@@ -270,21 +270,3 @@ export function getSalesStatisticsApi(params: any) {
 }
 
 
-/**
- * 分页查询打包站-批发商
- * @param params
- * @returnsF
- */
-export function packagingWholesalePageApi(data: any) {
-    return new Promise((resolve, reject) => {
-        resolve(
-            request({
-                url: `api/business/packagingWholesale/page`,
-                method: "POST",
-                data
-            })
-        )
-    })
-}
-
-

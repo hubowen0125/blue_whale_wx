@@ -10,7 +10,7 @@ const useUser = useUserStore()
 
 const props = defineProps({
     orderType: {
-        type: String,  // show 展示   handleOrder 下单  handleRefund 退款 detail 详情
+        type: String,  // show 展示   handleOrder 下单  handleRefund 退款 detail 详情  shareDetail 分享
         default: 'show'
     },
     productDetail: {
@@ -46,6 +46,8 @@ const selectTitle = computed(() => {
 })
 
 const tableDetail = computed(() => {
+    console.log(props.productDetail , 'props.productDetail');
+    
     return props.productDetail
 })
 
@@ -101,8 +103,8 @@ const selectItemFu = (data: boolean) => {
     }
     selectItem.value = data
     if (data) {
-        tableDetail.value.productColorsList.forEach((item: { returnNum: any; handNum: any }) => {
-            item.returnNum = item.handNum
+        tableDetail.value.productColorsList.forEach((item: { returnNum: any; unsentHandNum: any }) => {
+            item.returnNum = item.unsentHandNum
         })
     }
 }
@@ -120,16 +122,8 @@ const inputValueFu = async (e: any, item: any, key: string) => {
     if (result) {
         const num = parseInt(result, 10)
         if (props.orderType == 'handleOrder' && num > item.stockNum) {
-            // uni.showToast({
-            //     title: '超过库存',
-            //     icon: 'none'
-            // })
             item[key] = item.stockNum
         } else if (props.orderType == 'handleRefund' && num > item.unsentHandNum) {
-            // uni.showToast({
-            //     title: '超过退款数量',
-            //     icon: 'none'
-            // })
             item[key] = item.unsentHandNum
         } else {
             item[key] = num
@@ -175,7 +169,7 @@ defineExpose({
     <view class="order_table">
         <com-orderInfo :productDetail="tableDetail" :orderType="orderType">
             <template #button>
-                <template v-if="orderType == 'handleOrder'">
+                <template v-if="orderType == 'handleOrder' || orderType == 'shareDetail'">
                     <button class="order_unit">1手/{{ tableDetail.unitQuantity }}件</button>
                     <view class="order_unit_price">¥{{ formatNumber(totalAmount) }}</view>
                 </template>

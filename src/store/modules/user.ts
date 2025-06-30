@@ -2,7 +2,6 @@ import { defineStore } from "pinia";
 import { getWxNav } from "@/utils/com";
 
 export const useUserStore = defineStore('use', () => {
-
     const wxNavObj = getWxNav()
 
     const token = ref('')
@@ -46,6 +45,7 @@ export const useUserStore = defineStore('use', () => {
         token.value = ''
         jump401.value = false
         userInfo.value = {}
+        shareParam.value = {}
     }
 
     return {

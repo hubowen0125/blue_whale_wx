@@ -54,7 +54,8 @@ const popupData = {
         },
     ],
     cancelText: '取消',
-    confirmText: '确定'
+    confirmText: '确定',
+    callBack: true
 }
 
 const popupCom = ref()
@@ -111,7 +112,8 @@ const delByOrderNoFu = () => {
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
             console.log(data);
-            getByOrderNoFu
+            getByOrderNoFu()
+            proxy.$Toast({ title: '作废成功' })
         } else {
             proxy.$Toast({ title: msg })
         }
@@ -193,7 +195,8 @@ const cashOnDeliveryFu = () => {
             <button class="records_btn flex_1" @click="viewRecordsFu">操作记录</button>
             <button v-if="[1, 2].includes(orderDetails.status)" class="deliver_goods_btn flex_1"
                 @click="deliverGoodsFu">发货</button>
-            <button v-if="orderDetails.paymentStatus == 1" class="button_defalut flex_1" @click="cashOnDeliveryFu">收银</button>
+            <button v-if="orderDetails.paymentStatus == 1" class="button_defalut flex_1"
+                @click="cashOnDeliveryFu">收银</button>
         </view>
     </view>
     <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="delByOrderNoFu"></com-popup_com>

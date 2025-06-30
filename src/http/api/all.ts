@@ -285,3 +285,20 @@ export function editCardApi(data: any) {
         )
     })
 }
+
+/**
+ * 查询打包站或批发商
+ * @param params
+ * @returnsF
+ */
+export function packagingWholesalePageApi(data: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/packagingWholesale/page`,
+                method: "POST",
+                data
+            })
+        )
+    })
+}

@@ -1,12 +1,37 @@
 <script lang="ts" setup>
+import { stockInApi } from "@/packagingStation/http/packagingStation";
+import { packagingWholesalePageApi } from "@/http/api/all";
 import position_1 from "@/static/images/position_1.png"
 import scan_code_icon from "@/static/images/packagingStation/scan_code_icon.png"
+import arrow_bottom from "@/static/images/arrow_bottom.png"
 import { useUserStore } from '@/store/modules/user';
+import { handleInput } from "@/utils/utils";
 
 const useUser = useUserStore()
 const { proxy } = getCurrentInstance() as any;
 
+interface STOCKINPARAMS {
+    type: number
+    manufacturerName: string
+    packagingWholesaleId: string
+    storageNum: number | string
+    checkHandNum: number | string
+    [key: string]: string | number // 添加索引签名以允许通过字符串索引
+}
+
 const tabBarIndex = inject("tabBarIndex") as Ref<number>
+const stockInParams = reactive<STOCKINPARAMS>({
+    type: 1, // 类型1.输入 2.扫码 
+    manufacturerName: '',
+    packagingWholesaleId: '',
+    storageNum: '',
+    checkHandNum: ''
+})
+const wholesaleList = ref<any[]>([])
+const wholesaleDetail = ref<any>({
+    wholesaleName: ''
+})
+const selectWholesalerRef = ref<any>()
 
 
 watch(() => tabBarIndex.value, (newVal) => {
@@ -15,6 +40,99 @@ watch(() => tabBarIndex.value, (newVal) => {
     }
 })
 
+onMounted(() => {
+    packagingWholesalePageFu()
+})
+
+/**
+ * 获取批发商列表
+ */
+const packagingWholesalePageFu = () => {
+    packagingWholesalePageApi({ packagingId: useUser.userInfo.deptId }).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data, '0000');
+            if (data && data.length > 0) {
+                wholesaleList.value = data;
+            }
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+
+// 显示批发商弹窗
+const showWholesalerFu = () => {
+    console.log('显示批发商弹窗');
+    selectWholesalerRef.value.showPopupFu()
+}
+
+/**
+ * 选择批发商
+ * @param e 
+ */
+const selectSubmitFu = (e: any) => {
+    wholesaleDetail.value = e
+    stockInParams.packagingWholesaleId = e.id
+}
+
+const inputValueFu = async (e: any, key: string) => {
+    const value = e.target.value
+    const result = await handleInput(value) as string;
+    if (result) {
+        const num = parseInt(result, 10)
+        console.log(num, 'numnumnumnum');
+        stockInParams[key] = num.toString()
+    } else {
+        stockInParams[key] = 0
+    }
+}
+
+
+/**
+ * 入库
+ */
+const stockInFu = () => {
+    const { type, manufacturerName, packagingWholesaleId, storageNum, checkHandNum } = stockInParams
+    console.log(stockInParams, 'stockInParamsstockInParamsstockInParams');
+    if (!manufacturerName) {
+        return proxy.$Toast({ title: '请输入厂家名称' })
+    }
+    if (!packagingWholesaleId) {
+        return proxy.$Toast({ title: '请选择批发商' })
+    }
+    if (!checkHandNum) {
+        return proxy.$Toast({ title: '请输入核点数量' })
+    }
+    proxy.$Loading()
+    stockInApi(stockInParams).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data, '0000');
+            proxy.$Toast({ title: '入库成功' })
+            resetStockInParamsFu()
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+const resetStockInParamsFu = () => {
+    stockInParams.type = 1
+    stockInParams.manufacturerName = ''
+    stockInParams.packagingWholesaleId = ''
+    stockInParams.storageNum = ''
+    stockInParams.checkHandNum = ''
+}
 
 const scanCodeFu = () => {
     proxy.$Loading()
@@ -48,22 +166,30 @@ const scanCodeFu = () => {
         <view class="home_main flex_column">
             <view class="table_con">
                 <text class="table_title">厂家名称</text>
-                <input class="table_input" type="text" placeholder="请输入厂家名称">
+                <input class="table_input" type="text" placeholder="请输入厂家名称"
+                    v-model="stockInParams.manufacturerName">
             </view>
             <view class="table_con">
                 <text class="table_title">批发商名称</text>
                 <view class="flex table_input_list">
-                    <input class="table_input table_input_item" type="text" placeholder="请输入批发商名称">
-                    <input class="table_input flex_1" type="text" placeholder="请输入仓位">
+                    <view class="flex_align table_input table_input_item" @click="showWholesalerFu">
+                        <input class=" flex_1" type="text"
+                            placeholder="选择批发商" disabled
+                            v-model="wholesaleDetail.wholesaleName">
+                        <image class="arrow_bottom" :src="arrow_bottom"></image>
+                    </view>
+                    <input class="table_input flex_1" type="number" placeholder="请输入仓位"
+                        v-model="stockInParams.storageNum" @blur="(e: any) => inputValueFu(e, 'storageNum')">
                 </view>
             </view>
             <view class="table_con">
                 <text class="table_title">核点数量(手)</text>
-                <input class="table_input" type="text" placeholder="请输入核点数量">
+                <input class="table_input" type="number" placeholder="请输入核点数量"
+                    v-model="stockInParams.checkHandNum" @blur="(e: any) => inputValueFu(e, 'checkHandNum')">
             </view>
             <view class="btn_con flex_align">
-                <button class="reset_btn">重置</button>
-                <button class="button_defalut flex_1">立即入库</button>
+                <button class="reset_btn" @click="resetStockInParamsFu">重置</button>
+                <button class="button_defalut flex_1" @click="stockInFu">立即入库</button>
             </view>
         </view>
         <view class="scan_code_con flex_align flex_column" @click="scanCodeFu">
@@ -71,6 +197,8 @@ const scanCodeFu = () => {
             <view class="scan_code_desc">扫码入库</view>
         </view>
     </view>
+    <com-selectWholesaler ref="selectWholesalerRef"
+        :wholesaleList="wholesaleList" @selectSubmitFu="selectSubmitFu"></com-selectWholesaler>
 </template>
 
 <style lang="scss" scoped>
@@ -136,6 +264,11 @@ const scanCodeFu = () => {
                 .table_input_item {
                     width: 402rpx;
                 }
+
+                .arrow_bottom {
+                    width: 24rpx;
+                    height: 24rpx;
+                }
             }
         }
 
@@ -164,6 +297,7 @@ const scanCodeFu = () => {
         border: 2rpx solid #8CBAFF;
         gap: 36rpx;
         justify-content: center;
+        margin-top: 30rpx;
 
         .scan_code_icon {
             width: 136rpx;
