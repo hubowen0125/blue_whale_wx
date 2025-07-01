@@ -20,7 +20,7 @@ const funList = [
     },
     {
         name: '用户协议',
-        path: '/packagingStation/myWholesaler/index'
+        path: ''
     },
     {
         name: '隐私政策',
@@ -48,8 +48,8 @@ const infoDetails = ref<any>({})
 
 onMounted(() => {
     // popupCom.value.showPopup()
-    getInfoFu()
-    console.log('222');
+    // getInfoFu()
+    // console.log('222');
 })
 
 watch(() => tabBarIndex.value, (newVal) => {

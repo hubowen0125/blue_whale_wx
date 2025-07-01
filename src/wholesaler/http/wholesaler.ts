@@ -71,5 +71,21 @@ export function businessOrderApi(data: any) {
     })
 }
 
+/**
+ * 获取订单统计信息
+ * @param params
+ * @returnsF
+ */
+export function getWholesaleOrderStatisticsApi() {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/wholesale/getWholesaleOrderStatistics`,
+                method: "GET",
+            })
+        )
+    })
+}
+
 
 

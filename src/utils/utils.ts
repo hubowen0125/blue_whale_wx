@@ -446,3 +446,16 @@ export const createDateShifter = (baseDateStr?: string) => {
         }
     }
 }
+
+
+// 计算当前时间跟指定时间的差值
+export const calculateTimeDifference = (time: string) => {
+    const now = new Date()
+    const target = new Date(time)
+    const diff = target.getTime() - now.getTime()
+    const day = Math.floor(diff / (24 * 3600 * 1000))
+    const hour = Math.floor((diff % (24 * 3600 * 1000)) / (3600 * 1000))
+    const minute = Math.floor((diff % (3600 * 1000)) / (60 * 1000))
+    const second = Math.floor((diff % (60 * 1000)) / 1000)
+    return { day, hour, minute, second }
+}

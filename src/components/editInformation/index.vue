@@ -34,15 +34,13 @@ const formParams = reactive<any>({
 })
 const areaDetail = ref('')
 
-onMounted(() => {
-    sysRegionListFu()
-})
-
 const sysRegionListFu = () => {
     if (proxy.cascaderOptions.length > 0) {
         cascaderOptions.value = proxy.cascaderOptions
+        selectAreaRef.value.showPopupFu()
         return
     }
+    proxy.$Loading();
     sysRegionListApi().then((res: any) => {
         const { code, data, msg } = res
         proxy.$CloseLoading();
@@ -50,6 +48,7 @@ const sysRegionListFu = () => {
             console.log(data);
             cascaderOptions.value = areasMap(data);
             proxy.cascaderOptions = cascaderOptions.value
+            selectAreaRef.value.showPopupFu()
         } else {
             proxy.$Toast({ title: msg })
         }
@@ -77,7 +76,7 @@ const closePopupFu = () => {
  * 显示选择收货地址弹窗
  */
 const showSelectAreaFu = () => {
-    selectAreaRef.value.showPopupFu()
+    sysRegionListFu()
 }
 
 /**

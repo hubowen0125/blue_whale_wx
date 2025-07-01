@@ -1,31 +1,34 @@
 <script lang="ts" setup>
 import { getOrderPageApi } from "@/http/api/order";
+import { getInfoApi } from "@/http/api/all"
+import { getWholesaleOrderStatisticsApi } from "@/wholesaler/http/wholesaler"
 import position_1 from "@/static/images/position_1.png"
 import arrow_right_1 from "@/static/images/arrow_right_1.png"
 import long_arrow from "@/static/images/long_arrow.png"
 import orderItem from "../../orderItem/idnex.vue"
 import { useUserStore } from '@/store/modules/user';
+import { calculateTimeDifference } from "@/utils/utils";
 
 const emit = defineEmits(['setTabBarIndex'])
 
 const useUser = useUserStore()
 const { proxy } = getCurrentInstance() as any;
 
-const orderType = [
+const orderType = reactive([
     {
         title: '今日订单',
-        value: '100',
+        value: computed(() => statistic.value.orderToday || 0),
     },
     {
         title: '未发货订单',
-        value: '80',
+        value: computed(() => statistic.value.orderNotShipped || 0),
     },
     {
         title: '异常订单',
-        value: '20',
+        value: computed(() => statistic.value.abnormalOrderNum || 0),
     },
-]
-const popupData = {
+])
+const popupData = reactive({
     popupTitle: '续费提醒',
     pupupType: 'default',
     popupContent: [
@@ -39,8 +42,8 @@ const popupData = {
     ],
     cancelText: '稍后处理',
     confirmText: '立即续费',
-    caalBack:true
-}
+    caalBack: true
+})
 
 const popupCom = ref()
 const tabBarIndex = inject("tabBarIndex") as Ref<number>
@@ -50,27 +53,52 @@ const paramsPage = reactive({
 })
 const orderList = ref<any[]>([])
 const slideLoading = ref(true) // 是否需要滑动加载
+const statistic = ref<any>({
+    orderToday: 0,
+    orderNotShipped: 0,
+    abnormalOrderNum: 0
+})
 
 onMounted(() => {
-    popupCom.value.showPopup()
     getOrderPageFu()
+    getWholesaleOrderStatisticsFu()
 })
 
 
-watch(() => tabBarIndex.value, (newVal) => {
-    if (newVal == 0) {
-        // getOrderPageFu()
-    }
-})
+/**
+ * 获取用户信息
+ */
+const getInfoFu = () => {
+    getInfoApi().then((res: any) => {
+        const { code, data, msg } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data, calculateTimeDifference(data.expireTime));
+            const day = calculateTimeDifference(data.expireTime).day;
+            if (0 < day && day < 7) {
+                popupData.popupContent[0].desc = `${day}天后到期`
+                popupCom.value.showPopup()
+            } else if (day < 0) {
+                popupData.popupContent[0].text = '您的会员服务已过期'
+                popupData.popupContent[0].desc = `${day * -1}天`
+                popupCom.value.showPopup()
+            }
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
 
 /**
  * 获取订单列表
  */
-const getOrderPageFu = () => {
+const getOrderPageFu = async () => {
     proxy.$Loading()
-    getOrderPageApi({ status: '' }, paramsPage).then((res: any) => {
+    await getOrderPageApi({ status: '' }, paramsPage).then((res: any) => {
         const { code, data, msg, token } = res
-        proxy.$CloseLoading();
         if (code == proxy.$successCode) {
             console.log(data, '0000');
             if (data.datas && data.datas.length > 0) {
@@ -82,6 +110,24 @@ const getOrderPageFu = () => {
                 slideLoading.value = false
             }
         } else {
+            proxy.$CloseLoading();
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+    getInfoFu()
+}
+
+const getWholesaleOrderStatisticsFu = () => {
+    getWholesaleOrderStatisticsApi().then((res: any) => {
+        const { code, data, msg } = res
+        if (code == proxy.$successCode) {
+            console.log(data, '1111');
+            statistic.value = data
+        } else {
+            proxy.$CloseLoading();
             proxy.$Toast({ title: msg })
         }
     }, (req => {
