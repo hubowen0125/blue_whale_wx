@@ -160,7 +160,7 @@ export function getSignedUriApi(data: any) {
     return new Promise((resolve, reject) => {
         resolve(
             request({
-                url: `service/system/oss/getSignedUri`,
+                url: `api/oss/getSignedUri`,
                 method: "POST",
                 data
             })

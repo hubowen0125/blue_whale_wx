@@ -2,6 +2,7 @@
 import { getByIdApi, productsAddApi, productsEditApi } from "../http/manufacturer"
 import upload_icon from "@/static/images/upload_icon.png"
 import arrow_bottom from "@/static/images/arrow_bottom.png"
+import close_icon from "@/static/images/close_icon.png"
 import { getSignedUriFu } from "@/utils/upload"
 
 let timer: any
@@ -35,7 +36,7 @@ const productDetail = [
     },
     {
         title: '颜色',
-        value: '',
+        value: 'colors',
         type: 'select',
         inputType: 'text',
         required: true,
@@ -77,15 +78,12 @@ const productDetail = [
 ]
 const fileList = ref<any>([])
 let orderParams = ref<any>({
-    productImagesBoList: [
-        {
-            imageUrl: 'https://minio-dev.local-test.sxkemao.com/tv-bucket/tv/materiel/img/体验馆/dfadf4b40f91448cac16ab7b454164b5_1739409271391.png?x-oss-process=image/resize,m_pad,w_236,h_160',
-        }
-    ],
+    productImagesList: [],
     productName: '',
     styleNumber: '',
     sizeName: '',
     productColorsList: [],
+    colors: '',
     price: "",
     unitQuantity: '',
     season: ''
@@ -93,6 +91,8 @@ let orderParams = ref<any>({
 const productId = ref('')
 const headerTitle = ref('添加商品')
 const submitBtnText = ref('立即添加')
+const activeColorList = ref<Array<any>>([])
+const activeSizeList = ref<Array<any>>([])
 
 onLoad((e: any) => {
     if (e.id) {
@@ -108,18 +108,23 @@ onShow(() => {
     const currentPage = pages[pages.length - 1]
     // @ts-ignore
     if (currentPage.$vm.sizeActive) {
-        console.log(currentPage.$vm.sizeActive, '00000selectActiveList');
         orderParams.value.sizeName = currentPage.$vm.sizeActive.size
+        activeSizeList.value = currentPage.$vm.sizeActive
     }
     if (currentPage.$vm.colorsActive) {
-        console.log(currentPage.$vm.colorsActive, 'colorActive');
+        let colors = ''
         currentPage.$vm.colorsActive.map((item: any) => {
-            orderParams.value.productColorsList.push({
-                colorName: item.color,
-                stockNum: 0,
-                id: item.id
-            })
+            const find = orderParams.value.productColorsList.find((color: any) => color.id === item.id)
+            if (!find) {
+                orderParams.value.productColorsList.push({
+                    colorName: item.color,
+                    stockNum: 0,
+                })
+                colors += item.color + '、'
+            }
         })
+        activeColorList.value = currentPage.$vm.colorsActive
+        orderParams.value.colors = colors.substring(0, colors.length - 1)
     }
 })
 
@@ -136,6 +141,9 @@ const getByIdFu = () => {
                 colors += item.colorName + '、'
             })
             data.colors = colors.substring(0, colors.length - 1)
+            data.productImagesList.map((item: any) => {
+                fileList.value.push(item.imageUrlFull)
+            })
             orderParams.value = data
         } else {
             proxy.$Toast({ title: msg })
@@ -160,14 +168,37 @@ const uploadFu = async () => {
             proxy.$Loading();
             const { tempFilePaths } = res as any
             tempFilePaths.map(async (item: any) => {
-                const imgUrl = await getSignedUriFu('DEVICE_STOCK', { tempFilePath: item })
-                // orderParams.value.finishPicPath = imgUrl
+                const imgUrl = await getSignedUriFu('PRODUCT', { tempFilePath: item })
+                orderParams.value.productImagesList.push({ imageUrl: imgUrl })
                 proxy.$CloseLoading();
             })
         }
     });
 }
 
+/**
+ * 预览图片
+ */
+const previewImageFu = (index: number) => {
+    uni.previewImage({
+        current: index,
+        urls: fileList.value,
+    })
+}
+
+/**
+ * 删除上传的图片
+ */
+const delFileFu = (index: number) => {
+    try {
+        fileList.value.splice(index, 1)
+        orderParams.value.productImagesList.splice(index, 1)
+    } catch (error) {
+        console.log(error, '66666');
+    }
+    console.log(fileList.value, 'delFileFu');
+
+}
 
 /**
  * 添加参数
@@ -176,7 +207,15 @@ const uploadFu = async () => {
 const addParamFu = (item: any) => {
     console.log(item, 'addParamFu');
     uni.navigateTo({
-        url: `/manufacturer/addParameters/index?type=${item.selectType}`
+        url: `/manufacturer/addParameters/index?type=${item.selectType}`,
+        success: (res) => {
+            // 向页面B传递参数
+            if (item.selectType === 'color') {
+                res.eventChannel.emit('activeColorList', activeColorList.value);
+            } else if (item.selectType === 'size') {
+                res.eventChannel.emit('activeSizeList', activeSizeList.value);
+            }
+        }
     })
 }
 
@@ -263,6 +302,9 @@ const setPrevParams = () => {
         title: productId.value ? '商品修改成功' : '商品添加成功',
         successCB: () => {
             timer = setTimeout(() => {
+                const pages = getCurrentPages() // 获取当前页面栈
+                const prevPage = pages[pages.length - 2] // 上一个页面
+                prevPage.$vm.refresh = true
                 uni.navigateBack()
             }, 1500);
         }
@@ -282,8 +324,14 @@ const setPrevParams = () => {
                         <view class="form_label">上传图片</view>
                         <view class="form_desc">最多可上传9张图片</view>
                         <view class="upload_img_con">
-                            <image class="upload_icon" :src="upload_icon"></image>
-                            <image v-if="fileList.length < 1" class="upload_icon" :src="upload_icon" @click="uploadFu"
+                            <template v-for="item, index in fileList" :key="index">
+                                <image class="upload_img" :src="item" @click="previewImageFu(index)" mode="aspectFill">
+                                    <image :src="close_icon" class="close_icon" @click.stop="delFileFu(index)"
+                                        mode="aspectFill">
+                                    </image>
+                                </image>
+                            </template>
+                            <image v-if="fileList.length < 9" class="upload_img" :src="upload_icon" @click="uploadFu"
                                 mode="aspectFill"></image>
                         </view>
                     </view>
@@ -292,8 +340,7 @@ const setPrevParams = () => {
                                 v-if="item.required">*</text> </view>
                         <view class="form_input_con flex_align" @click="item.type === 'select' && addParamFu(item)">
                             <input class="flex_1" :type="item.inputType" :placeholder="item.placeholder"
-                                v-model.trim="orderParams[item.value]"
-                                :disabled="item.type === 'select'">
+                                v-model.trim="orderParams[item.value]" :disabled="item.type === 'select'">
                             <image v-if="item.type === 'select'" class="arrow_bottom" :src="arrow_bottom"></image>
                         </view>
                     </view>
@@ -343,12 +390,22 @@ const setPrevParams = () => {
 
                 .upload_img_con {
                     display: grid;
-                    grid-template-columns: repeat(3, 1fr);
+                    grid-template-columns: repeat(3, 184rpx);
                     gap: 20rpx;
 
-                    .upload_icon {
+                    .upload_img {
                         width: 184rpx;
                         height: 184rpx;
+                        position: relative;
+                        border-radius: 20rpx;
+
+                        .close_icon {
+                            width: 26rpx;
+                            height: 26rpx;
+                            position: absolute;
+                            top: 6rpx;
+                            right: 6rpx;
+                        }
                     }
                 }
 

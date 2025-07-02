@@ -178,8 +178,8 @@ defineExpose({
                 </view>
                 <view class="form_item">
                     <view class="form_label">区域城市</view>
-                    <view class="input_item flex_align">
-                        <input class="flex_1" @click="showSelectAreaFu" type="text" v-model="areaDetail" disabled
+                    <view class="input_item flex_align" @click="showSelectAreaFu">
+                        <input class="flex_1" type="text" v-model="areaDetail" disabled
                             placeholder="请选择区域城市">
                         <image class="arrow_bottom" :src="arrow_bottom"></image>
                     </view>

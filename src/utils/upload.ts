@@ -20,7 +20,7 @@ export const uploadByteStream = (url: string, data: ArrayBuffer): Promise<any> =
             },
             data: data,
             success: (res: any) => {
-                res.code = 'S000000'
+                res.code = 200
                 resolve(res);
             },
             fail: (error) => {
@@ -64,9 +64,9 @@ export const getSignedUriFu = async (code: string, detail: { tempFilePath: strin
     return new Promise((resolve) => {
         getSignedUriApi({ code, fileType: "jpg" }).then(async (res: any) => {
             const { code, data, msg } = res
-            if (code == 'S000000') {
+            if (code == 200) {
                 const response = await uploadByteStream(data.signedUrl, arrayBuffer) as any
-                if (response.code == 'S000000') {
+                if (response.code == 200) {
                     resolve(data.uploadPath)
                 } else {
                     uni.hideLoading()

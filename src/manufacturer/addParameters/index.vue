@@ -44,12 +44,24 @@ onLoad((e: any) => {
             addButtonText.value = '添加尺寸'
             popupData.value = popupDataList[0]
             getSizesListFu()
+            const eventChannel = proxy.getOpenerEventChannel();
+            if (eventChannel) {
+                eventChannel.on('activeSizeList', (data: any) => {
+                    sizeActive.value = data
+                });
+            }
         }
         if (e.type == 'color') {
             getColorsListFu()
             addButtonText.value = '添加颜色'
             headerTitle.value = '选择颜色'
             popupData.value = popupDataList[1]
+            const eventChannel = proxy.getOpenerEventChannel();
+            if (eventChannel) {
+                eventChannel.on('activeColorList', (data: any) => {
+                    colorsActive.value = data
+                });
+            }
         }
     }
 })
@@ -277,6 +289,7 @@ const selectDataFu = () => {
             .parameter_item {
                 height: 64rpx;
                 background: #F7F8FA;
+                border: 1rpx solid #F7F8FA;
                 border-radius: 16rpx;
                 font-weight: 500;
                 font-size: 26rpx;

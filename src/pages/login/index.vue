@@ -10,8 +10,8 @@ const { proxy } = getCurrentInstance() as any;
 
 let timer: any
 const loginParams = reactive({
-    phone: '18003764250',
-    code: '888888'
+    phone: '',
+    code: ''
 })
 const pointerBtn = ref(false)
 const codeBtn = ref('获取验证码')
@@ -154,7 +154,7 @@ const viewProtocolFu = (key: any) => {
 <template>
     <view class="container container_defalut_bg flex_floumn">
         <view class="login_title">欢迎登录/注册</view>
-        <view class="login_desc">蓝鲸, 聪明人的平台</view>
+        <view class="login_desc">欢迎来到聚衣仓平台</view>
         <form @submit="formSubmit">
             <view class="input_con flex_align">
                 <view class="input_area_code">+86</view>

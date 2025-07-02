@@ -7,24 +7,12 @@ type PrintContent =
     | { type: 'qrcode'; content: string }
 
 const devices = ref<Array<any>>([])
-const defaultDevice = 'DC:D4:44:9A:7D:E6'
 const status = ref('未连接')
 const connected = ref(false)
 const connectedDeviceId = ref('')
 const deviceId = ref('')
 const serviceId = ref('')
 const characteristicId = ref('')
-
-const content: PrintContent[] = [
-    { type: 'text', text: '欢迎光临', align: 'center', bold: true },
-    { type: 'text', text: '--------------------------' },
-    { type: 'text', text: '商品     数量   单价', bold: true },
-    { type: 'text', text: '苹果      2      3.00' },
-    { type: 'text', text: '香蕉      1      2.50' },
-    { type: 'text', text: '--------------------------' },
-    { type: 'text', text: '合计：8.50元', align: 'right' },
-    { type: 'text', text: '请扫码付款', align: 'center' }
-]
 
 const canvasWidth = ref(432);
 const canvasHeight = ref(310); // Adjust height as needed for the content.
@@ -225,42 +213,6 @@ wx.onBLEConnectionStateChange((res: { connected: any; }) => {
         }
     }
 })
-
-/**
- * 设置打印机打印内容
- * @param data 
- */
-const generatePrintCommand = (data: PrintContent[]): ArrayBuffer => {
-    const ESC = 0x1b
-    const cmds: number[] = []
-    const append = (...bytes: number[]) => cmds.push(...bytes)
-
-    // GBK编码函数
-    const textToGBK = (text: string): number[] => {
-        // 使用我们之前实现的gbkEncoder
-        // const gbkBytes = encodeToGBK(text);
-        // return Array.from(gbkBytes);
-        return []
-    }
-
-    append(ESC, 0x40) // 初始化
-    for (const item of data) {
-        if (item.type === 'text') {
-            // 对齐
-            const alignMap = { left: 0, center: 1, right: 2 }
-            append(ESC, 0x61, alignMap[item.align ?? 'left'])
-            // 加粗
-            append(ESC, 0x45, item.bold ? 1 : 0)
-            // 文本（使用GBK编码）
-            append(...textToGBK(item.text))
-            append(0x0a) // 换行
-        }
-    }
-    // 结束切纸（部分打印机会执行）
-    append(0x1d, 0x56, 0x41, 0x10)
-
-    return new Uint8Array(cmds).buffer
-}
 
 const printReceipt = async () => {
     status.value = '正在生成打印数据...';

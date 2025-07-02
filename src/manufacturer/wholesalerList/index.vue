@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { manufacturerWholesalePageApi } from '../http/manufacturer';
+import { manufacturerWholesalePageApi, getWholesaleStatisticsApi } from '../http/manufacturer';
 
 
 const { proxy } = getCurrentInstance() as any;
@@ -8,15 +8,15 @@ const { proxy } = getCurrentInstance() as any;
 const wholesalerDetails = [
     {
         title: '总批发商',
-        value: '100'
+        value: computed(() => wholesaleStatistics.value.wholesaleNum || 0)
     },
     {
         title: '总订单',
-        value: '100'
+        value: computed(() => wholesaleStatistics.value.orderNum || 0)
     },
     {
         title: '总金额',
-        value: '100'
+        value: computed(() => wholesaleStatistics.value.amount || 0)
     },
 ]
 const wholesalerList = ref<Array<any>>([])
@@ -25,9 +25,15 @@ const paramsPage = reactive({
     pageNum: 1,
     pageSize: 10,
 })
+const wholesaleStatistics = ref({
+    wholesaleNum: 0,
+    orderNum: 0,
+    amount: 0
+})
 
 onMounted(() => {
     wholesalePageFu()
+    getWholesaleStatisticsFu()
 })
 
 /**
@@ -52,6 +58,19 @@ const wholesalePageFu = () => {
         }
     }, (req => {
         proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+const getWholesaleStatisticsFu = () => {
+    getWholesaleStatisticsApi().then((res: any) => {
+        const { code, data, msg } = res
+        if (code == proxy.$successCode) {
+            wholesaleStatistics.value = data
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
         proxy.$Toast({ title: req.msg })
     }))
 }
@@ -100,7 +119,7 @@ const scrolltolower = () => {
                             <text class="wholesaler_item_address">{{ item.province }}</text>
                         </view>
                         <view class="flex_align flex_between wholesaler_item_order">
-                            <text>总订单: {{item.storageNum}}手</text>
+                            <text>总订单: {{ item.storageNum }}手</text>
                             <view class="wholesaler_item_order_price">
                                 <text>¥</text>
                                 <text class="price_num">200</text>

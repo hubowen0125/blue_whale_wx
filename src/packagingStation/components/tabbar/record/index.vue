@@ -35,14 +35,12 @@ const recordParams = reactive({
 })
 const slideLoading = ref(true) // 是否需要滑动加载
 const recordList = ref<any[]>([]) // 入库记录列表
+const isLoad = ref(false) // 是否加载
 
-onMounted(() => {
-    storageInputPageFu()
-})
 
 watch(() => tabBarIndex.value, (newVal) => {
-    if (newVal == 1) {
-        // useDataBoard.setConditionIndex(0)
+    if (newVal == 1 && !isLoad.value) {
+        isLoad.value = true
         storageInputPageFu()
         console.log('111111');
 

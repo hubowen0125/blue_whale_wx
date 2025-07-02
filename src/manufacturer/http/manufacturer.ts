@@ -160,7 +160,7 @@ export function getByIdApi(params: any) {
  * @param data
  * @returnsF
  */
-export function manufacturerWholesalePageApi(data: any , params: any) {
+export function manufacturerWholesalePageApi(data: any, params: any) {
     return new Promise((resolve, reject) => {
         resolve(
             request({
@@ -264,6 +264,21 @@ export function getSalesStatisticsApi(params: any) {
                 url: `api/business/manufacturer/getSalesStatistics`,
                 method: "GET",
                 params
+            })
+        )
+    })
+}
+
+/**
+ * 获取批发商统计信息
+ * @returns
+ */
+export function getWholesaleStatisticsApi() {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/manufacturer/getWholesaleStatistics`,
+                method: "GET",
             })
         )
     })

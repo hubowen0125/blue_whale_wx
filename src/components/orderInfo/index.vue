@@ -1,4 +1,7 @@
 <script lang="ts" setup>
+import { useUserStore } from '@/store/modules/user';
+
+const useUser = useUserStore();
 
 const emit = defineEmits(['viewDetailsFu']);
 
@@ -21,6 +24,10 @@ const props = defineProps({
     },
 });
 
+const orderImage = computed(() => {
+    return props.productDetail.productImagesList && props.productDetail.productImagesList[0] && props.productDetail.productImagesList[0].imageUrlFull || '';
+});
+
 /**
  * 查看详情
  */
@@ -28,13 +35,20 @@ const viewDetailsFu = () => {
     emit('viewDetailsFu', props.productDetail);
 }
 
+const downLoadingFu = () => {
+    console.log('下载图片');
+    useUser.setProductDetailFu(props.productDetail || {})
+    uni.navigateTo({
+        url: `/pages/downLoadImages/index?id=${props.productDetail.id}`
+    })
+}
 
 </script>
 
 <template>
     <view class="flex order_info" @click="viewDetailsFu">
-        <view :class="['order_image_con', needDownload ? '' : 'pointer']">
-            <image class="order_image"></image>
+        <view :class="['order_image_con', needDownload ? '' : 'pointer']" @click.stop="downLoadingFu">
+            <image class="order_image" :src="orderImage"></image>
             <view v-if="needDownload" class="order_image_tips">下载图片</view>
         </view>
         <view class="flex_column flex_1">

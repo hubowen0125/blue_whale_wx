@@ -19,7 +19,7 @@
             }
         },
         {
-            "path": "pages/downloadImages/index",
+            "path": "pages/downLoadImages/index",
             "style": {
                 "navigationStyle": "custom"
             }

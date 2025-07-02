@@ -42,8 +42,6 @@ const orderList = ref<any[]>([])
 
 watch(() => tabBarIndex.value, (newVal) => {
     if (newVal == 1 && !isLoad.value) {
-        // useDataBoard.setConditionIndex(0)
-        console.log('111111');
         isLoad.value = true
         getOrderPageFu()
     }

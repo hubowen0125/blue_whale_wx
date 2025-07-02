@@ -46,7 +46,7 @@ const popupData = {
         },
     ],
     confirmText: '确定',
-    callBakc:true
+    callBakc: true
 }
 const reportList = [
     {
@@ -69,6 +69,7 @@ const tabBarIndex = inject("tabBarIndex") as Ref<number>
 const popupCom = ref()
 const infoDetails = ref<any>({})
 const date = ref(dateShift.get())
+const isLoad = ref(false) // 是否加载
 const statisticsDetail = ref({
     orderNum: 0,
     handNum: 0,
@@ -77,17 +78,16 @@ const statisticsDetail = ref({
 })
 
 
-onMounted(() => {
-    // popupCom.value.showPopup()
-    getInfoFu()
-    getSalesStatisticsFu()
-})
+// onMounted(() => {
+//     getInfoFu()
+//     getSalesStatisticsFu()
+// })
 
 watch(() => tabBarIndex.value, (newVal) => {
-    if (newVal == 2) {
-        // useDataBoard.setConditionIndex(0)
-        console.log('111111');
-
+    if (newVal == 4 && !isLoad.value) {
+        isLoad.value = true
+        getInfoFu()
+        getSalesStatisticsFu()
     }
 })
 

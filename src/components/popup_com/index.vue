@@ -129,7 +129,7 @@ defineExpose({
             color: #7C8191;
 
             .popup_text_desc {
-                color: #0C62FF;
+                color: #FF840C;
             }
         }
     }

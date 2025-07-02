@@ -41,9 +41,16 @@ const statisticsDetail = ref({
     totalStock: 0,
 })
 
+onShow(() => {
+    const pages = getCurrentPages()
+    const currentPage = pages[pages.length - 1]
+    if (currentPage.$vm.refresh) {
+        resetParams()
+    }
+})
+
 watch(() => tabBarIndex.value, (newVal) => {
     if (newVal == 3 && !isLoad.value) {
-        console.log('213213');
         isLoad.value = true
         productsPageFu()
         getShelfStatisticsFu()
@@ -132,6 +139,13 @@ const searchInputBlur = (e: string) => {
     productsPageFu()
 }
 
+const resetParams = () => {
+    getProductParams.value.productName = ''
+    paramsPage.pageNum = 1
+    productList.value = []
+    slideLoading.value = true
+    productsPageFu()
+}
 
 /**
  * 滑动加载
@@ -222,12 +236,12 @@ const scrolltolower = () => {
         gap: 20rpx;
         overflow-x: hidden;
         overflow-y: auto;
-        padding: 0 24rpx;
 
         .product_lsit {
             background: #FFFFFF;
             border-radius: 24rpx;
             padding: 28rpx;
+            margin: 0 24rpx;
             gap: 56rpx;
         }
     }

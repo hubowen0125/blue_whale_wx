@@ -1,9 +1,8 @@
 <script lang="ts" setup>
 import { getOrderPageApi } from "@/http/api/order";
-import { infoApi, getOrderStatisticsApi } from "@/manufacturer/http/manufacturer"
+import { getOrderStatisticsApi } from "@/manufacturer/http/manufacturer"
 import position_1 from "@/static/images/position_1.png"
 import arrow_right_1 from "@/static/images/arrow_right_1.png"
-import long_arrow from "@/static/images/long_arrow.png"
 import orderItem from "../../orderItem/idnex.vue"
 import { useUserStore } from '@/store/modules/user';
 
@@ -46,11 +45,6 @@ const popupData = {
 }
 
 const popupCom = ref()
-const tabBarIndex = inject("tabBarIndex") as Ref<number>
-const params = reactive({
-    pageNum: 1,
-    pageSize: 10,
-})
 const orderList = ref<Array<any>>([])
 const statisticsDetail = ref({
     orderNotShipped: 0,
@@ -61,21 +55,10 @@ const paramsPage = reactive({
     pageNum: 1,
     pageSize: 10,
 })
-const slideLoading = ref(true) // 是否需要滑动加载
 
 onMounted(() => {
-    // popupCom.value.showPopup()
-    // orderPageFu()
     getOrderStatisticsFu()
-})
-
-
-watch(() => tabBarIndex.value, (newVal) => {
-    if (newVal == 0) {
-        console.log('213213');
-        getOrderStatisticsFu()
-        getOrderPageFu()
-    }
+    getOrderPageFu()
 })
 
 /**
@@ -90,11 +73,6 @@ const getOrderPageFu = () => {
             console.log(data, '0000');
             if (data.datas && data.datas.length > 0) {
                 orderList.value = [...orderList.value, ...data.datas]
-                if (data.datas.length < paramsPage.pageSize) {
-                    slideLoading.value = false
-                }
-            } else {
-                slideLoading.value = false
             }
         } else {
             proxy.$Toast({ title: msg })
@@ -120,16 +98,6 @@ const getOrderStatisticsFu = () => {
     }, (req => {
         proxy.$Toast({ title: req.msg })
     }))
-}
-
-/**
- * 滑动加载
- */
-const scrolltolower = () => {
-    // if (!slideLoading.value) return
-    console.log('++++++++');
-    // manageDevicesParams.value.page += 1
-    // resetManageDevicesParams()
 }
 
 // 确认弹窗
@@ -167,13 +135,13 @@ const lookAll = () => {
         </view>
         <view class="main_con flex_1">
             <scroll-view class="scroll_con " scroll-y="true"
-                lower-threshold="50"
-                @scrolltolower="scrolltolower">
-                <view class="order_list flex_column">
+                lower-threshold="50">
+                <view class="order_list flex_column" v-if="orderList.length > 0">
                     <template v-for="item in orderList" :key="item.orderNo">
                         <orderItem :orderData="item"></orderItem>
                     </template>
                 </view>
+                <com-no_data v-else noDataText="暂无订单"></com-no_data>
             </scroll-view>
         </view>
         <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="confirmPopupFu"></com-popup_com>
@@ -184,13 +152,14 @@ const lookAll = () => {
 .home_com {
     width: 100%;
     height: 100%;
-    padding: v-bind('`${useUser.navHeight + (useUser.statusBarHeight / 2)}px`') 30rpx 30rpx 30rpx;
+    padding: v-bind('`${useUser.navHeight + (useUser.statusBarHeight / 2)}px`') 0 30rpx;
     box-sizing: border-box;
 
     .header_con {
         font-weight: bold;
         font-size: 40rpx;
         color: #202020;
+        margin: 0 30rpx;
 
         .header_img {
             width: 36rpx;
@@ -201,7 +170,7 @@ const lookAll = () => {
 
     .order_type_con {
         gap: 16rpx;
-        margin: 32rpx 0 56rpx;
+        margin: 32rpx 30rpx 56rpx;
 
         .order_type_item {
             width: 220rpx;
@@ -226,6 +195,7 @@ const lookAll = () => {
         font-weight: bold;
         font-size: 32rpx;
         color: #202020;
+        margin: 0 30rpx;
 
         .order_all_btn {
             font-weight: 400;
@@ -245,7 +215,8 @@ const lookAll = () => {
 
         .order_list {
             gap: 20rpx;
-
+            position: relative;
+            margin: 0 30rpx;
         }
     }
 }

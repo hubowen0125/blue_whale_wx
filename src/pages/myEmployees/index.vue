@@ -134,7 +134,7 @@ onUnmounted(() => {
                                 <view class="employee_item_name">{{ item.nickName }}</view>
                                 <view>{{ item.phonenumber }}</view>
                             </view>
-                            <switch color="#0C61FD" checked @change="(e) => updateEmployeeStatusFu(item.userId, e)" />
+                            <switch color="#0C61FD" :checked="item.status != 1" @change="(e) => updateEmployeeStatusFu(item.userId, e)" />
                             <view class="flex_align" @click="deleteEmployeeFu(item.userId)">
                                 <image class="del_icon" :src="del_icon"></image>
                                 <text>删除</text>

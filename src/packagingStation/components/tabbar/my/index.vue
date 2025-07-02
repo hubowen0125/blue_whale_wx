@@ -48,7 +48,7 @@ const popupData = {
         },
     ],
     confirmText: '确定',
-    caalBack:true
+    caalBack: true
 }
 
 const tabBarIndex = inject("tabBarIndex") as Ref<number>
@@ -57,15 +57,12 @@ const infoDetails = ref<any>({})
 
 
 onMounted(() => {
-    // popupCom.value.showPopup()
     getInfoFu()
 })
 
 watch(() => tabBarIndex.value, (newVal) => {
     if (newVal == 2) {
-        // useDataBoard.setConditionIndex(0)
-        console.log('111111');
-
+        getInfoFu()
     }
 })
 

@@ -87,11 +87,26 @@ const getByIdFu = () => {
     }))
 }
 
+/**
+ * 预览图片
+ */
+const previewImageFu = (index: number) => {
+    const fileList: Array<any> = []
+    productDetailsData.value.productImagesList.map((item: any) => {
+        fileList.push(item.imageUrlFull)
+    })
+    uni.previewImage({
+        current: index,
+        urls: fileList,
+    })
+}
+
 const editProductFu = () => {
     uni.navigateTo({
         url: '/manufacturer/addProduct/index?id=' + productId.value
     })
 }
+
 </script>
 
 
@@ -104,7 +119,7 @@ const editProductFu = () => {
                 <view class="product_title">商品图片</view>
                 <view class="img_list">
                     <template v-for="(item, index) in productDetailsData.productImagesList" :key="index">
-                        <image class="img" :src="item.imageUrl"></image>
+                        <image class="img" :src="item.imageUrlFull" @click="previewImageFu(index)"></image>
                     </template>
                 </view>
             </view>
@@ -158,7 +173,6 @@ const editProductFu = () => {
                 .img {
                     width: 184rpx;
                     height: 184rpx;
-                    border: 1px solid #000;
                     border-radius: 20rpx;
                 }
             }

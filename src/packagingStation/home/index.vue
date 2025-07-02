@@ -33,7 +33,7 @@ const tabbarList = [
         index: 2,
     },
 ]
-const tabBarIndex = ref(1)
+const tabBarIndex = ref(0)
 
 onLoad(() => {
     // proxy.$Loading()

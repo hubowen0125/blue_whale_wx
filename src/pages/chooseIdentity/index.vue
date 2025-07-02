@@ -43,18 +43,21 @@ const popupList = [
 const identityList = [
     {
         title: '我是厂家',
+        desc:'厂家',
         iamge: manufacturer_icon,
         key: 'manufacturer',
         className: 'icon_1'
     },
     {
         title: '我是批发商',
+        desc:'批发商',
         iamge: wholesale_icon,
         key: 'wholesale',
         className: 'icon_2',
     },
     {
         title: '我是打包站',
+        desc:'打包站',
         iamge: packaging_icon,
         key: 'packaging',
         className: 'icon_3'
@@ -130,7 +133,7 @@ const getUserInfoFu = () => {
         <view class="container_desc">帮助我们更好地为您提供服务</view>
         <view class="identity_list flex_column">
             <view class="identity_item flex_align" v-for="item in identityList" :key="item.key"
-                @click="params.userRole = item.key, roleTitle = item.title">
+                @click="params.userRole = item.key, roleTitle = item.desc">
                 <image class="identity_item_image" :class="item.className" :src="item.iamge"></image>
                 <view class="identity_item_title flex_1">{{ item.title }}</view>
                 <image class="identity_item_checkbox" :src="params.userRole == item.key ? checkbox_active : checkbox" />

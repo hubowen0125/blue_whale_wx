@@ -66,12 +66,18 @@ const selectedCityIndex = ref(0)
 const selectedDistrictIndex = ref(0)
 const areaDetail = ref('请选择')
 const showArea = ref(false)
+const selectAreaRef = ref();
 
 onMounted(() => {
     sysRegionListFu()
 })
 
 const sysRegionListFu = () => {
+    if (proxy.cascaderOptions.length > 0) {
+        cascaderOptions.value = proxy.cascaderOptions
+        selectAreaRef.value.showPopupFu()
+        return
+    }
     sysRegionListApi().then((res: any) => {
         const { code, data, msg } = res
         proxy.$CloseLoading();
@@ -116,37 +122,16 @@ const bindPickerChange = (e: any) => {
     }
 }
 
-const confirmSelection = () => {
-    const province = cascaderOptions.value[selectedProvinceIndex.value].text || '';
-    const provinceCode = cascaderOptions.value[selectedProvinceIndex.value].value || '';
-    let city
-    let cityCode
-    let district
-    let districtCode
-    if (cascaderOptions.value[selectedProvinceIndex.value].children) {
-        city = cascaderOptions.value[selectedProvinceIndex.value].children[selectedCityIndex.value]?.text || ''
-        cityCode = cascaderOptions.value[selectedProvinceIndex.value]?.children[selectedCityIndex.value]?.value || ''
-        if (cascaderOptions.value[selectedProvinceIndex.value].children[selectedCityIndex.value].children) {
-            district = cascaderOptions.value[selectedProvinceIndex.value]?.children[selectedCityIndex.value]?.children[selectedDistrictIndex.value]?.text || ''
-            districtCode = cascaderOptions.value[selectedProvinceIndex.value]?.children[selectedCityIndex.value]?.children[selectedDistrictIndex.value]?.value || ''
-        } else {
-            district = ''
-            districtCode = ''
-        }
-    } else {
-        city = ''
-        cityCode = ''
-        district = ''
-        districtCode = ''
-    }
-    areaDetail.value = `${province}${city}${district}`
-    // areaParams.value.provinceCode = provinceCode
-    // areaParams.value.cityCode = cityCode
-    // areaParams.value.areaCode = districtCode
-    // areaParams.value.provinceName = province
-    // areaParams.value.cityName = city
-    // areaParams.value.areaName = district
-    showArea.value = false
+/**
+ * 选择收货地址
+ * @param e 
+ */
+const selectAreaFu = (e: any) => {
+    const { province, city, district, provinceCode, cityCode, districtCode } = e
+    // addParams.areaDetail = `${province}${city}${district}`
+    // addParams.province = provinceCode
+    // addParams.city = cityCode
+    // addParams.district = districtCode
 }
 
 const formSubmit = (e: any) => {
@@ -174,39 +159,7 @@ const formSubmit = (e: any) => {
                 </view>
             </form>
         </view>
-        <van-popup
-            :show="showArea"
-            round
-            custom-style="height: 80%;"
-            position="bottom">
-            <view class="popup_main flex_column">
-                <view class="flex_between popup_btn_con">
-                    <view class="btn_1" @click="onClose">取消</view>
-                    <view class="btn_2" @click="confirmSelection">确定</view>
-                </view>
-                <picker-view @change="bindPickerChange" class="picker_view flex_1"
-                    :value="[selectedProvinceIndex, selectedCityIndex, selectedDistrictIndex]">
-                    <picker-view-column class="picker_view_column">
-                        <view v-for="(province, index) in cascaderOptions" :key="index" class="flex_align flex_center">
-                            {{
-                                province.text }}</view>
-                    </picker-view-column>
-                    <picker-view-column class="picker_view_column"
-                        v-if="cascaderOptions[selectedProvinceIndex]?.children">
-                        <view v-for="(province, index) in cascaderOptions[selectedProvinceIndex].children" :key="index"
-                            class="flex_align flex_center">{{
-                                province.text }}</view>
-                    </picker-view-column>
-                    <picker-view-column class="picker_view_column"
-                        v-if="cascaderOptions[selectedProvinceIndex] && cascaderOptions[selectedProvinceIndex].children && cascaderOptions[selectedProvinceIndex].children[selectedCityIndex]?.children">
-                        <view
-                            v-for="(province, index) in cascaderOptions[selectedProvinceIndex].children[selectedCityIndex].children"
-                            class="flex_align flex_center"
-                            :key="index">{{ province.text }}</view>
-                    </picker-view-column>
-                </picker-view>
-            </view>
-        </van-popup>
+        <com-selectArea ref="selectAreaRef" :cascader="cascaderOptions" @selectAreaFu="selectAreaFu"></com-selectArea>
     </view>
 </template>
 
