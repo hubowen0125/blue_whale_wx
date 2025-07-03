@@ -1,6 +1,49 @@
 <script lang="ts" setup>
+import { wholesaleIncomeApi } from "../http/packagingStation";
 import calendar_icon from "@/static/images/calendar_icon.png"
+import { getCurrentDate, compareTime, calculateDaysDifference } from "@/utils/utils";
 
+const { proxy } = getCurrentInstance() as any
+
+const params = reactive({
+    startTime: '',
+    endTime: '',
+})
+const wholesaleDetail = ref<any>({})
+const pickerTime = ref<any>([])
+
+onLoad(() => {
+    const time = getCurrentDate(7)
+    const { startTime, endTime, startYear, startMonth, startDay, endYear, endMonth, endDay } = time
+    params.startTime = `${startYear}-${startMonth}-${startDay}`
+    params.endTime = `${endYear}-${endMonth}-${endDay}`
+    pickerTime.value = [startTime, endTime]
+    wholesaleIncomeFu()
+})
+
+/**
+ * 获取批发商收入
+ */
+const wholesaleIncomeFu = () => {
+    wholesaleIncomeApi(params).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            wholesaleDetail.value = data
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+const timeChangeFu = (e: any) => {
+    console.log('maskClick', e)
+    params.startTime = e[0]
+    params.endTime = e[1]
+}
 
 /**
  * 滑动加载
@@ -18,18 +61,21 @@ const scrolltolower = () => {
     <view class="container flex_column">
         <view class="bg">
             <com-header header-title="我的报表" :backColor="false" :titleColor="true"></com-header>
-            <view class="select_calendar flex_align">
-                <input class="flex_1" type="text" placeholder="请选择报表周期" :disabled="true">
-                <image class="calendar_icon" :src="calendar_icon"></image>
-            </view>
-            <view class="select_time">已选时间: 2025-04-03至202</view>
+            <uni-datetime-picker type="daterange" @change="timeChangeFu" v-model="pickerTime">
+                <view class="select_calendar flex_align">
+                    <input :value="`${params.startTime}至${params.endTime}`" class="flex_1" type="text"
+                        placeholder="请选择报表周期" :disabled="true">
+                    <image class="calendar_icon" :src="calendar_icon"></image>
+                </view>
+            </uni-datetime-picker>
+            <view class="select_time">已选时间: {{ params.startTime }}至{{ params.endTime }}</view>
             <view class="report_info flex_between">
                 <view class="report_info_item flex_1">
-                    <view>100</view>
+                    <view>{{ wholesaleDetail.totalWholesaleNum }}</view>
                     <view class="report_info_title">批发商数</view>
                 </view>
                 <view class="report_info_item flex_1">
-                    <view>100</view>
+                    <view>{{ wholesaleDetail.totalHandNum }}</view>
                     <view class="report_info_title">来货数量</view>
                 </view>
             </view>
@@ -39,14 +85,16 @@ const scrolltolower = () => {
                 lower-threshold="50"
                 @scrolltolower="scrolltolower">
                 <view class="report_list  flex_column">
-                    <view class="report_item flex_align" v-for="item in 100" :key="item">
-                        <view class="report_item_time">2025-05-05 11:26</view>
+                    <view class="report_item flex_align flex_between"
+                        v-for="(item, index) in wholesaleDetail.wholesaleIncomeList"
+                        :key="index">
+                        <view class="report_item_time">{{ item.time }}</view>
                         <view class="flex_column flex_align ">
-                            <view>1</view>
+                            <view>{{ item.wholesaleNum }}</view>
                             <view class="report_item_title">批发商数</view>
                         </view>
                         <view class="flex_column flex_align report_item_right">
-                            <view>2</view>
+                            <view>{{ item.handNum }}</view>
                             <view class="report_item_title">来货数量</view>
                         </view>
                     </view>

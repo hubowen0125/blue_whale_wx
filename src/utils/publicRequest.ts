@@ -81,7 +81,7 @@ export const saveFileFu = (obj = { suffix: '', name: '', url: '', type: '' }) =>
         console.log(obj.url, 'urlurlurlurl', encodeURI(obj.url));
         uni.downloadFile({
             url: encodeURI(obj.url),
-            // filePath: `${wx.env.USER_DATA_PATH}/${obj.name}.${obj.type === 'img' ? 'jpg' : 'mp4'}`, // 强制 .jpg 扩展名
+            filePath: `${wx.env.USER_DATA_PATH}/${obj.name}.${obj.type === 'img' ? 'jpg' : 'mp4'}`, // 强制 .jpg 扩展名
             success: async (res: any) => {
                 await savePhoto()
                 let url = res.filePath;

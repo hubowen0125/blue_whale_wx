@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { getInfoApi } from "@/http/api/all"
+import { getInfoApi, logoutApi } from "@/http/api/all"
 import arrow_right_1 from "@/static/images/arrow_right_1.png"
 import { useUserStore } from '@/store/modules/user';
 import { useWholesalerStore } from "@/wholesaler/store/wholesaler";
@@ -38,7 +38,7 @@ const popupData = {
         },
     ],
     confirmText: '确定',
-    caalBack:true
+    caalBack: true
 }
 
 const tabBarIndex = inject("tabBarIndex") as Ref<number>
@@ -73,6 +73,7 @@ const getInfoFu = () => {
         if (code == proxy.$successCode) {
             console.log(data);
             infoDetails.value = data
+            useUser.userInfo.dept = { ...useUser.userInfo.dept, ...data }
         } else {
             proxy.$Toast({ title: msg })
         }
@@ -109,10 +110,26 @@ const renewFu = () => {
 }
 
 const logoutFu = () => {
-    useUser.resetState()
-    useWholesaler.resetState()
-    uni.reLaunch({
-        url: `/pages/loading/index`
+    uni.showModal({
+        content: '确定退出登录吗？',
+        success: (res) => {
+            if (res.confirm) {
+                logoutApi({}).then((res: any) => {
+                    const { code, data, msg } = res
+                    if (code == proxy.$successCode) {
+                        useUser.resetState()
+                        useWholesaler.resetState()
+                        uni.reLaunch({
+                            url: `/pages/loading/index`
+                        })
+                    } else {
+                        proxy.$Toast({ title: msg })
+                    }
+                }, (req => {
+                    proxy.$Toast({ title: req.msg })
+                }))
+            }
+        }
     })
 }
 

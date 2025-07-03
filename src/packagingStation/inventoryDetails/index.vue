@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { getByIdApi, storageInputApi } from "../http/packagingStation";
+import { getByIdApi, storageInputApi, delByIdApi } from "../http/packagingStation";
 import arrow_right from "@/static/images/arrow_right.png"
 import { dateStrToDateFormat } from "@/utils/utils";
 
@@ -58,7 +58,12 @@ const inventoryId = ref('')
 onLoad((e: any) => {
     if (e.id) {
         inventoryId.value = e.id
-        getByIdFu(e.id)
+    }
+})
+
+onShow(() => {
+    if (inventoryId.value) {
+        getByIdFu(inventoryId.value)
     }
 })
 
@@ -91,6 +96,23 @@ const confirmPopupFu = (num: string | number) => {
         const { code, data, msg, token } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+const delByIdFu = () => {
+    proxy.$Loading()
+    delByIdApi({ id: inventoryId.value }).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            proxy.$Toast({ title: '删除成功' })
+            uni.navigateBack()
         } else {
             proxy.$Toast({ title: msg })
         }
@@ -148,7 +170,7 @@ const confirmPopupFu = (num: string | number) => {
             </view>
         </view>
         <view class="footer_con">
-            <button class="delete_record_button">删除记录</button>
+            <button class="delete_record_button" @click="delByIdFu">删除记录</button>
         </view>
     </view>
     <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="confirmPopupFu"></com-popup_com>

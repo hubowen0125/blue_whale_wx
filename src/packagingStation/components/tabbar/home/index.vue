@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import { stockInApi } from "@/packagingStation/http/packagingStation";
-import { packagingWholesalePageApi } from "@/http/api/all";
+import { getInfoApi, packagingWholesalePageApi } from "@/http/api/all";
 import position_1 from "@/static/images/position_1.png"
 import scan_code_icon from "@/static/images/packagingStation/scan_code_icon.png"
 import arrow_bottom from "@/static/images/arrow_bottom.png"
 import { useUserStore } from '@/store/modules/user';
-import { handleInput } from "@/utils/utils";
+import { calculateTimeDifference, handleInput } from "@/utils/utils";
 
 const useUser = useUserStore()
 const { proxy } = getCurrentInstance() as any;
@@ -32,6 +32,23 @@ const wholesaleDetail = ref<any>({
     wholesaleName: ''
 })
 const selectWholesalerRef = ref<any>()
+const popupData = reactive({
+    popupTitle: '续费提醒',
+    pupupType: 'default',
+    popupContent: [
+        {
+            text: '您的会员服务将在',
+            desc: '7天内到期',
+        },
+        {
+            text: '请及时续费',
+        },
+    ],
+    cancelText: '稍后处理',
+    confirmText: '立即续费',
+    caalBack: true
+})
+const popupCom = ref()
 
 
 watch(() => tabBarIndex.value, (newVal) => {
@@ -42,6 +59,7 @@ watch(() => tabBarIndex.value, (newVal) => {
 
 onMounted(() => {
     packagingWholesalePageFu()
+    getInfoFu()
 })
 
 /**
@@ -55,6 +73,33 @@ const packagingWholesalePageFu = () => {
             console.log(data, '0000');
             if (data && data.length > 0) {
                 wholesaleList.value = data;
+            }
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+/**
+ * 获取用户信息
+ */
+const getInfoFu = () => {
+    getInfoApi().then((res: any) => {
+        const { code, data, msg } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data, calculateTimeDifference(data.expireTime));
+            const day = calculateTimeDifference(data.expireTime).day;
+            if (0 < day && day < 7) {
+                popupData.popupContent[0].desc = `${day}天后到期`
+                popupCom.value.showPopup()
+            } else if (day < 0) {
+                popupData.popupContent[0].text = '您的会员服务已过期'
+                popupData.popupContent[0].desc = `${day * -1}天`
+                popupCom.value.showPopup()
             }
         } else {
             proxy.$Toast({ title: msg })
@@ -154,6 +199,11 @@ const scanCodeFu = () => {
     });
 }
 
+// 确认弹窗
+const confirmPopupFu = () => {
+    console.log('1111');
+}
+
 </script>
 
 
@@ -161,7 +211,7 @@ const scanCodeFu = () => {
     <view class="home_com flex_column">
         <view class="header_con flex_align">
             <image class="header_img" :src="position_1"></image>
-            <view class="header_title">新村路打包站</view>
+            <view class="header_title">{{ useUser.userInfo.nickName }}</view>
         </view>
         <view class="home_main flex_column">
             <view class="table_con">
@@ -192,13 +242,16 @@ const scanCodeFu = () => {
                 <button class="button_defalut flex_1" @click="stockInFu">立即入库</button>
             </view>
         </view>
-        <view class="scan_code_con flex_align flex_column" @click="scanCodeFu">
-            <image class="scan_code_icon" :src="scan_code_icon"></image>
-            <view class="scan_code_desc">扫码入库</view>
+        <view>
+            <view class="scan_code_con flex_align flex_column" @click="scanCodeFu">
+                <image class="scan_code_icon" :src="scan_code_icon"></image>
+                <view class="scan_code_desc">扫码入库</view>
+            </view>
         </view>
     </view>
     <com-selectWholesaler ref="selectWholesalerRef"
         :wholesaleList="wholesaleList" @selectSubmitFu="selectSubmitFu"></com-selectWholesaler>
+    <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="confirmPopupFu"></com-popup_com>
 </template>
 
 <style lang="scss" scoped>
@@ -207,6 +260,8 @@ const scanCodeFu = () => {
     height: 100%;
     padding: v-bind('`${useUser.navHeight + (useUser.statusBarHeight / 2)}px`') 30rpx 30rpx 30rpx;
     box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: auto;
 
     .header_con {
         font-weight: bold;

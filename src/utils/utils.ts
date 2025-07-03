@@ -459,3 +459,25 @@ export const calculateTimeDifference = (time: string) => {
     const second = Math.floor((diff % (60 * 1000)) / 1000)
     return { day, hour, minute, second }
 }
+
+// 判断两个时间大小
+export const compareTime = (time1: string, time2: string) => {
+    const time1Obj = new Date(time1)
+    const time2Obj = new Date(time2)
+    if (time1Obj.getTime() > time2Obj.getTime()) {
+        return 1
+    } else if (time1Obj.getTime() < time2Obj.getTime()) {
+        return -1
+    } else {
+        return 0
+    }
+}
+
+// 计算两个时间差多少天
+export const calculateDaysDifference = (time1: string, time2: string) => {
+    const time1Obj = new Date(time1)
+    const time2Obj = new Date(time2)
+    const diff = time1Obj.getTime() - time2Obj.getTime()
+    const day = Math.floor(diff / (24 * 3600 * 1000))
+    return day
+}

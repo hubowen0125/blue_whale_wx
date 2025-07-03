@@ -36,6 +36,26 @@ export function verifySmsApi(params: any) {
 }
 
 /**
+ * 退出登录
+ * @param params
+ * @returnsF
+ */
+export function logoutApi(params: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/logout`,
+                method: "GET",
+                params
+            })
+        )
+    })
+}
+
+
+
+
+/**
  * 获取用户信息
  * @param params
  * @returnsF
@@ -296,6 +316,57 @@ export function packagingWholesalePageApi(data: any) {
         resolve(
             request({
                 url: `api/business/packagingWholesale/page`,
+                method: "POST",
+                data
+            })
+        )
+    })
+}
+
+/**
+ * 编辑信息
+ * @param data
+ * @returnsF
+ */
+export function manufacturerEditApi(data: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/manufacturer/edit`,
+                method: "POST",
+                data
+            })
+        )
+    })
+}
+
+/**
+ * 编辑信息
+ * @param params
+ * @returnsF
+ */
+export function wholesaleEditApi(data: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/wholesale/edit`,
+                method: "POST",
+                data
+            })
+        )
+    })
+}
+
+/**
+ * 编辑信息
+ * @param params
+ * @returnsF
+ */
+export function packagingEditApi(data: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/packaging/edit`,
                 method: "POST",
                 data
             })

@@ -59,8 +59,8 @@ onShow(() => {
     const pages = getCurrentPages()
     const currentPage = pages[pages.length - 1]
     // @ts-ignore
-    if (currentPage.$vm.loading) {
-        console.log(currentPage.$vm.sizeActive, '00000selectActiveList');
+    if (currentPage.$vm.refresh) {
+        currentPage.$vm.refresh = false
         getByIdFu()
     }
 })

@@ -152,27 +152,18 @@ defineExpose({
     .popup_btn_con {
         height: 100rpx;
         border-top: 1px solid #E7E7E7;
-        font-weight: 500;
-        font-size: 28rpx;
 
         .popup_btn {
             line-height: 100rpx;
             background-color: transparent;
+            font-weight: 500;
+            font-size: 28rpx;
         }
 
         .popup_btn_cancel {
             position: relative;
             color: #9299BA;
-
-            &::after {
-                content: '';
-                position: absolute;
-                width: 2rpx;
-                height: 99rpx;
-                background: #E7E7E7;
-                right: 0;
-                top: 0;
-            }
+            border-right: 1px solid #E7E7E7;
         }
 
         .popup_btn_confirm {

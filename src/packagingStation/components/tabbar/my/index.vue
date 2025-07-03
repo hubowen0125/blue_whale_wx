@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import arrow_right_1 from "@/static/images/arrow_right_1.png"
 import { useUserStore } from '@/store/modules/user';
-import { getInfoApi } from "@/http/api/all"
+import { getInfoApi, logoutApi } from "@/http/api/all"
 
 const useUser = useUserStore()
 const { proxy } = getCurrentInstance() as any;
@@ -55,11 +55,6 @@ const tabBarIndex = inject("tabBarIndex") as Ref<number>
 const popupCom = ref()
 const infoDetails = ref<any>({})
 
-
-onMounted(() => {
-    getInfoFu()
-})
-
 watch(() => tabBarIndex.value, (newVal) => {
     if (newVal == 2) {
         getInfoFu()
@@ -78,6 +73,7 @@ const getInfoFu = () => {
         if (code == proxy.$successCode) {
             console.log(data);
             infoDetails.value = data
+            useUser.userInfo.dept = { ...useUser.userInfo.dept, ...data }
         } else {
             proxy.$Toast({ title: msg })
         }
@@ -111,10 +107,19 @@ const logoutFu = () => {
         content: '确定退出登录吗？',
         success: (res) => {
             if (res.confirm) {
-                useUser.resetState()
-                uni.reLaunch({
-                    url: `/pages/loading/index`
-                })
+                logoutApi({}).then((res: any) => {
+                    const { code, data, msg } = res
+                    if (code == proxy.$successCode) {
+                        useUser.resetState()
+                        uni.reLaunch({
+                            url: `/pages/loading/index`
+                        })
+                    } else {
+                        proxy.$Toast({ title: msg })
+                    }
+                }, (req => {
+                    proxy.$Toast({ title: req.msg })
+                }))
             }
         }
     })
@@ -127,7 +132,7 @@ const logoutFu = () => {
 <template>
     <view class="my_con flex_column">
         <view class="bg"></view>
-        <com-myHeader :userRole="'packaging'" :infoDetails="infoDetails"></com-myHeader>
+        <com-myHeader :userRole="'packaging'" :infoDetails="infoDetails" @editInformationFu="getInfoFu"></com-myHeader>
         <view class="fun_list">
             <view class="fun_item flex_between flex_align" @click="toPageFu(item)" v-for="item, index in funList"
                 :key="index">
@@ -144,7 +149,6 @@ const logoutFu = () => {
 <style lang="scss" scoped>
 .my_con {
     width: 100%;
-    height: 100%;
     padding: v-bind('`${useUser.statusBarHeight + useUser.navHeight}px`') 24rpx 30rpx 24rpx;
     box-sizing: border-box;
     background: #F2F1F5;
@@ -167,6 +171,7 @@ const logoutFu = () => {
         border-radius: 24rpx;
         padding: 0 28rpx;
         margin: 20rpx 0;
+        position: relative;
 
         .fun_item {
             font-weight: 500;

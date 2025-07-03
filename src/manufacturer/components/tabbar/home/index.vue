@@ -5,6 +5,8 @@ import position_1 from "@/static/images/position_1.png"
 import arrow_right_1 from "@/static/images/arrow_right_1.png"
 import orderItem from "../../orderItem/idnex.vue"
 import { useUserStore } from '@/store/modules/user';
+import { getInfoApi } from "@/http/api/all";
+import { calculateTimeDifference } from "@/utils/utils";
 
 const useUser = useUserStore()
 const { proxy } = getCurrentInstance() as any;
@@ -59,6 +61,7 @@ const paramsPage = reactive({
 onMounted(() => {
     getOrderStatisticsFu()
     getOrderPageFu()
+    getInfoFu()
 })
 
 /**
@@ -96,6 +99,33 @@ const getOrderStatisticsFu = () => {
             proxy.$Toast({ title: msg })
         }
     }, (req => {
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+/**
+ * 获取用户信息
+ */
+const getInfoFu = () => {
+    getInfoApi().then((res: any) => {
+        const { code, data, msg } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data, calculateTimeDifference(data.expireTime));
+            const day = calculateTimeDifference(data.expireTime).day;
+            if (0 < day && day < 7) {
+                popupData.popupContent[0].desc = `${day}天后到期`
+                popupCom.value.showPopup()
+            } else if (day < 0) {
+                popupData.popupContent[0].text = '您的会员服务已过期'
+                popupData.popupContent[0].desc = `${day * -1}天`
+                popupCom.value.showPopup()
+            }
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
         proxy.$Toast({ title: req.msg })
     }))
 }

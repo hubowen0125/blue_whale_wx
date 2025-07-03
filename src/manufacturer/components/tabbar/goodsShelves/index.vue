@@ -45,6 +45,7 @@ onShow(() => {
     const pages = getCurrentPages()
     const currentPage = pages[pages.length - 1]
     if (currentPage.$vm.refresh) {
+        currentPage.$vm.refresh = false
         resetParams()
     }
 })

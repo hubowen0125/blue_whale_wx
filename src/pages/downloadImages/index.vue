@@ -8,8 +8,9 @@ import { saveFileFu } from "@/utils/publicRequest";
 const useUser = useUserStore()
 const { proxy } = getCurrentInstance() as any;
 
-const productId = ref('')
 const productDetail = ref<any>({})
+// 随机数
+const num = Math.floor(Math.random() * 100)
 
 onLoad(() => {
     productDetail.value = deepCopy(useUser.productDetail)
@@ -20,14 +21,16 @@ const downloadImages = async () => {
     console.log(productDetail.value, 'productDetail.valueproductDetail.valueproductDetail.value');
     const imgList = productDetail.value.productImagesList.filter((item: { active: any; }) => item.active)
     console.log(imgList, 'imgListimgListimgList');
-    saveFileFu({
-        suffix: '',
-        name: '',
-        url: imgList[0].imageUrlFull,
-        type: 'img'
-    })
-    // const results = await batchDownloadAndSaveImages(imgList.map((item: { imageUrlFull: any; }) => item.imageUrlFull))
-
+    const num = Math.floor(Math.random() * 100)
+    for (let i = 0; i < imgList.length; i++) {
+        const item = imgList[i]
+        await saveFileFu({
+            suffix: '',
+            name: `img_${num}${i}`,
+            url: item.imageUrlFull,
+            type: 'img'
+        })
+    }
 }
 
 </script>

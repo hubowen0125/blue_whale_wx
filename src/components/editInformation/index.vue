@@ -1,6 +1,5 @@
 <script lang="ts" setup>
-import { wholesaleEditApi } from "@/http/api/wholesaler";
-import { manufacturerEditApi } from "@/http/api/manufacturer";
+import { packagingEditApi, wholesaleEditApi, manufacturerEditApi } from "@/http/api/all";
 import { sysRegionListApi, getInfoApi } from "@/http/api/all";
 import off_icon from "@/static/images/off_icon.png"
 import arrow_bottom from "@/static/images/arrow_bottom.png"
@@ -133,9 +132,19 @@ const formSubmit = async (e: any) => {
             proxy.$Toast({ title: req.msg })
         }))
     } else if (props.type == 'packaging') {
-
+        await packagingEditApi(formParams).then((res: any) => {
+            const { code, data, msg } = res
+            if (code == proxy.$successCode) {
+                proxy.$Toast({ title: '修改成功' })
+                closePopupFu()
+            } else {
+                proxy.$Toast({ title: msg })
+            }
+        }, (req => {
+            proxy.$Toast({ title: req.msg })
+        }))
     }
-    getInfoFu()
+    // getInfoFu()
     emit('editInformationFu')
 }
 

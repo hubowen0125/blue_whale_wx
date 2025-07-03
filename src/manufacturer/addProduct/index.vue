@@ -113,18 +113,21 @@ onShow(() => {
     }
     if (currentPage.$vm.colorsActive) {
         let colors = ''
+        orderParams.value.productColorsList = []
         currentPage.$vm.colorsActive.map((item: any) => {
-            const find = orderParams.value.productColorsList.find((color: any) => color.id === item.id)
-            if (!find) {
-                orderParams.value.productColorsList.push({
-                    colorName: item.color,
-                    stockNum: 0,
-                })
-                colors += item.color + '、'
-            }
+            // const find = orderParams.value.productColorsList.find((color: any) => color.id === item.id)
+            // if (!find) {
+            orderParams.value.productColorsList.push({
+                colorName: item.color,
+                stockNum: 0,
+            })
+            colors += item.color + '、'
+            // }
         })
         activeColorList.value = currentPage.$vm.colorsActive
         orderParams.value.colors = colors.substring(0, colors.length - 1)
+        console.log(orderParams.value.productColorsList, 'orderParams.value.productColorsListorderParams.value.productColorsListorderParams.value.productColorsList');
+        currentPage.$vm.colorsActive = ''
     }
 })
 

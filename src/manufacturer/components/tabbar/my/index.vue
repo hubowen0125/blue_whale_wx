@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { getSalesStatisticsApi } from "@/manufacturer/http/manufacturer"
-import { getInfoApi } from "@/http/api/all"
+import { getInfoApi, logoutApi } from "@/http/api/all"
 import arrow_right_1 from "@/static/images/arrow_right_1.png"
 import left_icon from "@/manufacturer/images/left_icon.png"
 import right_icon from "@/manufacturer/images/right_icon.png"
@@ -14,10 +14,10 @@ const { proxy } = getCurrentInstance() as any;
 
 // 功能列表
 const funList = [
-    {
-        name: '我的批发商',
-        path: '/manufacturer/wholesalerList/index'
-    },
+    // {
+    //     name: '我的批发商',
+    //     path: '/manufacturer/wholesalerList/index'
+    // },
     {
         name: '我的员工',
         path: '/pages/myEmployees/index?userRole=manufacturer'
@@ -101,7 +101,8 @@ const getInfoFu = () => {
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
             console.log(data);
-            infoDetails.value = { ...infoDetails.value, ...data }
+            infoDetails.value = data
+            useUser.userInfo.dept = { ...useUser.userInfo.dept, ...data }
         } else {
             proxy.$Toast({ title: msg })
         }
@@ -162,16 +163,24 @@ const renewFu = () => {
 }
 
 const logoutFu = () => {
-
     uni.showModal({
         content: '确定退出登录吗？',
         success: (res) => {
             if (res.confirm) {
-                useUser.resetState()
-                useManufacturer.resetState()
-                uni.reLaunch({
-                    url: `/pages/loading/index`
-                })
+                logoutApi({}).then((res: any) => {
+                    const { code, data, msg } = res
+                    if (code == proxy.$successCode) {
+                        useUser.resetState()
+                        useManufacturer.resetState()
+                        uni.reLaunch({
+                            url: `/pages/loading/index`
+                        })
+                    } else {
+                        proxy.$Toast({ title: msg })
+                    }
+                }, (req => {
+                    proxy.$Toast({ title: req.msg })
+                }))
             }
         }
     })

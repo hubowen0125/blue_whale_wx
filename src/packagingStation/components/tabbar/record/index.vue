@@ -4,6 +4,7 @@ import arrow_bottom from "@/static/images/arrow_bottom.png"
 import long_arrow from "@/static/images/long_arrow.png"
 import search_icon from "@/static/images/search_icon.png"
 import { useUserStore } from '@/store/modules/user';
+import { getCurrentDate, compareTime, calculateDaysDifference } from "@/utils/utils";
 
 const useUser = useUserStore()
 const { proxy } = getCurrentInstance() as any;
@@ -11,15 +12,15 @@ const { proxy } = getCurrentInstance() as any;
 const quertList = [
     {
         placeholder: '请输入批发商名称进行查询',
-        value: ''
+        value: 'wholesaleName'
     },
     {
         placeholder: '请输入仓位名称进行查询',
-        value: ''
+        value: 'storageNum'
     },
     {
         placeholder: '请输入厂家名称进行查询',
-        value: ''
+        value: 'manufacturerName'
     },
 ]
 
@@ -28,26 +29,52 @@ const paramsPage = reactive({
     pageNum: 1,
     pageSize: 10,
 })
-const recordParams = reactive({
+const recordParams = reactive<any>({
     wholesaleName: '',
     manufacturerName: '',
     storageNum: '',
+    startTime: '',
+    endTime: '',
 })
 const slideLoading = ref(true) // 是否需要滑动加载
 const recordList = ref<any[]>([]) // 入库记录列表
 const isLoad = ref(false) // 是否加载
 
+const startDate = computed(() => {
+    return getDate('start')
+})
+
+const endDate = computed(() => {
+    return getDate('end')
+})
+
+const timeDesc = computed(() => {
+    return calculateDaysDifference(recordParams.endTime, recordParams.startTime) + '天'
+})
+
+
+
 
 watch(() => tabBarIndex.value, (newVal) => {
-    if (newVal == 1 && !isLoad.value) {
+    if (newVal == 1) {
         isLoad.value = true
-        storageInputPageFu()
-        console.log('111111');
+        const time = getCurrentDate(7)
+        const { startTime, endTime, startYear, startMonth, startDay, endYear, endMonth, endDay } = time
+        recordParams.startTime = `${startYear}-${startMonth}-${startDay}`
+        recordParams.endTime = `${endYear}-${endMonth}-${endDay}`
+        console.log(time, 'assaddsd');
+        resetParams()
+    }
+})
 
+onShow(() => {
+    if (isLoad.value) {
+        resetParams()
     }
 })
 
 const storageInputPageFu = () => {
+    proxy.$Loading();
     storageInputPageApi(recordParams, paramsPage).then((res: any) => {
         const { code, data, msg, token } = res
         proxy.$CloseLoading();
@@ -70,6 +97,16 @@ const storageInputPageFu = () => {
 }
 
 /**
+ * 输入框失去焦点
+ */
+const resetParams = () => {
+    slideLoading.value = true
+    paramsPage.pageNum = 1
+    recordList.value = []
+    storageInputPageFu()
+}
+
+/**
  * 查看入库记录详情
  * @param item 
  */
@@ -80,6 +117,46 @@ const viewRecordDetailFu = (item: any) => {
             url: `/packagingStation/inventoryDetails/index?id=${id}`
         })
     }
+}
+
+const getDate = (type: string) => {
+    const date = new Date();
+    let year = date.getFullYear();
+    let month: string | number = date.getMonth() + 1;
+    let day: string | number = date.getDate();
+
+    if (type === 'start') {
+        year = year - 10;
+    } else if (type === 'end') {
+        year = year
+    }
+    month = month > 9 ? month : '0' + month;
+    day = day > 9 ? day : '0' + day;
+    return `${year}-${month}-${day}`;
+}
+
+/**
+ * 开始时间改变
+ * @param e 
+ */
+const startChangeFu = (e: any) => {
+    const { value } = e.detail
+    if (compareTime(value, recordParams.endTime) > 0) {
+        return proxy.$Toast({ title: '开始时间不能大于结束时间' })
+    }
+    recordParams.startTime = value
+}
+
+/**
+ * 结束时间改变
+ * @param e 
+ */
+const endChangeFu = (e: any) => {
+    const { value } = e.detail
+    if (compareTime(recordParams.startTime, value) > 0) {
+        return proxy.$Toast({ title: '结束时间不能小于开始时间' })
+    }
+    recordParams.endTime = value
 }
 
 /**
@@ -101,30 +178,37 @@ const scrolltolower = () => {
         <view class="record_main flex_1 flex_column">
             <view class="query_criteria">
                 <view class="flex_align time_desc">
-                    <view class="flex_align">
-                        <text>开始时间</text>
-                        <image class="desc_icon" :src="arrow_bottom"></image>
-                    </view>
-                    <view class="flex_align ">
-                        <text>结束时间</text>
-                        <image class="desc_icon" :src="arrow_bottom"></image>
-                    </view>
+                    <picker mode="date" :value="recordParams.startTime" :start="startDate" :end="endDate"
+                        @change="startChangeFu">
+                        <view class="flex_align">
+                            <text>开始时间</text>
+                            <image class="desc_icon" :src="arrow_bottom"></image>
+                        </view>
+                    </picker>
+                    <picker mode="date" :value="recordParams.endTime" :start="startDate" :end="endDate"
+                        @change="endChangeFu">
+                        <view class="flex_align ">
+                            <text>结束时间</text>
+                            <image class="desc_icon" :src="arrow_bottom"></image>
+                        </view>
+                    </picker>
                 </view>
                 <view class="select_time flex_align">
                     <view class="flex_align">
-                        <view>5月27日</view>
+                        <view>{{ recordParams.startTime }}</view>
                         <image class="long_arrow" :src="long_arrow"></image>
-                        <view>6月3日</view>
+                        <view>{{ recordParams.endTime }}</view>
                     </view>
-                    <view class="time_long flex_1">共7天</view>
+                    <view class="time_long flex_1">共{{ timeDesc }}</view>
                 </view>
                 <view class="quert_input_list flex_column">
                     <view class="flex_align quert_input" v-for="item, index in quertList" :key="index">
                         <image class="search_icon" :src="search_icon"></image>
-                        <input class="flex_1" type="text" :placeholder="item.placeholder" />
+                        <input class="flex_1" type="text" :placeholder="item.placeholder"
+                            v-model.trim="recordParams[item.value]" />
                     </view>
                 </view>
-                <button class="button_defalut">查询</button>
+                <button class="button_defalut" @click="resetParams">查询</button>
             </view>
             <view class="flex_1 record_con">
                 <scroll-view class="scroll_con " scroll-y="true"
@@ -201,7 +285,7 @@ const scrolltolower = () => {
                 font-weight: 400;
                 font-size: 24rpx;
                 color: #7C8191;
-                gap: 174rpx;
+                gap: 196rpx;
 
                 .desc_icon {
                     width: 24rpx;
@@ -212,7 +296,7 @@ const scrolltolower = () => {
 
             .select_time {
                 font-weight: 500;
-                font-size: 40rpx;
+                font-size: 30rpx;
                 color: #202020;
                 font-style: normal;
                 margin-top: 10rpx;

@@ -136,4 +136,39 @@ export function storageInputApi(params: any) {
     })
 }
 
+/**
+ * 修改入库数量
+ * @param params
+ * @returnsF
+ */
+export function delByIdApi(params: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/storageInput/delById`,
+                method: "GET",
+                params
+            })
+        )
+    })
+}
+
+/**
+ * 按天统计入库单
+ * @param params
+ * @returnsF
+ */
+export function wholesaleIncomeApi(params: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/packaging/wholesaleIncome`,
+                method: "GET",
+                params
+            })
+        )
+    })
+}
+
+
 

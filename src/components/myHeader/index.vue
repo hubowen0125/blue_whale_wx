@@ -109,7 +109,7 @@ const editInformationFu = () => {
         }
 
         .edit_btn {
-            width: 120rpx;
+            width: 124rpx;
             box-sizing: border-box;
             padding: 18rpx 20rpx;
             background: rgba(255, 255, 255, 0.05);
