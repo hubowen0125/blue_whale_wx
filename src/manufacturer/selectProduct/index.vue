@@ -35,6 +35,7 @@ const shareProductParams = ref({
 const getProductParams = ref({
     productName: '',
 })
+const isLoad = ref(false) // 是否加载
 
 
 const shoppingCartNum = computed(() => {
@@ -46,43 +47,34 @@ onLoad((e: any) => {
         selectProductType.value = e.type
         if (e.type == 'orderCard') {
             headerTitle.value = '立即订货'
+            productsPageFu()
         } else {
             headerTitle.value = '选择商品'
             addProductParams.value.cardNo = e.cardNo
             shareProductParams.value.cardNo = e.cardNo
-        }
-    }
-})
-
-onShow(() => {
-    if (selectProductType.value) {
-        if (selectProductType.value == 'orderCard') {
-            productsPageFu()
-        } else {
             productListFu()
         }
     }
 })
 
-// onMounted(() => {
-//     productsPageFu()
-// })
+onShow(() => {
+    if (selectProductType.value && isLoad.value) {
+        if (selectProductType.value !== 'orderCard') {
+            productList.value = []
+            paramsPage.pageNum = 1
+            slideLoading.value = true
+            productListFu()
+        }
+    }
+})
 
-const productListFu = () => {
+const productListFu = async () => {
     proxy.$Loading()
-    productListApi(shareProductParams.value).then((res: any) => {
+    await productListApi(shareProductParams.value, paramsPage).then((res: any) => {
         const { code, data, msg, token } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
-            console.log(data, '0000');
             if (data.datas && data.datas.length > 0) {
-                data.datas.map((item: any) => {
-                    if (useManufacturer.orderCard.some((cartItem: any) => cartItem.id === item.id)) {
-                        item.isAdded = true
-                    } else {
-                        item.isAdded = false
-                    }
-                })
                 productList.value = [...productList.value, ...data.datas]
                 console.log(productList.value, '00000');
                 if (data.datas.length < paramsPage.pageSize) {
@@ -98,6 +90,7 @@ const productListFu = () => {
         proxy.$CloseLoading();
         proxy.$Toast({ title: req.msg })
     }))
+    isLoad.value = true
 }
 
 /**
@@ -144,6 +137,9 @@ const showPopupFu = (data: any) => {
     if (selectProductType.value == 'orderCard') {
         arr = [...useManufacturer.orderCard]
     } else {
+        if (data.isAdded) {
+            return
+        }
         arr = [...shareCradList.value]
     }
     const index = arr.findIndex((item: any) => item.id === data.id)
@@ -153,7 +149,9 @@ const showPopupFu = (data: any) => {
             return item
         })
         arr.push(data)
-        data.isAdded = true
+        if (selectProductType.value == 'orderCard') {
+            data.isAdded = true
+        }
     } else {
         arr.splice(index, 1)
         if (selectProductType.value == 'orderCard') {
@@ -164,7 +162,7 @@ const showPopupFu = (data: any) => {
         useManufacturer.setOrderCardFu(arr)
     } else {
         popupProductDetail.value = data
-        shareCradList.value = arr
+        // shareCradList.value = arr
         popupRef.value.open('bottom');
     }
 }
@@ -187,7 +185,10 @@ const closePopupFu = () => {
  * 加入订货单
  */
 const addToCartFu = () => {
-    const arr = [...useManufacturer.shoppingCart]
+    let arr: any[] = []
+    if (selectProductType.value == 'orderCard') {
+        arr = [...useManufacturer.shoppingCart]
+    }
     const index = arr.findIndex((item: any) => item.id === popupProductDetail.value.id)
     if (index === -1) {
         arr.push(popupProductDetail.value)
@@ -196,7 +197,10 @@ const addToCartFu = () => {
     }
     useManufacturer.setShoppingCartFu(arr)
     popupProductDetail.value.isAdded = true
-    popupRef.value.close()
+    shareCradList.value = arr
+    console.log(arr, '2123');
+    addProductParams.value.cardProductsParams = []
+    addProductFu()
 }
 
 /**
@@ -217,13 +221,14 @@ const addProductFu = () => {
             })
         })
     })
+    proxy.$Loading()
     addProductApi(addProductParams.value).then((res: any) => {
         const { code, data, msg } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
             console.log(data);
             proxy.$Toast({ title: '添加成功' })
-            uni.navigateBack() // 返回上一页
+            popupRef.value.close()
         } else {
             proxy.$Toast({ title: msg })
         }
@@ -231,6 +236,16 @@ const addProductFu = () => {
         proxy.$CloseLoading();
         proxy.$Toast({ title: req.msg })
     }))
+}
+
+/**
+ * 添加商品
+ * @param e 
+ */
+const newProductFu = () => {
+    uni.navigateTo({
+        url: '/manufacturer/addProduct/index'
+    })
 }
 
 const searchInputBlur = (e: string) => {
@@ -254,7 +269,11 @@ const scrolltolower = () => {
     console.log('滑动加载');
     if (!slideLoading.value) return
     paramsPage.pageNum += 1
-    productsPageFu()
+    if (selectProductType.value == 'orderCard') {
+        productsPageFu()
+    } else {
+        productListFu()
+    }
 }
 
 </script>
@@ -294,7 +313,7 @@ const scrolltolower = () => {
             </uni-badge>
         </view>
         <view v-if="selectProductType == 'shareCrad'" class="footer_con">
-            <button class="button_defalut" @click="addProductFu">添加商品</button>
+            <button class="button_defalut" @click="newProductFu">添加商品</button>
         </view>
     </view>
 

@@ -2,23 +2,12 @@
 import { getByOrderNoApi, orderShipRecordShipApi } from "@/http/api/order";
 import checkbox_active from "@/static/images/checkbox_active.png"
 import deliverGoodsInfo from "../components/deliverGoodsInfo/index.vue"
+import QRCode from 'weapp-qrcode';
+import close_icon_1 from "@/static/images/close_icon_1.png"
 
 const { proxy } = getCurrentInstance() as any;
 
-const popupData = {
-    popupTitle: '修改订单',
-    pupupType: 'default',
-    popupContent: [
-        {
-            text: '是否确认修改该订单',
-        },
-    ],
-    cancelText: '取消',
-    confirmText: '确定',
-    callBack: true
-}
 
-const popupCom = ref()
 
 // 全选
 const selectAll = ref(false)
@@ -29,6 +18,8 @@ const shipParams = reactive<any>({
     orderNo: '',
     productsParams: []
 })
+const qrcodeIcon = ref('')
+const codePopupRef = ref()
 
 onLoad((e: any) => {
     if (e.orderNo) {
@@ -75,9 +66,10 @@ const selectAllFu = (data: boolean) => {
 // 立即发货
 const deliverGoodsFu = () => {
     console.log('立即发货')
+    shipParams.productsParams = []
     orderDetails.value.orderProductsList.map((item: any) => {
         const obj: any = {
-            orderProductId: item.productId,
+            orderProductId: item.id,
             productsDetailParams: []
         }
         item.orderProductsDetailList.map((items: any) => {
@@ -94,7 +86,26 @@ const deliverGoodsFu = () => {
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
             console.log(data);
-            uni.navigateBack()
+            uni.showToast({ title: '发货成功'})
+            const { orderNo, packagingId } = orderDetails.value
+            const id = ''
+            // 生成二维码
+            new QRCode({
+                width: 140,
+                height: 140,
+                canvasId: 'qrcode',
+                text: `shipId=${id}&orderNo=${orderNo}&packagingId=${packagingId}`, // 二维码内容动态化
+                callback: (res: any) => {
+                    console.log(res)
+                    uni.canvasToTempFilePath({
+                        canvasId: 'qrcode',
+                        success: async (res: any) => {
+                            qrcodeIcon.value = res.tempFilePath;
+                            codePopupRef.value.open('center')
+                        }
+                    })
+                }
+            });
         } else {
             proxy.$Toast({ title: msg })
         }
@@ -104,9 +115,9 @@ const deliverGoodsFu = () => {
     }))
 }
 
-// 确认弹窗
-const confirmPopupFu = () => {
-    console.log('1111');
+const closePopupFu = () => {
+    uni.navigateBack()
+    codePopupRef.value.close()
 }
 </script>
 
@@ -154,8 +165,20 @@ const confirmPopupFu = () => {
         <view class="footer_con ">
             <button class="button_defalut" @click="deliverGoodsFu">立即发货</button>
         </view>
+        <canvas class="code_icon" canvas-id="qrcode"
+            style="width: 140px; height: 140px;position: absolute;left: -9999px;"></canvas>
     </view>
-    <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="confirmPopupFu"></com-popup_com>
+
+    <uni-popup ref="codePopupRef">
+        <view class="popup_main flex_column flex_align">
+            <view>发货成功</view>
+            <image class="popup_img" :src="qrcodeIcon"></image>
+            <view class="popup_tips popup_text">请下载或打印该二维码</view>
+            <view class="popup_text">已便于打包站扫码入库</view>
+            <view class="popup_text">在发货记录中也可查看该二维码</view>
+        </view>
+        <image class="close_icon" :src="close_icon_1" @click="closePopupFu"></image>
+    </uni-popup>
 </template>
 
 
@@ -243,5 +266,42 @@ const confirmPopupFu = () => {
             }
         }
     }
+}
+
+.popup_main {
+    width: 532rpx;
+    height: 590rpx;
+    background: #FFFFFF;
+    border-radius: 24rpx;
+    font-weight: bold;
+    font-size: 36rpx;
+    color: #202020;
+    padding-top: 60rpx;
+    box-sizing: border-box;
+
+    .popup_img {
+        width: 280rpx;
+        height: 280rpx;
+        margin: 36rpx auto 0;
+    }
+
+    .popup_text {
+        font-weight: 500;
+        font-size: 24rpx;
+        color: #7C8191;
+        margin-top: 6rpx;
+    }
+
+    .popup_tips {
+        color: #FF840C;
+        margin-top: 14px;
+    }
+}
+
+.close_icon {
+    width: 56rpx;
+    height: 56rpx;
+    display: block;
+    margin: 40rpx auto 0;
 }
 </style>

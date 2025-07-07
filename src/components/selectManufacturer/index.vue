@@ -82,7 +82,7 @@ defineExpose({
                                 <view class="flex_column">
                                     <view class="flex_align manufacturer_info">
                                         <image class="position_icon" :src="position_1"></image>
-                                        <view class="manufacturer_name">{{ item.dept.deptName }}</view>
+                                        <view class="manufacturer_name">{{ item.dept?.deptName }}</view>
                                     </view>
                                     <view>{{ item.dept.address }}</view>
                                     <view>{{ item.dept.phone }}</view>

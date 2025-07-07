@@ -158,7 +158,7 @@ const confirmPopupFu = () => {
 // 立即续费
 const renewFu = () => {
     uni.navigateTo({
-        url: '/wholesaler/renewalMembership/index'
+        url: '/pages/renewalMembership/index'
     })
 }
 

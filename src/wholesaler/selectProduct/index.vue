@@ -192,7 +192,7 @@ const scrolltolower = () => {
                 <image class="off_icon" :src="off_icon" @click="closePopupFu"></image>
             </view>
             <view class="flex_1 poupo_main">
-                <com-orderTable ref="orderTableRef" orderType="handleOrder"
+                <com-orderTable ref="orderTableRef" orderType="handleOrder" miniRole="wholesaler"
                     :productDetail="popupProductDetail"></com-orderTable>
             </view>
             <view class="popup_footer flex_align">

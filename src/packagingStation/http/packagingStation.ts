@@ -170,5 +170,22 @@ export function wholesaleIncomeApi(params: any) {
     })
 }
 
+/**
+ * 扫码
+ * @param params
+ * @returnsF
+ */
+export function scanCodeApi(params: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/storageInput/scanCode`,
+                method: "GET",
+                params
+            })
+        )
+    })
+}
+
 
 

@@ -14,6 +14,8 @@ export const useUserStore = defineStore('use', () => {
     const jump401 = ref(false)
     const shareParam = ref<any>({})
     const productDetail = ref<any>({})
+    const servicePhone = ref('')
+    const renewalFee = ref(0)
 
     const setTokenFu = (data: string) => {
         token.value = data
@@ -46,12 +48,22 @@ export const useUserStore = defineStore('use', () => {
         productDetail.value = data
     }
 
+    const setservicePhoneFu = (data: string) => {
+        servicePhone.value = data
+    }
+
+    const setRenewalFeeFu = (data: number) => {
+        renewalFee.value = data
+    }
+
     const resetState = () => {
         token.value = ''
         jump401.value = false
         userInfo.value = {}
         shareParam.value = {}
         productDetail.value = []
+        servicePhone.value = ''
+        renewalFee.value = 0
     }
 
     return {
@@ -65,6 +77,8 @@ export const useUserStore = defineStore('use', () => {
         shareParam,
         jump401,
         productDetail,
+        servicePhone,
+        renewalFee,
         setTokenFu,
         setNavHeagihtFu,
         setUserInfoFu,
@@ -72,6 +86,8 @@ export const useUserStore = defineStore('use', () => {
         setJump401Fu,
         setShareParamFu,
         setProductDetailFu,
+        setservicePhoneFu,
+        setRenewalFeeFu,
         resetState
     }
 

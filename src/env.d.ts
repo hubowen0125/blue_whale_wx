@@ -15,3 +15,5 @@ declare var process: {
         [key: string]: string | undefined
     }
 }
+
+declare module 'weapp-qrcode'

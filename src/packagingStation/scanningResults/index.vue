@@ -1,28 +1,37 @@
 <script lang="ts" setup>
+import { scanCodeApi, stockInApi } from "../http/packagingStation";
 import scan_icon from "@/static/images/packagingStation/scan_icon.png"
 
 const { proxy } = getCurrentInstance() as any;
 
+interface STOCKINPARAMS {
+    type: number
+    manufacturerName: string
+    packagingWholesaleId: string
+    storageNum: number | string
+    checkHandNum: number | string
+    [key: string]: string | number // 添加索引签名以允许通过字符串索引
+}
 
 const orderDetail = [
     {
         title: '厂家',
-        value: '上海蓝鲸童装有限公司',
+        value: 'manufacturerName',
         type: 'text'
     },
     {
         title: '批发商',
-        value: '上海-陈冠希',
+        value: 'wholesaleName',
         type: 'text'
     },
     {
         title: '客户仓位',
-        value: 'AI',
+        value: 'storageNum',
         type: 'text'
     },
     {
         title: '订单数量(手)',
-        value: '20',
+        value: 'orderHandNum',
         type: 'text'
     },
     {
@@ -31,9 +40,70 @@ const orderDetail = [
         type: 'input'
     },
 ]
+const codeDetails = ref<any>({})
+const stockInParams = ref<STOCKINPARAMS>({
+    type: 2, // 类型1.输入 2.扫码 
+    manufacturerName: '',
+    packagingWholesaleId: '',
+    storageNum: '',
+    checkHandNum: ''
+})
 
+onLoad((e: any) => {
+    if (e.orderNo) {
+        const { orderNo, shipId } = e
+        scanCodeFu(orderNo, shipId)
+    }
+})
 
+/**
+ * 扫码按钮点击事件
+ */
+const scanCodeFu = (orderNo: string, shipId: string) => {
+    scanCodeApi({ orderNo, shipId }).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data, '0000');
+            codeDetails.value = data
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
 
+const stockInFu = () => {
+    const { type, manufacturerName, packagingWholesaleId, storageNum } = codeDetails.value
+    console.log(stockInParams, 'stockInParamsstockInParamsstockInParams');
+    stockInParams.value = { ...stockInParams.value, type, manufacturerName, packagingWholesaleId, storageNum }
+    if (!stockInParams.value.checkHandNum) {
+        return proxy.$Toast({ title: '请输入核点数量' })
+    }
+    proxy.$Loading()
+    stockInApi(stockInParams).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data, '0000');
+            proxy.$Toast({ title: '入库成功' })
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+/**
+ * 重置按钮点击事件
+ */
+const resetFu = () => {
+    uni.navigateBack()
+}
 </script>
 
 
@@ -49,20 +119,21 @@ const orderDetail = [
             <view class="result_con">
                 <view class="result_title flex_align">
                     <text>订单号: </text>
-                    <text class="order_num">GuLang008</text>
+                    <text class="order_num">{{ codeDetails.orderNo }}</text>
                 </view>
                 <view class="result_detail">
                     <view class="result_item flex_align" v-for="item in orderDetail" :key="item.title">
                         <view class="result_item_title">{{ item.title }}</view>
                         <view class="result_item_key flex_1" v-if="item.type === 'text'">
-                            {{ item.value }}
+                            {{ codeDetails[item.value] }}
                         </view>
-                        <input class="result_item_key flex_1" v-else type="text" :placeholder="item.value">
+                        <input class="result_item_key flex_1" v-model="stockInParams.checkHandNum" v-else type="text"
+                            :placeholder="item.value">
                     </view>
                 </view>
                 <view class="btn_con flex_align">
-                    <button class="reset_btn">重置</button>
-                    <button class="button_defalut flex_1">立即入库</button>
+                    <button class="reset_btn" @click="resetFu">重置</button>
+                    <button class="button_defalut flex_1" @click="stockInFu">立即入库</button>
                 </view>
             </view>
         </view>

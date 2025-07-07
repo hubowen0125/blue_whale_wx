@@ -2,6 +2,8 @@
 import { orderShipRecordListApi, orderPaymentRecordListApi, orderOperationRecordListApi } from "@/http/api/order";
 import QR_code_icon from "@/static/images/QR_code_icon.png"
 import { dateStrToDateFormat, formatNumber } from "@/utils/utils";
+import QRCode from 'weapp-qrcode';
+import close_icon_1 from "@/static/images/close_icon_1.png"
 
 
 const { proxy } = getCurrentInstance() as any;
@@ -25,6 +27,8 @@ const orderNo = ref('')
 const shipmentRecord = ref<Array<any>>([])
 const cashierRecord = ref<Array<any>>([])
 const otherRecords = ref<Array<any>>([])
+const qrcodeIcon = ref('')
+const codePopupRef = ref()
 
 onLoad((e: any) => {
     if (e.orderNo) {
@@ -108,6 +112,35 @@ const selectActiveStateFu = (key: number) => {
 }
 
 /**
+ * 查看二维码
+ * @param item 
+ */
+const viewCodeFu = (item: any) => {
+    const { id, orderNo, packagingId } = item
+    // 生成二维码
+    new QRCode({
+        width: 140,
+        height: 140,
+        canvasId: 'qrcode',
+        text: `shipId=${id}&orderNo=${orderNo}&packagingId=${packagingId}`, // 二维码内容动态化
+        callback: (res: any) => {
+            console.log(res)
+            uni.canvasToTempFilePath({
+                canvasId: 'qrcode',
+                success: async (res: any) => {
+                    qrcodeIcon.value = res.tempFilePath;
+                    codePopupRef.value.open('center')
+                }
+            })
+        }
+    });
+};
+
+const closePopupFu = () => {
+    codePopupRef.value.close()
+}
+
+/**
  * 滑动加载
  */
 const scrolltolower = () => {
@@ -146,14 +179,14 @@ const scrolltolower = () => {
                             <view class="record_item_code_con flex_align">
                                 <image class="QR_code_icon" :src="QR_code_icon"></image>
                                 <view class="flex_1">发货二维码</view>
-                                <button class="record_item_code_btn">查看</button>
+                                <button class="record_item_code_btn" @click="viewCodeFu(item)">查看</button>
                             </view>
                         </view>
                     </template>
                     <template v-else-if="activeState == 1 && cashierRecord.length > 0" v-for="item in cashierRecord"
                         :key="`cashier_${item.id}`">
                         <view class="record_item cashier_record flex_align">
-                            <image class="cashier_img"></image>
+                            <image class="cashier_img" :src="item.icon"></image>
                             <view class="flex_column flex_1 cashier_record_content">
                                 <view>{{ item.payUserName }}</view>
                                 <view class="flex_between flex_align">
@@ -180,7 +213,16 @@ const scrolltolower = () => {
                 </view>
             </scroll-view>
         </view>
+        <canvas class="code_icon" canvas-id="qrcode"
+            style="width: 140px; height: 140px;position: absolute;left: -9999px;"></canvas>
     </view>
+    <uni-popup ref="codePopupRef">
+        <view class="popup_main flex_column flex_align">
+            <view>查看二维码</view>
+            <image class="popup_img" :src="qrcodeIcon"></image>
+        </view>
+        <image class="close_icon" :src="close_icon_1" @click="closePopupFu"></image>
+    </uni-popup>
 </template>
 
 
@@ -307,7 +349,6 @@ const scrolltolower = () => {
                     width: 64rpx;
                     height: 64rpx;
                     border-radius: 50%;
-                    border: 1px solid #000;
                 }
 
                 .cashier_record_content {
@@ -326,5 +367,30 @@ const scrolltolower = () => {
             }
         }
     }
+}
+
+.popup_main {
+    width: 532rpx;
+    height: 480rpx;
+    background: #FFFFFF;
+    border-radius: 24rpx;
+    font-weight: bold;
+    font-size: 36rpx;
+    color: #202020;
+    padding-top: 60rpx;
+    box-sizing: border-box;
+
+    .popup_img {
+        width: 280rpx;
+        height: 280rpx;
+        margin: 36rpx auto 0;
+    }
+}
+
+.close_icon {
+    width: 56rpx;
+    height: 56rpx;
+    display: block;
+    margin: 40rpx auto 0;
 }
 </style>

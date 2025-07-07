@@ -101,7 +101,7 @@ const scrolltolower = () => {
                 <view class="companys_list flex_column" v-if="shelfList.length > 0">
                     <view class="companys_item flex_column" v-for="(items, index) in shelfList" :key="index">
                         <view class="companys_item_title flex_align flex_between">
-                            <view>{{ items.dept.deptName }}</view>
+                            <view>{{ items?.dept?.deptName }}</view>
                             <button class="btn_buy" @click="handleBuyFu(items)">立即订货</button>
                         </view>
                         <view class="product_list flex_column">

@@ -53,7 +53,7 @@ const getByCardNoFu = (cardNo: string) => {
             console.log(data, '0000');
             data.cardProductsList.map((item: { productColorsList: any; cardProductsDetailList: any; id: any; productId: any; }) => {
                 item.productColorsList = item.cardProductsDetailList
-                item.id = item.productId
+                // item.id = item.productId
                 return item
             })
             orderDetails.value = data

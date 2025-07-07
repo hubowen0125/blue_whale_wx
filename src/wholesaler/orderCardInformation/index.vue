@@ -45,7 +45,7 @@ const createParams = ref<any>({
     totalNum: 0,
     totalAmount: 0,
     packaging: {},
-    cardProductsList:[],
+    cardProductsList: [],
     remark: ''
 })
 
@@ -74,7 +74,7 @@ const getByCardNoFu = (cardNo: string) => {
             console.log(data, '0000');
             createParams.value = data
             console.log(createParams.value.cardProductsList, '1111');
-            
+
         } else {
             proxy.$Toast({ title: msg })
         }
@@ -193,7 +193,7 @@ onUnmounted(() => {
             <view class="product_list flex_column">
                 <template v-for="item in createParams.cardProductsList" :key="item.id">
                     <view class="product_item">
-                        <com-orderTable orderType="show" :productDetail="item"></com-orderTable>
+                        <com-orderTable orderType="show" :productDetail="item" miniRole="wholesaler"></com-orderTable>
                     </view>
                 </template>
             </view>

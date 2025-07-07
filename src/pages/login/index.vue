@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { getSmsCodeApi, verifySmsApi, getUserInfoApi } from '@/http/api/all';
+import { getSmsCodeApi, verifySmsApi, getUserInfoApi, servicePhoneApi, renewalFeeApi } from '@/http/api/all';
 import { checkStr } from '@/utils/utils';
 import checkbox from "@/static/images/checkbox.png"
 import checkbox_active from "@/static/images/checkbox_active.png"
@@ -16,13 +16,19 @@ const loginParams = reactive({
 const pointerBtn = ref(false)
 const codeBtn = ref('获取验证码')
 const checked = ref(false)
+const type = ref('') // 订货卡类型
+const cardNo = ref('')
 
 
-onLoad((e) => {
+onLoad((e: any) => {
     if (e && e.code) {
         proxy.$CloseLoading();
         useUser.resetState()
         useUser.setJump401Fu(false)
+    }
+    if (e.type) {
+        type.value = e.type
+        cardNo.value = e.cardNo
     }
 })
 
@@ -88,7 +94,7 @@ const formSubmit = (e: any) => {
         return
     }
     proxy.$Loading();
-    verifySmsApi(loginParams).then((res: any) => {
+    verifySmsApi(loginParams).then(async (res: any) => {
         const { code, data, msg, token } = res
         if (code == proxy.$successCode) {
             useUser.setTokenFu(token)
@@ -103,33 +109,82 @@ const formSubmit = (e: any) => {
     }))
 }
 
+/**
+ * 服务电话
+ */
+const servicePhoneFu = async () => {
+    await servicePhoneApi().then((res: any) => {
+        const { code, data, msg } = res
+        if (code == proxy.$successCode) {
+            useUser.setservicePhoneFu(data)
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+/**
+ * 续费
+ */
+const renewalFeeFu = async (miniRole: string) => {
+    await renewalFeeApi({ type: miniRole }).then((res: any) => {
+        const { code, data, msg } = res
+        if (code == proxy.$successCode) {
+            console.log(data, '123');
+            useUser.setRenewalFeeFu(data)
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
 const getUserInfoFu = () => {
-    getUserInfoApi().then((res: any) => {
+    getUserInfoApi().then(async (res: any) => {
         const { code, data, msg } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
             useUser.setUserInfoFu(data.sysUser)
             useUser.setMiniRoleFu(data.miniRole)
+            await servicePhoneFu()
+            await renewalFeeFu(data.miniRole)
             console.log(data.miniRole, '213');
             if (data.miniRole == 'guest') {
                 uni.redirectTo({
                     url: '/pages/chooseIdentity/index'
                 })
-            }
-            if (data.miniRole == 'manufacturer') {
-                uni.redirectTo({
-                    url: '/manufacturer/home/index'
-                })
-            }
-            if (data.miniRole == 'wholesale') {
-                uni.redirectTo({
-                    url: '/wholesaler/home/index'
-                })
-            }
-            if (data.miniRole == 'packaging') {
-                uni.redirectTo({
-                    url: '/packagingStation/home/index'
-                })
+            } else {
+                if (type.value) {
+                    if (type.value == 'manufacturer') {
+                        uni.redirectTo({
+                            url: `/manufacturer/shareOrderCard/index?type=${type.value}&cardNo=${cardNo.value}`
+                        })
+                    }
+                    if (type.value == 'wholesale') {
+                        uni.redirectTo({
+                            url: `/wholesaler/shareOrderCard/index?type=${type.value}&cardNo=${cardNo.value}`
+                        })
+                    }
+                } else {
+                    if (data.miniRole == 'manufacturer') {
+                        uni.redirectTo({
+                            url: '/manufacturer/home/index'
+                        })
+                    }
+                    if (data.miniRole == 'wholesale') {
+                        uni.redirectTo({
+                            url: '/wholesaler/home/index'
+                        })
+                    }
+                    if (data.miniRole == 'packaging') {
+                        uni.redirectTo({
+                            url: '/packagingStation/home/index'
+                        })
+                    }
+                }
             }
         } else {
             proxy.$Toast({ title: msg })
@@ -158,7 +213,8 @@ const viewProtocolFu = (key: any) => {
         <form @submit="formSubmit">
             <view class="input_con flex_align">
                 <view class="input_area_code">+86</view>
-                <input class="input flex_1" type="number" placeholder="请输入手机号" ref="phoneValue" maxlength="11" name="phone"
+                <input class="input flex_1" type="number" placeholder="请输入手机号" ref="phoneValue" maxlength="11"
+                    name="phone"
                     v-model.trim="loginParams.phone">
             </view>
             <view class="input_con flex_align">

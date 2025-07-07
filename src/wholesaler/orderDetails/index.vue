@@ -168,6 +168,7 @@ const delByOrderNoFu = () => {
                 <view class="table_con flex_column">
                     <template v-for="item in orderDetails.orderProductsList" :key="item.id">
                         <com-orderTable
+                            miniRole="wholesaler"
                             orderType="detail"
                             :productDetail="item">
                         </com-orderTable>

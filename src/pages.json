@@ -35,6 +35,12 @@
             "style": {
                 "navigationStyle": "custom"
             }
+        },
+        {
+            "path": "pages/renewalMembership/index",
+            "style": {
+                "navigationStyle": "custom"
+            }
         }
     ],
     "subPackages": [
@@ -198,12 +204,6 @@
                 },
                 {
                     "path": "selectProduct/index",
-                    "style": {
-                        "navigationStyle": "custom"
-                    }
-                },
-                {
-                    "path": "renewalMembership/index",
                     "style": {
                         "navigationStyle": "custom"
                     }

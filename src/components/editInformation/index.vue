@@ -61,6 +61,10 @@ const sysRegionListFu = () => {
  * 显示弹窗
  */
 const showPopupFu = () => {
+    const { deptName, address, provinceName, cityName, districtName } = useUser.userInfo.dept
+    formParams.deptName = deptName
+    formParams.address = address
+    areaDetail.value = `${provinceName}${cityName}${districtName}`
     popupRef.value.open('center')
 }
 

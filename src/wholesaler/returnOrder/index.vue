@@ -152,6 +152,7 @@ const confirmPopupFu = () => {
                     <template v-for="item in orderDetails.orderProductsList" :key="item.id">
                         <view class="order_item">
                             <com-orderTable
+                                miniRole="wholesaler"
                                 orderType="handleRefund"
                                 :productDetail="item"
                                 :selectAll="selectAll"

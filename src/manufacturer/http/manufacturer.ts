@@ -211,13 +211,13 @@ export function manufacturerEditApi(data: any) {
  * @param data
  * @returnsF
  */
-export function productListApi(data: any) {
+export function productListApi(data: any , params:any) {
     return new Promise((resolve, reject) => {
         resolve(
             request({
-                url: `api/business/products/productList`,
+                url: `api/business/products/productList?${splicingObjects(params)}`,
                 method: "POST",
-                data
+                data,
             })
         )
     })

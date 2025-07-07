@@ -147,7 +147,7 @@ const lookAll = () => {
     <view class="home_com flex_column">
         <view class="header_con flex_align">
             <image class="header_img" :src="position_1"></image>
-            <view class="header_title">上海蓝鲸童装有限公司</view>
+            <view class="header_title">{{ useUser.userInfo?.dept?.deptName }}</view>
         </view>
         <view class="order_type_con flex">
             <view class="order_type_item flex_column flex_align flex_center" v-for="item in orderType"

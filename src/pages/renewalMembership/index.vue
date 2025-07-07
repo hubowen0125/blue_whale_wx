@@ -3,7 +3,9 @@ import member_icon from "@/static/images/member_icon.png"
 import icon_1 from "@/static/images/wholesaler/renewalMembership/icon_1.png"
 import icon_2 from "@/static/images/wholesaler/renewalMembership/icon_2.png"
 import icon_3 from "@/static/images/wholesaler/renewalMembership/icon_3.png"
+import { useUserStore } from "@/store/modules/user"
 
+const useUser = useUserStore()
 
 const interestsList = [
     {
@@ -20,6 +22,29 @@ const interestsList = [
     },
 ]
 
+const popupData = reactive({
+    popupTitle: '立即续费',
+    pupupType: 'default',
+    popupContent: [
+        {
+            text: '请联系',
+            desc: '',
+            text1: '进行续费'
+        }
+    ],
+    confirmText: '我知道了',
+})
+const popupCom = ref()
+
+
+onLoad(() => {
+    popupData.popupContent[0].desc = useUser.servicePhone
+})
+
+const openPopup = () => {
+    popupCom.value.showPopup()
+}
+
 </script>
 
 
@@ -30,14 +55,14 @@ const interestsList = [
         <view class="member_title_con flex_between flex_align">
             <view>
                 <view>使用有效期至</view>
-                <view class="member_title_date">2026-05-16</view>
+                <view class="member_title_date">{{ useUser.userInfo.dept.expireTime }}</view>
             </view>
             <button class="member_title_btn">续费记录</button>
         </view>
         <view class="renewal_fee_con flex_align flex_between">
             <view>续费费用</view>
             <view class="flex_align">
-                <text class="renewal_fee_price">¥300</text>
+                <text class="renewal_fee_price">¥{{ useUser.renewalFee }}</text>
                 <text>/年</text>
             </view>
         </view>
@@ -56,8 +81,9 @@ const interestsList = [
                 </view>
             </view>
         </view>
-        <view class="footer_con"><button class="button_defalut">立即续费</button></view>
+        <view class="footer_con"><button class="button_defalut" @click="openPopup">立即续费</button></view>
     </view>
+    <com-popup_com ref="popupCom" :popupData="popupData"></com-popup_com>
 </template>
 
 

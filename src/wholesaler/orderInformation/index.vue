@@ -185,7 +185,7 @@ const createAddFu = async () => {
                 <view class="flex_column my_information">
                     <view class="flex_align my_info">
                         <image class="position_icon" :src="position_1"></image>
-                        <view class="my_info_name">{{ useInfo.deptName }}</view>
+                        <view class="my_info_name">{{ useInfo?.deptName }}</view>
                     </view>
                     <view>{{ useInfo.address }}</view>
                     <view>{{ useInfo.phone }}</view>
@@ -208,6 +208,7 @@ const createAddFu = async () => {
                 <template v-for="item in shoppingCart" :key="item.id">
                     <view class="product_item">
                         <com-orderTable
+                            miniRole="wholesaler"
                             orderType="handleOrder"
                             :productDetail="item"></com-orderTable>
                     </view>

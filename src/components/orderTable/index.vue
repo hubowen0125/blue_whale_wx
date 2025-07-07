@@ -153,14 +153,13 @@ const reduceFu = (item: any, key: string) => {
  */
 const addFu = (item: any, key: string) => {
     console.log(item, key, 'itemitemitem');
-
-    if (props.orderType == 'handleOrder' && item[key] == item.stockNum) {
-        return
-    } else if (props.orderType == 'handleRefund' && item[key] == item.unsentHandNum) {
-        return
-    } else {
-        item[key] = item[key] + 1
-    }
+    // if (props.orderType == 'handleOrder' && item[key] == item.stockNum) {
+    //     return
+    // } else if (props.orderType == 'handleRefund' && item[key] == item.unsentHandNum) {
+    //     return
+    // } else {
+    item[key] = item[key] + 1
+    // }
 }
 
 
@@ -220,7 +219,7 @@ defineExpose({
                                 @blur="(e: any) => inputValueFu(e, row, col.key)"
                                 v-model="row[col.key]">
                             <view class="table_cell_btn table_cell_btn_plus"
-                                :class="{ table_cell_disabled: row[col.key] == row.stockNum }"
+                                :class="{ table_cell_disabled: props.orderType == 'handleRefund' && (row[col.key] == row.unsentHandNum) }"
                                 @click="addFu(row, col.key)">+
                             </view>
                         </view>

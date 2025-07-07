@@ -48,6 +48,17 @@ const popupData = reactive({
     confirmText: '立即续费',
     caalBack: true
 })
+const codePopupData = reactive({
+    popupTitle: '提示',
+    pupupType: 'default',
+    popupContent: [
+        {
+            text: '您无权限进行入库操作，请联系对方进行调整'
+        }
+    ],
+    confirmText: '我知道了',
+})
+const codePopupCom = ref()
 const popupCom = ref()
 
 
@@ -124,6 +135,7 @@ const showWholesalerFu = () => {
 const selectSubmitFu = (e: any) => {
     wholesaleDetail.value = e
     stockInParams.packagingWholesaleId = e.id
+    stockInParams.storageNum = e.storageNum
 }
 
 const inputValueFu = async (e: any, key: string) => {
@@ -187,9 +199,26 @@ const scanCodeFu = () => {
             console.log('条码类型：' + res.scanType);
             console.log('条码内容：' + res.result);
             proxy.$CloseLoading()
-            uni.navigateTo({
-                url: '/packagingStation/scanningResults/index'
-            })
+            if (res.result) {
+                const params: any = {};
+                const queryStr = res.result
+                const queryArr = queryStr.split('&');
+                queryArr.forEach(item => {
+                    const keyValueArr = item.split('=');
+                    if (keyValueArr.length > 1) {
+                        params[keyValueArr[0]] = keyValueArr[1];
+                    }
+                });
+                console.log(params, 'params');
+                const { packagingId, shipId, orderNo } = params
+                // if (packagingId == useUser.userInfo.dept.deptId) {
+                    uni.navigateTo({
+                        url: `/packagingStation/scanningResults/index?shipId=${shipId}&orderNo=${orderNo}`
+                    })
+                // } else {
+                //     codePopupCom.value.showPopup()
+                // }
+            }
         },
         fail: function (res) {
             console.log('扫描失败：' + res.errMsg);
@@ -211,7 +240,7 @@ const confirmPopupFu = () => {
     <view class="home_com flex_column">
         <view class="header_con flex_align">
             <image class="header_img" :src="position_1"></image>
-            <view class="header_title">{{ useUser.userInfo.nickName }}</view>
+            <view class="header_title">{{ useUser.userInfo?.dept?.deptName }}</view>
         </view>
         <view class="home_main flex_column">
             <view class="table_con">
@@ -252,6 +281,7 @@ const confirmPopupFu = () => {
     <com-selectWholesaler ref="selectWholesalerRef"
         :wholesaleList="wholesaleList" @selectSubmitFu="selectSubmitFu"></com-selectWholesaler>
     <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="confirmPopupFu"></com-popup_com>
+    <com-popup_com ref="codePopupCom" :popupData="codePopupData"></com-popup_com>
 </template>
 
 <style lang="scss" scoped>

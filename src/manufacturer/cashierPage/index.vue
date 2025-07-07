@@ -82,7 +82,7 @@ const selectPayMethod = (item: any) => {
 }
 
 const paymentFu = () => {
-    const {amount, type } = payParams
+    const { amount, type } = payParams
     if (!amount) {
         proxy.$Toast({ title: '请输入收款金额' })
         return
@@ -159,7 +159,8 @@ const paymentFu = () => {
                 </view>
             </view>
         </view>
-        <view class="footer_con"><button class="button_defalut" @click="paymentFu">确认收款 ¥350</button></view>
+        <view class="footer_con"><button class="button_defalut" @click="paymentFu">确认收款 ¥{{
+            formatNumber(payParams.amount) }}</button></view>
     </view>
 </template>
 

@@ -85,7 +85,7 @@ let orderParams = ref<any>({
     productColorsList: [],
     colors: '',
     price: "",
-    unitQuantity: '',
+    unitQuantity: '5',
     season: ''
 })
 const productId = ref('')

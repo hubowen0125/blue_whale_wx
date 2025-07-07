@@ -373,3 +373,38 @@ export function packagingEditApi(data: any) {
         )
     })
 }
+
+/**
+ * 客服电话
+ * @param params
+ * @returnsF
+ */
+export function servicePhoneApi() {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/user/servicePhone`,
+                method: "GET",
+            })
+        )
+    })
+}
+
+/**
+ * 会员续费费用
+ * @param params
+ * @returnsF
+ */
+export function renewalFeeApi(params:any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/user/renewalFee`,
+                method: "GET",
+                params
+            })
+        )
+    })
+}
+
+

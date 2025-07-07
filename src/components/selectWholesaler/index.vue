@@ -114,6 +114,7 @@ defineExpose({
         .packaging_station_item {
             background: #F7F8FA;
             border-radius: 24rpx;
+            border: 2rpx solid #F7F8FA;
             padding: 32rpx;
             font-weight: 400;
             font-size: 24rpx;

@@ -46,9 +46,15 @@ onLoad((e: any) => {
             }
         }
     } else {
-        uni.redirectTo({
-            url: '/pages/login/index'
-        })
+        if (e.type) {
+            uni.redirectTo({
+                url: `/pages/login/index?type=${e.type}&cardNo=${e.cardNo}`
+            })
+        } else {
+            uni.redirectTo({
+                url: '/pages/login/index'
+            })
+        }
     }
 })
 

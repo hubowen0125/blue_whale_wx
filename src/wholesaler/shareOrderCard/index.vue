@@ -144,6 +144,7 @@ const handleOrderFu = () => {
                 <template v-for="item in cardOrderDetail.cardProductsList" :key="item.id">
                     <view class="product_item">
                         <com-orderTable
+                            miniRole="wholesaler"
                             orderType="handleOrder"
                             :productDetail="item">
                         </com-orderTable>

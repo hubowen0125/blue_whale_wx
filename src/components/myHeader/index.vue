@@ -6,6 +6,9 @@ import packaging_icon from "@/static/images/chooseIdentity/packaging_icon.png"
 import member_icon from "@/static/images/member_icon.png"
 import arrow_right from "@/static/images/arrow_right.png"
 import position_2 from "@/static/images/position_2.png"
+import { useUserStore } from "@/store/modules/user"
+
+const useUser = useUserStore()
 
 const emit = defineEmits(['editInformationFu'])
 
@@ -22,6 +25,19 @@ const props = defineProps({
 })
 const headerIcon = ref()
 const editInformationRef = ref()
+const popupData = reactive({
+    popupTitle: '立即续费',
+    pupupType: 'default',
+    popupContent: [
+        {
+            text: '请联系',
+            desc: '',
+            text1: '进行续费'
+        }
+    ],
+    confirmText: '我知道了',
+})
+const popupCom = ref()
 
 onMounted(() => {
     if (props.userRole === 'wholesaler') {
@@ -41,9 +57,14 @@ const editFu = () => {
 
 // 立即续费
 const renewFu = () => {
-    uni.navigateTo({
-        url: '/wholesaler/renewalMembership/index'
-    })
+    if (props.userRole === 'packaging') {
+        popupData.popupContent[0].desc = useUser.servicePhone
+        popupCom.value.showPopup()
+    } else {
+        uni.navigateTo({
+            url: '/pages/renewalMembership/index'
+        })
+    }
 }
 
 const editInformationFu = () => {
@@ -57,10 +78,10 @@ const editInformationFu = () => {
         <view class="my_header_info flex_column ">
             <view class="flex_align position_info">
                 <image class="position_icon" :src="position_2"></image>
-                <view>{{ infoDetails.username }}</view>
+                <view>{{ infoDetails?.deptName }}</view>
             </view>
             <view>{{ infoDetails.address }}</view>
-            <view>{{ infoDetails.userPhone }}</view>
+            <view>{{ infoDetails.deptPhone }}</view>
             <button class="flex_align edit_btn" @click="editFu">
                 <image class="edit_icon" :src="edit_icon"></image>
                 <text>编辑</text>
@@ -83,6 +104,8 @@ const editInformationFu = () => {
     </view>
     <com-editInformation ref="editInformationRef" :type="userRole"
         @editInformationFu="editInformationFu"></com-editInformation>
+
+    <com-popup_com ref="popupCom" :popupData="popupData"></com-popup_com>
 </template>
 
 <style lang="scss" scoped>

@@ -122,6 +122,7 @@ defineExpose({
         margin-top: 32rpx;
         gap: 16rpx;
         margin-bottom: 52rpx;
+        padding:0 20rpx;
 
         .popup_text_item {
             font-weight: 400;

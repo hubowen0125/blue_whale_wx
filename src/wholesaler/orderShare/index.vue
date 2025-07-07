@@ -85,6 +85,7 @@ const getByCardNoFu = (cardNo: string) => {
                 <template v-for="item in orderDetails.cardProductsList" :key="item.id">
                     <view class="product_item">
                         <com-orderTable
+                            miniRole="wholesaler"
                             orderType="shareDetail"
                             :productDetail="item"></com-orderTable>
                     </view>
