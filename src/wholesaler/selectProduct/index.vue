@@ -94,12 +94,12 @@ const showPopupFu = (data: any) => {
             return item
         })
         arr.push(data)
-    } else {    
+    } else {
         // arr.splice(index, 1)
         data = arr[index]
     }
     popupProductDetail.value = data
-    console.log(data , 'sfsadsad');
+    console.log(data, 'sfsadsad');
     popupRef.value.open('bottom');
 }
 
@@ -186,13 +186,15 @@ const scrolltolower = () => {
         </view>
     </view>
     <uni-popup ref="popupRef" :safe-area="false">
-        <view class="popup_content flex_cloumn">
+        <view class="popup_content flex_column">
             <view class="popup_header flex_align flex_between">
                 <text>加入订货单</text>
                 <image class="off_icon" :src="off_icon" @click="closePopupFu"></image>
             </view>
-            <com-orderTable ref="orderTableRef" orderType="handleOrder"
-                :productDetail="popupProductDetail"></com-orderTable>
+            <view class="flex_1 poupo_main">
+                <com-orderTable ref="orderTableRef" orderType="handleOrder"
+                    :productDetail="popupProductDetail"></com-orderTable>
+            </view>
             <view class="popup_footer flex_align">
                 <button class="button_cancel" @click="closePopupFu">取消</button>
                 <button class="button_defalut flex_1" @click="addToCartFu">加入订货单</button>
@@ -279,6 +281,9 @@ const scrolltolower = () => {
     background-color: #fff;
     padding: 40rpx 24rpx calc(26rpx + env(safe-area-inset-bottom));
     border-radius: 32rpx 32rpx 0 0;
+    max-height: 60vh;
+    overflow: hidden;
+    box-sizing: border-box;
 
     .popup_header {
         font-weight: bold;
@@ -291,6 +296,11 @@ const scrolltolower = () => {
             height: 28rpx;
         }
 
+    }
+
+    .poupo_main {
+        overflow-x: hidden;
+        overflow-y: auto;
     }
 
     .popup_footer {

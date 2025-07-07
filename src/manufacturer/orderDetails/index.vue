@@ -181,6 +181,7 @@ const cashOnDeliveryFu = () => {
                     <template v-for="item in orderDetails.orderProductsList" :key="item.id">
                         <com-orderTable
                             orderType="detail"
+                            miniRole="manufacturer"
                             :productDetail="item">
                         </com-orderTable>
                     </template>

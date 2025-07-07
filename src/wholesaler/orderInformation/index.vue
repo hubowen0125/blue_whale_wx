@@ -120,8 +120,14 @@ const scrolltolower = () => {
 
 const selectManufacturerSubmitFu = (e: any) => {
     console.log(e, '1223');
-    manufacturerData.value = e
-    createParams.manufacturerId = e.deptId
+    if (createParams.manufacturerId == e.deptId) {
+        return
+    } else {
+        manufacturerData.value = e
+        createParams.manufacturerId = e.deptId
+        shoppingCart.value = []
+        useWholesaler.setShoppingCartFu([])
+    }
 }
 
 const selectProductFu = () => {
@@ -241,6 +247,8 @@ const createAddFu = async () => {
         padding: 24rpx;
         position: relative;
         gap: 20rpx;
+        overflow-x: hidden;
+        overflow-y: auto;
 
         .product_list {
             gap: 20rpx;

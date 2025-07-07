@@ -187,6 +187,7 @@ const selectProductFu = () => {
                 <template v-for="item in cardOrderDetail.cardProductsList" :key="item.id">
                     <view class="product_item">
                         <com-orderTable
+                            miniRole="manufacturer"
                             orderType="handleOrder"
                             :productDetail="item">
                         </com-orderTable>

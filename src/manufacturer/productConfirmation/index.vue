@@ -60,6 +60,7 @@ const handleOrderFu = () => {
                 <template v-for="item in shoppingCart" :key="item.id">
                     <view class="product_item">
                         <com-orderTable
+                            miniRole="manufacturer"
                             orderType="handleOrder"
                             :productDetail="item"></com-orderTable>
                     </view>

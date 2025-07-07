@@ -74,16 +74,16 @@ defineExpose({
 <template>
     <view class="popup_con">
         <uni-popup ref="popupRef">
-            <view class="popup_content flex_cloumn text_align">
+            <view class="popup_content flex_column text_align">
                 <view class="popup_title">{{ popupData.popupTitle }}</view>
-                <view class="popup_main flex_cloumn" v-if="popupData.pupupType === 'default'">
+                <view class="popup_main flex_column" v-if="popupData.pupupType === 'default'">
                     <view v-for="item in popupData.popupContent" :key="item.id" class="popup_text_item">
                         <text>{{ item.text }}</text>
                         <text v-if="item.desc" class="popup_text_desc">{{ item.desc }}</text>
                         <text v-if="item.text1">{{ item.text1 }}</text>
                     </view>
                 </view>
-                <view class="popup_main popup_input_con flex_cloumn" v-if="popupData.pupupType === 'input'">
+                <view class="popup_main popup_input_con flex_column" v-if="popupData.pupupType === 'input'">
                     <view v-for="item in popupData.popupContent" :key="item.id" class="popup_text_item">
                         <text>{{ item.text }}</text>
                         <text v-if="item.desc" class="popup_text_desc">{{ item.desc }}</text>

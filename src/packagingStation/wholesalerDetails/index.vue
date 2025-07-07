@@ -188,7 +188,7 @@ const modifyFu = () => {
                 .wholesaler_details_item_value {
                     font-weight: 400;
                     font-size: 28rpx;
-                    color: #7C8191;
+                    color: #7C8191
                 }
             }
         }

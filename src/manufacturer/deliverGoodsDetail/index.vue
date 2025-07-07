@@ -140,6 +140,7 @@ const confirmPopupFu = () => {
                         <view class="order_item">
                             <com-orderTable
                                 orderType="handleRefund"
+                                miniRole="manufacturer"
                                 :productDetail="item"
                                 :selectAll="selectAll"
                                 @deselectAllFu="selectAllFu">

@@ -141,7 +141,7 @@ const formSubmit = (e: any) => {
 </script>
 
 <template>
-    <view class="container container_defalut_bg flex_cloumn">
+    <view class="container container_defalut_bg flex_column">
         <com-header header-title="添加批发商"></com-header>
         <view class="main_con flex_1">
             <form @submit="formSubmit">

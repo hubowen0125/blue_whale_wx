@@ -20,6 +20,10 @@ const props = defineProps({
     selectAll: {
         type: Boolean,
         default: false
+    },
+    miniRole: {
+        type: String,
+        default: ''
     }
 })
 
@@ -46,8 +50,8 @@ const selectTitle = computed(() => {
 })
 
 const tableDetail = computed(() => {
-    console.log(props.productDetail , 'props.productDetail');
-    
+    console.log(props.productDetail, 'props.productDetail');
+
     return props.productDetail
 })
 
@@ -148,6 +152,8 @@ const reduceFu = (item: any, key: string) => {
  * 增加数量
  */
 const addFu = (item: any, key: string) => {
+    console.log(item, key, 'itemitemitem');
+
     if (props.orderType == 'handleOrder' && item[key] == item.stockNum) {
         return
     } else if (props.orderType == 'handleRefund' && item[key] == item.unsentHandNum) {
@@ -206,13 +212,21 @@ defineExpose({
                     <view class="table_cell table_cell_input"
                         v-if="(orderType == 'handleOrder' && col.key == 'handNum') || (orderType == 'handleRefund' && col.key == 'returnNum')">
                         <view class="flex_align flex_center table_cell_input_con" :class="{ 'pointer': selectItem }">
-                            <view class="table_cell_btn table_cell_btn_minus" @click="reduceFu(row, col.key)">-</view>
+                            <view class="table_cell_btn table_cell_btn_minus"
+                                :class="{ table_cell_disabled: row[col.key] == 0 }" @click="reduceFu(row, col.key)">-
+                            </view>
                             <input class="tabler_cell_input"
                                 type="number"
                                 @blur="(e: any) => inputValueFu(e, row, col.key)"
                                 v-model="row[col.key]">
-                            <view class="table_cell_btn table_cell_btn_plus" @click="addFu(row, col.key)">+</view>
+                            <view class="table_cell_btn table_cell_btn_plus"
+                                :class="{ table_cell_disabled: row[col.key] == row.stockNum }"
+                                @click="addFu(row, col.key)">+
+                            </view>
                         </view>
+                    </view>
+                    <view class="table_cell" v-else-if="col.key == 'sizeName' && miniRole == 'manufacturer'">
+                        {{ tableDetail.sizeName }}({{ row.stockNum }})
                     </view>
                     <view :class="['table_cell', orderType == 'show' && col.key == 'handNum' ? 'table_cell_color' : '']"
                         v-else>{{
@@ -314,6 +328,7 @@ defineExpose({
                     height: 60rpx;
                     background: #FFFFFF;
                     line-height: 60rpx;
+                    color: #0C62FF;
                 }
 
                 .table_cell_btn_minus {
@@ -322,6 +337,11 @@ defineExpose({
 
                 .table_cell_btn_plus {
                     border-left: 1rpx solid #E0E0E7;
+                }
+
+                .table_cell_disabled {
+                    pointer-events: none;
+                    color: #C2C5CE;
                 }
 
                 .tabler_cell_input {

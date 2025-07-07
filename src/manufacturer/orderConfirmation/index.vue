@@ -274,7 +274,7 @@ const createOrderFu = () => {
             <view class="product_list flex_column">
                 <template v-for="item in orderDetails.orderProductsParams" :key="item.id">
                     <view class="product_item">
-                        <com-orderTable orderType="show"
+                        <com-orderTable orderType="show" miniRole="manufacturer"
                             :productDetail="item"></com-orderTable>
                     </view>
                 </template>

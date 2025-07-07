@@ -184,6 +184,8 @@ const paymentFu = () => {
         padding: 24rpx;
         gap: 20rpx;
         position: relative;
+        overflow-x: hidden;
+        overflow-y: auto;
 
         .customer_info {
             background: #FFFFFF;

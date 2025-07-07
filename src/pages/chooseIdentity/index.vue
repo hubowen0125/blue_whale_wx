@@ -128,7 +128,7 @@ const getUserInfoFu = () => {
 
 
 <template>
-    <view class="container flex_cloumn container_defalut_bg">
+    <view class="container flex_column container_defalut_bg">
         <view class="container_title">请选择您的身份</view>
         <view class="container_desc">帮助我们更好地为您提供服务</view>
         <view class="identity_list flex_column">
