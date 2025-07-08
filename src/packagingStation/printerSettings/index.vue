@@ -16,10 +16,113 @@ const characteristicId = ref('')
 
 const canvasWidth = ref(432);
 const canvasHeight = ref(310); // Adjust height as needed for the content.
+const labelImg = ref('')
 
 onMounted(() => {
-
+    generateCanvasFu()
 })
+
+
+const generateCanvasFu = async () => {
+    // status.value = '正在生成打印数据...';
+    try {
+        const ctx = uni.createCanvasContext('labelCanvas')
+        const canvasW = canvasWidth.value
+        const canvasH = canvasHeight.value
+        const padding = 10
+        const lineHeight = 28
+        let y = padding + 20
+        const leftColX = padding
+        const rightColX = canvasW - padding - 120
+        let colDividerX = 0
+        let colDividerY = 0
+        ctx.setFillStyle('#FFFFFF')
+        ctx.fillRect(0, 0, canvasW, canvasH)
+        ctx.setStrokeStyle('#000000')
+        ctx.setFillStyle('#000000')
+        ctx.setLineWidth(1)
+        // === 外边框 ===
+        ctx.strokeRect(0, 0, canvasW, canvasH)
+        // === 标题 ===
+        ctx.setFontSize(30)
+        ctx.setTextAlign('center')
+        ctx.fillText('杭盛打包站', canvasW / 2, y)
+        y += lineHeight
+        // === 分隔线（标题下）===
+        drawLine(0, y - lineHeight / 2, canvasW, y - lineHeight / 2)
+        colDividerY = y - lineHeight / 2
+        y += 36
+        // === 客户 / 仓位 ===
+        ctx.setFontSize(28)
+        ctx.setTextAlign('left')
+        ctx.fillText('客户：云南，潘石屹', leftColX, y)
+        ctx.fillText('仓位：', rightColX, y)
+        y += lineHeight
+        // === 分隔线 ===
+        drawLine(0, y - lineHeight / 2, rightColX - 10, y - lineHeight / 2)
+        colDividerX = rightColX - 10
+        y += 36
+        // === 厂家 / 仓位号 ===
+        ctx.setFontSize(32)
+        ctx.fillText('厂家：木童巷多多', leftColX, y)
+        ctx.setFontSize(60)
+        ctx.setTextAlign('center')
+        y += lineHeight
+        ctx.fillText('B38', colDividerX + (canvasW - colDividerX) / 2, y - lineHeight / 2)
+        // === 分隔线 ===
+        drawLine(0, y - lineHeight / 2, rightColX - 10, y - lineHeight / 2)
+        y += 36
+        // === 数量 ===
+        ctx.setFontSize(32)
+        ctx.setTextAlign('left')
+        ctx.fillText('数量：135手', leftColX, y)
+        y += lineHeight
+        // === 横线 ===
+        drawLine(0, y - lineHeight / 2, canvasW, y - lineHeight / 2)
+        // === 竖线（分栏）===
+        drawLine(colDividerX, colDividerY, colDividerX, y - lineHeight / 2)
+        y += 36
+        // === 打印时间 ===
+        ctx.setFontSize(22)
+        ctx.setTextAlign('center')
+        ctx.fillText('打印时间：2024年12月28日19:36', canvasW / 2, y)
+        // === 渲染 ===
+        await new Promise(resolve => ctx.draw(false, resolve))
+        // === 辅助函数 ===
+        function drawLine(x1: number, y1: number, x2: number, y2: number) {
+            ctx.beginPath()
+            ctx.moveTo(x1, y1)
+            ctx.lineTo(x2, y2)
+            ctx.stroke()
+        }
+        uni.canvasToTempFilePath({
+            canvasId: 'labelCanvas',
+            success: async (res: any) => {
+                labelImg.value = res.tempFilePath
+            },
+            fail: (err: any) => {
+                console.error('生成临时文件失败', err)
+            }
+        })
+
+        // status.value = '正在将Canvas转为图片...';
+        // status.value = '正在生成打印指令...';
+        // const commands = await canvasGetImageDataFu()
+        // console.log(commands, 'commandscommandscommandscommandscommands');
+
+        // status.value = '正在发送数据...';
+        // await writeData(commands);
+
+        // status.value = '打印完成';
+        // uni.showToast({ title: '打印指令已发送', icon: 'success' });
+
+    } catch (err: any) {
+        status.value = `打印失败: ${err.message || err.errMsg}`;
+        uni.showToast({ title: `打印失败: ${err.message || err.errMsg}`, icon: 'none' });
+    } finally {
+    }
+};
+
 
 /**
  * 搜索蓝牙打印机
@@ -215,96 +318,19 @@ wx.onBLEConnectionStateChange((res: { connected: any; }) => {
 })
 
 const printReceipt = async () => {
-    status.value = '正在生成打印数据...';
 
-    try {
-        const ctx = uni.createCanvasContext('labelCanvas')
-        const canvasW = canvasWidth.value
-        const canvasH = canvasHeight.value
-        const padding = 10
-        const lineHeight = 28
-        let y = padding + 20
-        const leftColX = padding
-        const rightColX = canvasW - padding - 120
-        let colDividerX = 0
-        let colDividerY = 0
-        ctx.setFillStyle('#FFFFFF')
-        ctx.fillRect(0, 0, canvasW, canvasH)
-        ctx.setStrokeStyle('#000000')
-        ctx.setFillStyle('#000000')
-        ctx.setLineWidth(1)
-        // === 外边框 ===
-        ctx.strokeRect(0, 0, canvasW, canvasH)
-        // === 标题 ===
-        ctx.setFontSize(30)
-        ctx.setTextAlign('center')
-        ctx.fillText('杭盛打包站', canvasW / 2, y)
-        y += lineHeight
-        // === 分隔线（标题下）===
-        drawLine(0, y - lineHeight / 2, canvasW, y - lineHeight / 2)
-        colDividerY = y - lineHeight / 2
-        y += 36
-        // === 客户 / 仓位 ===
-        ctx.setFontSize(28)
-        ctx.setTextAlign('left')
-        ctx.fillText('客户：云南，潘石屹', leftColX, y)
-        ctx.fillText('仓位：', rightColX, y)
-        y += lineHeight
-        // === 分隔线 ===
-        drawLine(0, y - lineHeight / 2, rightColX - 10, y - lineHeight / 2)
-        colDividerX = rightColX - 10
-        y += 36
-        // === 厂家 / 仓位号 ===
-        ctx.setFontSize(32)
-        ctx.fillText('厂家：木童巷多多', leftColX, y)
-        ctx.setFontSize(60)
-        ctx.setTextAlign('center')
-        y += lineHeight
-        ctx.fillText('B38', colDividerX + (canvasW - colDividerX) / 2, y - lineHeight / 2)
-        // === 分隔线 ===
-        drawLine(0, y - lineHeight / 2, rightColX - 10, y - lineHeight / 2)
-        y += 36
-        // === 数量 ===
-        ctx.setFontSize(32)
-        ctx.setTextAlign('left')
-        ctx.fillText('数量：135手', leftColX, y)
-        y += lineHeight
-        // === 横线 ===
-        drawLine(0, y - lineHeight / 2, canvasW, y - lineHeight / 2)
-        // === 竖线（分栏）===
-        drawLine(colDividerX, colDividerY, colDividerX, y - lineHeight / 2)
-        y += 36
-        // === 打印时间 ===
-        ctx.setFontSize(22)
-        ctx.setTextAlign('center')
-        ctx.fillText('打印时间：2024年12月28日19:36', canvasW / 2, y)
-        // === 渲染 ===
-        await new Promise(resolve => ctx.draw(false, resolve))
-        // === 辅助函数 ===
-        function drawLine(x1: number, y1: number, x2: number, y2: number) {
-            ctx.beginPath()
-            ctx.moveTo(x1, y1)
-            ctx.lineTo(x2, y2)
-            ctx.stroke()
-        }
+    status.value = '正在将Canvas转为图片...';
+    status.value = '正在生成打印指令...';
+    const commands = await canvasGetImageDataFu()
+    console.log(commands, 'commandscommandscommandscommandscommands');
 
-        status.value = '正在将Canvas转为图片...';
-        status.value = '正在生成打印指令...';
-        const commands = await canvasGetImageDataFu()
-        console.log(commands, 'commandscommandscommandscommandscommands');
+    status.value = '正在发送数据...';
+    await writeData(commands);
 
-        status.value = '正在发送数据...';
-        await writeData(commands);
+    status.value = '打印完成';
+    uni.showToast({ title: '打印指令已发送', icon: 'success' });
 
-        // status.value = '打印完成';
-        // uni.showToast({ title: '打印指令已发送', icon: 'success' });
-
-    } catch (err: any) {
-        status.value = `打印失败: ${err.message || err.errMsg}`;
-        uni.showToast({ title: `打印失败: ${err.message || err.errMsg}`, icon: 'none' });
-    } finally {
-    }
-};
+}
 
 const canvasGetImageDataFu = () => {
     return new Promise<Uint8Array>((resolve, reject) => {
@@ -398,8 +424,14 @@ const writeData = async (data: Uint8Array) => {
 
 <template>
     <view class="container flex_column">
-        <com-header header-title="蓝牙列表" />
+        <com-header header-title="打印机设置" />
         <view class="main_con flex_1">
+            <view class="section_con">
+                <view class="section_title">页面预览</view>
+                <view class="label_img_con">
+                    <image class="label_img" :src="labelImg"></image>
+                </view>
+            </view>
             <button @click="searchPrinter">搜索蓝牙</button>
             <view v-for="item in devices" :key="item.deviceId" class="device-item" @click="connectPrinter(item)">
                 {{ item.name || '未知设备' }} ({{ item.deviceId }})
@@ -407,7 +439,7 @@ const writeData = async (data: Uint8Array) => {
             <view class="status">状态: {{ status }}</view>
         </view>
         <canvas canvas-id="labelCanvas" id="labelCanvas"
-            :style="{ width: canvasWidth + 'px', height: canvasHeight + 'px', transform: 'scale(.8)' }"></canvas>
+            :style="{ width: canvasWidth + 'px', height: canvasHeight + 'px', transform: 'scale(.8)', position: 'absolute', left: '-99999px' }"></canvas>
         <view class="footer_con"><button class="button_defalut" @click="printReceipt">打印</button></view>
     </view>
 </template>
@@ -415,6 +447,37 @@ const writeData = async (data: Uint8Array) => {
 
 
 <style lang="scss" scoped>
+.main_con {
+    padding: 24rpx;
+
+    .section_con {
+        background: #FFFFFF;
+        border-radius: 24rpx;
+        padding: 36rpx 28rpx;
+
+        .section_title {
+            font-weight: bold;
+            font-size: 32rpx;
+            color: #202020;
+            margin-bottom: 30rpx;
+        }
+
+        .label_img_con {
+            background: #F6F6F6;
+            border-radius: 24rpx;
+            padding: 20rpx 0;
+
+            .label_img {
+                width: 432rpx;
+                height: 310rpx;
+                margin: auto;
+                display: block;
+            }
+        }
+
+    }
+}
+
 .device-item {
     padding: 15px;
     border-bottom: 1px solid #eee;

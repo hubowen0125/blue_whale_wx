@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { handleInput } from "@/utils/utils";
 import { getSizesListApi, sizeAddApi, getColorsListApi, colorsAddApi } from "../http/manufacturer"
 
 
@@ -34,6 +35,7 @@ const sizeActive = ref<any>()
 const type = ref('')
 const colorsList = ref<any>([])
 const colorsActive = ref<any>([])
+const productColorsList = ref<any>([])
 
 
 onLoad((e: any) => {
@@ -60,6 +62,16 @@ onLoad((e: any) => {
             if (eventChannel) {
                 eventChannel.on('activeColorList', (data: any) => {
                     colorsActive.value = data
+                });
+            }
+        }
+        if (e.type == 'inventory') {
+            headerTitle.value = '库存'
+            const eventChannel = proxy.getOpenerEventChannel();
+            if (eventChannel) {
+                eventChannel.on('productColorsList', (data: any) => {
+                    console.log(data, 'productColorsList');
+                    productColorsList.value = data
                 });
             }
         }
@@ -231,7 +243,29 @@ const selectDataFu = () => {
     if (type.value == 'color') {
         prevPage.$vm.colorsActive = colorsActive.value
     }
+    if (type.value == 'inventory') {
+        prevPage.$vm.productColorsList = productColorsList.value
+    }
     uni.navigateBack() // 返回上一页
+}
+
+
+
+/**
+ * 输入框输入值
+ * @param e 
+ * @param item 
+ * @param key 
+ */
+const inputValueFu = async (e: any, index: any) => {
+    const value = e.target.value
+    const result = await handleInput(value) as string;
+    if (result) {
+        const num = parseInt(result, 10)
+        productColorsList.value[index].stockNum = num * 1
+    } else {
+        productColorsList.value[index].stockNum = 0
+    }
 }
 </script>
 
@@ -241,8 +275,9 @@ const selectDataFu = () => {
         <com-header :header-title="headerTitle"></com-header>
         <view class="main_con flex_1">
             <view class="parameter_container">
-                <view>{{ headerTitle }}</view>
-                <view class="parameter_list" v-if="sizeList.length > 0 || colorsList.length > 0">
+                <view class="parameter_container_title">{{ type == 'inventory' ? '请输入库存' : headerTitle }}</view>
+                <view :class="[type == 'inventory' ? 'flex_column inventory_list' : 'parameter_list']"
+                    v-if="sizeList.length > 0 || colorsList.length > 0 || productColorsList.length > 0">
                     <template v-if="type == 'size'">
                         <button v-for="item in sizeList" :key="item.id" class="parameter_item"
                             :class="{ 'parameter_item_active': sizeActive?.id == item.id }"
@@ -253,12 +288,22 @@ const selectDataFu = () => {
                             :class="{ 'parameter_item_active': setColorClassFu(item) }"
                             @click="selectColorsFu(item)">{{ item.color }}</button>
                     </template>
+                    <template v-if="type == 'inventory'">
+                        <template v-for="(item, index) in productColorsList" :key="index">
+                            <view class="inventory_item">
+                                <view class="inventory_item_title">{{ item.colorName }}</view>
+                                <input class="inventory_item_input" type="number"
+                                    :placeholder="`请输入${item.colorName}库存`"
+                                    v-model.trim="item.stockNum" @blur="(e: any) => inputValueFu(e, index)">
+                            </view>
+                        </template>
+                    </template>
                 </view>
                 <com-no_data v-else noDataText="暂无数据"></com-no_data>
             </view>
         </view>
         <view class="footer_con flex">
-            <button class="add_btn" @click="addParamsFu">{{ addButtonText }}</button>
+            <button v-if="addButtonText" class="add_btn" @click="addParamsFu">{{ addButtonText }}</button>
             <button class="flex_1 button_defalut" @click="selectDataFu">确认</button>
         </view>
     </view>
@@ -274,11 +319,14 @@ const selectDataFu = () => {
         background: #FFFFFF;
         border-radius: 24rpx;
         padding: 36rpx 28rpx;
-        font-weight: bold;
-        font-size: 32rpx;
-        color: #202020;
         min-height: 832rpx;
         position: relative;
+
+        .parameter_container_title {
+            font-weight: bold;
+            font-size: 32rpx;
+            color: #202020;
+        }
 
         .parameter_list {
             margin-top: 28rpx;
@@ -302,6 +350,27 @@ const selectDataFu = () => {
                 background: rgba(12, 104, 255, 0.03);
                 border: 1rpx solid #CDE1FF;
                 color: #0C62FF;
+            }
+        }
+
+        .inventory_list {
+            gap: 40rpx;
+            margin-top: 60rpx;
+
+            .inventory_item_title {
+                font-weight: 500;
+                font-size: 28rpx;
+                color: #202020;
+                margin-bottom: 20rpx;
+            }
+
+            .inventory_item_input {
+                width: 646rpx;
+                height: 96rpx;
+                background: #F7F8FA;
+                border-radius: 12rpx;
+                padding: 0 32rpx;
+                box-sizing: border-box;
             }
         }
     }

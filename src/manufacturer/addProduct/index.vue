@@ -22,7 +22,7 @@ const productDetail = [
         value: 'styleNumber',
         type: 'input',
         inputType: 'text',
-        required: false,
+        required: true,
         placeholder: '请输入商品款号'
     },
     {
@@ -73,7 +73,8 @@ const productDetail = [
         type: 'select',
         inputType: 'number',
         required: false,
-        placeholder: '请输入库存'
+        placeholder: '请查看库存',
+        selectType: 'inventory'
     },
 ]
 const fileList = ref<any>([])
@@ -115,19 +116,19 @@ onShow(() => {
         let colors = ''
         orderParams.value.productColorsList = []
         currentPage.$vm.colorsActive.map((item: any) => {
-            // const find = orderParams.value.productColorsList.find((color: any) => color.id === item.id)
-            // if (!find) {
             orderParams.value.productColorsList.push({
                 colorName: item.color,
                 stockNum: 0,
             })
             colors += item.color + '、'
-            // }
         })
         activeColorList.value = currentPage.$vm.colorsActive
         orderParams.value.colors = colors.substring(0, colors.length - 1)
-        console.log(orderParams.value.productColorsList, 'orderParams.value.productColorsListorderParams.value.productColorsListorderParams.value.productColorsList');
         currentPage.$vm.colorsActive = ''
+    }
+    if (currentPage.$vm.productColorsList) {
+        orderParams.value.productColorsList = currentPage.$vm.productColorsList
+        currentPage.$vm.productColorsList = []
     }
 })
 
@@ -209,6 +210,9 @@ const delFileFu = (index: number) => {
  */
 const addParamFu = (item: any) => {
     console.log(item, 'addParamFu');
+    if (item.selectType == 'inventory' && orderParams.value.productColorsList.length == 0) {
+        return proxy.$Toast({ title: '请先选择颜色' })
+    }
     uni.navigateTo({
         url: `/manufacturer/addParameters/index?type=${item.selectType}`,
         success: (res) => {
@@ -217,6 +221,9 @@ const addParamFu = (item: any) => {
                 res.eventChannel.emit('activeColorList', activeColorList.value);
             } else if (item.selectType === 'size') {
                 res.eventChannel.emit('activeSizeList', activeSizeList.value);
+            } else if (item.selectType === 'inventory') {
+                console.log(orderParams.value.productColorsList, 'orderParams.value.productColorsList');
+                res.eventChannel.emit('productColorsList', orderParams.value.productColorsList);
             }
         }
     })
@@ -227,9 +234,14 @@ const addParamFu = (item: any) => {
  * @param e 
  */
 const formSubmit = (e: any) => {
-    const { productName, sizeName, productColorsList, price, unitQuantity } = orderParams.value
+    const { productName, styleNumber, sizeName, productColorsList, price, unitQuantity } = orderParams.value
+    console.log(orderParams.value, 'orderParams.value');
     if (!productName) {
         proxy.$Toast({ title: '请填写商品名称' })
+        return
+    }
+    if (!styleNumber) {
+        proxy.$Toast({ title: '请填写款号' })
         return
     }
     if (!sizeName) {
