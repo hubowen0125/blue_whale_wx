@@ -62,6 +62,9 @@ const downLoadingFu = () => {
         <view class="order_unit_con">
             <slot name="button"></slot>
         </view>
+        <view class="order_del">
+            <slot name="del"></slot>
+        </view>
     </view>
 </template>
 
@@ -125,5 +128,7 @@ const downLoadingFu = () => {
         border-radius: 12rpx;
         border: 1rpx solid #CDE1FF;
     }
+
+
 }
 </style>

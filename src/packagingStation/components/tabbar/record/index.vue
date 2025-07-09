@@ -195,9 +195,15 @@ const scrolltolower = () => {
                 </view>
                 <view class="select_time flex_align">
                     <view class="flex_align">
-                        <view>{{ recordParams.startTime }}</view>
+                        <picker mode="date" :value="recordParams.startTime" :start="startDate" :end="endDate"
+                            @change="startChangeFu">
+                            <view>{{ recordParams.startTime }}</view>
+                        </picker>
                         <image class="long_arrow" :src="long_arrow"></image>
-                        <view>{{ recordParams.endTime }}</view>
+                        <picker mode="date" :value="recordParams.endTime" :start="startDate" :end="endDate"
+                            @change="endChangeFu">
+                            <view>{{ recordParams.endTime }}</view>
+                        </picker>
                     </view>
                     <view class="time_long flex_1">共{{ timeDesc }}</view>
                 </view>

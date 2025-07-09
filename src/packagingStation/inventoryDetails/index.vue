@@ -3,7 +3,7 @@ import { getByIdApi, storageInputApi, delByIdApi } from "../http/packagingStatio
 import arrow_right from "@/static/images/arrow_right.png"
 import { dateStrToDateFormat } from "@/utils/utils";
 
-
+let timer: any
 const { proxy } = getCurrentInstance() as any;
 
 const inventoryDetail = reactive([
@@ -63,13 +63,13 @@ onLoad((e: any) => {
 
 onShow(() => {
     if (inventoryId.value) {
-        getByIdFu(inventoryId.value)
+        getByIdFu()
     }
 })
 
-const getByIdFu = (id: string) => {
+const getByIdFu = () => {
     proxy.$Loading()
-    getByIdApi({ id }).then((res: any) => {
+    getByIdApi({ id: inventoryId.value }).then((res: any) => {
         const { code, data, msg, token } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
@@ -96,6 +96,14 @@ const confirmPopupFu = (num: string | number) => {
         const { code, data, msg, token } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
+            proxy.$Toast({
+                title: '修改成功',
+                successCB: () => {
+                    timer = setTimeout(() => {
+                        getByIdFu()
+                    }, 1500)
+                }
+            })
         } else {
             proxy.$Toast({ title: msg })
         }
@@ -122,6 +130,16 @@ const delByIdFu = () => {
     }))
 }
 
+/**
+ * 页面
+ */
+onUnmounted(() => {
+    // 清除定时器
+    if (timer) {
+        clearTimeout(timer);
+        timer = null;
+    }
+})
 </script>
 
 

@@ -14,15 +14,16 @@ const orderDetails = ref<any>({
     packaging: {},
     wholesale: {},
     manufacturer: {},
-    cardProductsList:[],
+    cardProductsList: [],
     remark: ''
 })
 
 onLoad((e: any) => {
     if (e.orderNo) {
         getByCardNoFu(e.orderNo)
+        const title = `来自批发商: ${useUser.userInfo.dept.deptName}的订货卡，请立即查看`
         useUser.setShareParamFu({
-            title: '蓝鲸',
+            title,
             path: `/pages/loading/index?type=wholesale&cardNo=${e.orderNo}`,
             imageUrl: share
         })

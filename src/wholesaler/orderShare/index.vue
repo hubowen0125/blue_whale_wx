@@ -21,11 +21,6 @@ const orderDetails = ref<any>({
 onLoad((e: any) => {
     if (e.orderNo) {
         getByCardNoFu(e.orderNo)
-        useUser.setShareParamFu({
-            title: '蓝鲸',
-            path: `/pages/loading/index?type=manufacturer&cardNo=${e.orderNo}`,
-            imageUrl: share
-        })
     }
 })
 
@@ -46,6 +41,12 @@ const getByCardNoFu = (cardNo: string) => {
                 })
             }
             orderDetails.value = data
+            const title = `来自批发商: ${useUser.userInfo.dept.deptName}的订货卡，请立即查看`
+            useUser.setShareParamFu({
+                title,
+                path: `/pages/loading/index?type=manufacturer&cardNo=${cardNo}&manufacturerId=${data.manufacturerId}`,
+                imageUrl: share
+            })
         } else {
             proxy.$Toast({ title: msg })
         }
@@ -112,9 +113,12 @@ const getByCardNoFu = (cardNo: string) => {
     }
 
     .main_con {
-        padding: 24rpx;
+        margin-top: 24rpx;
+        padding: 0 24rpx 24rpx;
         position: relative;
         gap: 20rpx;
+        overflow-x: hidden;
+        overflow-y: auto;
 
         .product_list {
             gap: 20rpx;

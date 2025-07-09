@@ -189,12 +189,12 @@ const resetStockInParamsFu = () => {
     stockInParams.packagingWholesaleId = ''
     stockInParams.storageNum = ''
     stockInParams.checkHandNum = ''
+    wholesaleDetail.value.wholesaleName = ''
 }
 
 const scanCodeFu = () => {
     proxy.$Loading()
     uni.scanCode({
-        onlyFromCamera: true,
         success: function (res) {
             console.log('条码类型：' + res.scanType);
             console.log('条码内容：' + res.result);
@@ -211,13 +211,13 @@ const scanCodeFu = () => {
                 });
                 console.log(params, 'params');
                 const { packagingId, shipId, orderNo } = params
-                // if (packagingId == useUser.userInfo.dept.deptId) {
+                if (packagingId == useUser.userInfo.dept.deptId) {
                     uni.navigateTo({
                         url: `/packagingStation/scanningResults/index?shipId=${shipId}&orderNo=${orderNo}`
                     })
-                // } else {
-                //     codePopupCom.value.showPopup()
-                // }
+                } else {
+                    codePopupCom.value.showPopup()
+                }
             }
         },
         fail: function (res) {

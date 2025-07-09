@@ -92,6 +92,15 @@ const wholesaleListFu = () => {
     }))
 }
 
+const orderDelFu = (e: any) => {
+    console.log(e , '删除订单');
+    const index = shoppingCart.value.findIndex((item) => item.id === e)
+    if (index !== -1) {
+        shoppingCart.value.splice(index, 1)
+        useWholesaler.setShoppingCartFu(shoppingCart.value)
+    }
+}
+
 
 const selectPackagingStationFu = () => {
     selectPackagingStationRef.value.showPopupFu()
@@ -210,6 +219,8 @@ const createAddFu = async () => {
                         <com-orderTable
                             miniRole="wholesaler"
                             orderType="handleOrder"
+                            @orderDelFu="orderDelFu"
+                            :deleteBtn="true"
                             :productDetail="item"></com-orderTable>
                     </view>
                 </template>

@@ -1,7 +1,9 @@
 <script lang="ts" setup>
+import { handleInput } from "@/utils/utils";
 import { scanCodeApi, stockInApi } from "../http/packagingStation";
 import scan_icon from "@/static/images/packagingStation/scan_icon.png"
 
+let timer: any
 const { proxy } = getCurrentInstance() as any;
 
 interface STOCKINPARAMS {
@@ -66,6 +68,7 @@ const scanCodeFu = (orderNo: string, shipId: string) => {
         if (code == proxy.$successCode) {
             console.log(data, '0000');
             codeDetails.value = data
+            stockInParams.value = { ...stockInParams.value, ...codeDetails.value }
         } else {
             proxy.$Toast({ title: msg })
         }
@@ -75,20 +78,35 @@ const scanCodeFu = (orderNo: string, shipId: string) => {
     }))
 }
 
+const inputValueFu = async (e: any, key: string) => {
+    const value = e.target.value
+    const result = await handleInput(value) as string;
+    if (result) {
+        const num = parseInt(result, 10)
+        stockInParams.value[key] = num.toString()
+    } else {
+        stockInParams.value[key] = 0
+    }
+}
+
 const stockInFu = () => {
-    const { type, manufacturerName, packagingWholesaleId, storageNum } = codeDetails.value
-    console.log(stockInParams, 'stockInParamsstockInParamsstockInParams');
-    stockInParams.value = { ...stockInParams.value, type, manufacturerName, packagingWholesaleId, storageNum }
     if (!stockInParams.value.checkHandNum) {
         return proxy.$Toast({ title: '请输入核点数量' })
     }
     proxy.$Loading()
-    stockInApi(stockInParams).then((res: any) => {
+    stockInApi(stockInParams.value).then((res: any) => {
         const { code, data, msg, token } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
             console.log(data, '0000');
-            proxy.$Toast({ title: '入库成功' })
+            proxy.$Toast({
+                title: '入库成功',
+                successCB: () => {
+                    timer = setTimeout(() => {
+                        uni.navigateBack()
+                    }, 1500)
+                }
+            })
         } else {
             proxy.$Toast({ title: msg })
         }
@@ -104,6 +122,17 @@ const stockInFu = () => {
 const resetFu = () => {
     uni.navigateBack()
 }
+
+/**
+ * 页面
+ */
+onUnmounted(() => {
+    // 清除定时器
+    if (timer) {
+        clearTimeout(timer);
+        timer = null;
+    }
+})
 </script>
 
 
@@ -127,8 +156,9 @@ const resetFu = () => {
                         <view class="result_item_key flex_1" v-if="item.type === 'text'">
                             {{ codeDetails[item.value] }}
                         </view>
-                        <input class="result_item_key flex_1" v-model="stockInParams.checkHandNum" v-else type="text"
-                            :placeholder="item.value">
+                        <input class="result_item_key flex_1" v-model.trim="stockInParams.checkHandNum" v-else
+                            type="number"
+                            :placeholder="item.value" @blur="(e: any) => inputValueFu(e, 'checkHandNum')">
                     </view>
                 </view>
                 <view class="btn_con flex_align">

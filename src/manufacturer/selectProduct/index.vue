@@ -64,7 +64,18 @@ onShow(() => {
             paramsPage.pageNum = 1
             slideLoading.value = true
             productListFu()
+        } else {
+            let arr = [...useManufacturer.orderCard]
+            productList.value.map((item: any) => {
+                if (arr.some((cartItem: any) => cartItem.id === item.id)) {
+                    item.isAdded = true
+                } else {
+                    item.isAdded = false
+                }
+            })
         }
+    } else {
+        isLoad.value = true
     }
 })
 
@@ -90,7 +101,6 @@ const productListFu = async () => {
         proxy.$CloseLoading();
         proxy.$Toast({ title: req.msg })
     }))
-    isLoad.value = true
 }
 
 /**

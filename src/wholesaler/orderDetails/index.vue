@@ -184,7 +184,7 @@ const delByOrderNoFu = () => {
             </view>
             <button class="records_btn flex_1" @click="viewRecordsFu">操作记录</button>
             <button class="button_defalut flex_1" v-if="[2].includes(orderDetails.status * 1)"
-                @click="refundOrderFu">未发货退单</button>
+                @click="refundOrderFu">待发货退单</button>
         </view>
     </view>
     <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="delByOrderNoFu"></com-popup_com>

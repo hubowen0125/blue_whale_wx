@@ -18,6 +18,7 @@ const codeBtn = ref('获取验证码')
 const checked = ref(false)
 const type = ref('') // 订货卡类型
 const cardNo = ref('')
+const typeId = ref('')
 
 
 onLoad((e: any) => {
@@ -29,6 +30,7 @@ onLoad((e: any) => {
     if (e.type) {
         type.value = e.type
         cardNo.value = e.cardNo
+        typeId.value = e.typeId
     }
 })
 
@@ -132,7 +134,6 @@ const renewalFeeFu = async (miniRole: string) => {
     await renewalFeeApi({ type: miniRole }).then((res: any) => {
         const { code, data, msg } = res
         if (code == proxy.$successCode) {
-            console.log(data, '123');
             useUser.setRenewalFeeFu(data)
         } else {
             proxy.$Toast({ title: msg })
@@ -151,7 +152,6 @@ const getUserInfoFu = () => {
             useUser.setMiniRoleFu(data.miniRole)
             await servicePhoneFu()
             await renewalFeeFu(data.miniRole)
-            console.log(data.miniRole, '213');
             if (data.miniRole == 'guest') {
                 uni.redirectTo({
                     url: '/pages/chooseIdentity/index'
@@ -159,9 +159,22 @@ const getUserInfoFu = () => {
             } else {
                 if (type.value) {
                     if (type.value == 'manufacturer') {
-                        uni.redirectTo({
-                            url: `/manufacturer/shareOrderCard/index?type=${type.value}&cardNo=${cardNo.value}`
-                        })
+                        if (useUser.miniRole == 'manufacturer' && typeId.value == useUser.userInfo.deptId) {
+                            uni.redirectTo({
+                                url: `/manufacturer/shareOrderCard/index?type=${type.value}&cardNo=${cardNo.value}`
+                            })
+                        } else {
+                            if (useUser.miniRole == 'manufacturer') {
+                                uni.redirectTo({
+                                    url: '/manufacturer/home/index?popup=true'
+                                })
+                            }
+                            if (useUser.miniRole == 'wholesale') {
+                                uni.redirectTo({
+                                    url: '/wholesaler/home/index?popup=true'
+                                })
+                            }
+                        }
                     }
                     if (type.value == 'wholesale') {
                         uni.redirectTo({
@@ -203,6 +216,16 @@ const viewProtocolFu = (key: any) => {
     // })
 }
 
+/**
+ * 页面
+ */
+onUnmounted(() => {
+    // 清除定时器
+    if (timer) {
+        clearTimeout(timer);
+        timer = null;
+    }
+})
 </script>
 
 

@@ -326,6 +326,16 @@ const setPrevParams = () => {
     })
 }
 
+/**
+ * 页面
+ */
+onUnmounted(() => {
+    // 清除定时器
+    if (timer) {
+        clearTimeout(timer);
+        timer = null;
+    }
+})
 </script>
 
 

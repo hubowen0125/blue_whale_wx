@@ -12,7 +12,7 @@ const stateList = [
         key: '',
     },
     {
-        title: '未发货',
+        title: '待发货',
         key: 1,
     },
     {

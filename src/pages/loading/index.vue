@@ -8,13 +8,24 @@ const { proxy } = getCurrentInstance() as any
 onLoad((e: any) => {
     proxy.$Loading()
     if (useUser.token) {
-        console.log(e.type, 'werwere');
         if (e.type) {
-            console.log(e.type, 'werwere');
             if (e.type == 'manufacturer') {
-                uni.redirectTo({
-                    url: `/manufacturer/shareOrderCard/index?type=${e.type}&cardNo=${e.cardNo}`
-                })
+                if (useUser.miniRole == 'manufacturer' && e.manufacturerId == useUser.userInfo.deptId) {
+                    uni.redirectTo({
+                        url: `/manufacturer/shareOrderCard/index?type=${e.type}&cardNo=${e.cardNo}`
+                    })
+                } else {
+                    if (useUser.miniRole == 'manufacturer') {
+                        uni.redirectTo({
+                            url: '/manufacturer/home/index?popup=true'
+                        })
+                    }
+                    if (useUser.miniRole == 'wholesale') {
+                        uni.redirectTo({
+                            url: '/wholesaler/home/index?popup=true'
+                        })
+                    }
+                }
             }
             if (e.type == 'wholesale') {
                 uni.redirectTo({
@@ -48,7 +59,7 @@ onLoad((e: any) => {
     } else {
         if (e.type) {
             uni.redirectTo({
-                url: `/pages/login/index?type=${e.type}&cardNo=${e.cardNo}`
+                url: `/pages/login/index?type=${e.type}&cardNo=${e.cardNo}&typeId=${e.type == 'manufacturer' ? e.manufacturerId : e.wholesaleId}`
             })
         } else {
             uni.redirectTo({

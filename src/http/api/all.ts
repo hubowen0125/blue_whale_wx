@@ -307,6 +307,23 @@ export function editCardApi(data: any) {
 }
 
 /**
+ * 删除订货卡商品
+ * @param data
+ * @returnsF
+ */
+export function delProductApi(params: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/card/delProduct`,
+                method: "GET",
+                params
+            })
+        )
+    })
+}
+
+/**
  * 查询打包站或批发商
  * @param params
  * @returnsF
@@ -395,7 +412,7 @@ export function servicePhoneApi() {
  * @param params
  * @returnsF
  */
-export function renewalFeeApi(params:any) {
+export function renewalFeeApi(params: any) {
     return new Promise((resolve, reject) => {
         resolve(
             request({

@@ -128,7 +128,7 @@ const confirmPopupFu = () => {
 <template>
     <view class="container flex_column">
         <view class="bg"></view>
-        <com-header header-title="未发货退单" :backColor="false" :titleColor="true"></com-header>
+        <com-header header-title="待发货退单" :backColor="false" :titleColor="true"></com-header>
         <view class="order_info flex_align flex_between">
             <view class="flex_align order_info_con">
                 <view class="flex_column order_info_item">
@@ -137,7 +137,7 @@ const confirmPopupFu = () => {
                 </view>
                 <view class="flex_column order_info_item">
                     <view>2手/10件</view>
-                    <view class="order_info_title">未发货</view>
+                    <view class="order_info_title">待发货</view>
                 </view>
             </view>
             <view class="flex_align" @click="selectAllFu(!selectAll)">

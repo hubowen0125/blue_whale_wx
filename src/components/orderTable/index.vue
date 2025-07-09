@@ -3,8 +3,10 @@ import checkbox from "@/static/images/checkbox.png"
 import checkbox_active from "@/static/images/checkbox_active.png"
 import { handleInput, formatNumber } from "@/utils/utils"
 import { useUserStore } from "@/store/modules/user"
+import del_icon from "@/static/images/del_icon.png"
 
-const emit = defineEmits(['deselectAllFu'])
+
+const emit = defineEmits(['deselectAllFu', 'orderDelFu'])
 
 const useUser = useUserStore()
 
@@ -24,6 +26,10 @@ const props = defineProps({
     miniRole: {
         type: String,
         default: ''
+    },
+    deleteBtn: {
+        type: Boolean,
+        default: false
     }
 })
 
@@ -162,6 +168,9 @@ const addFu = (item: any, key: string) => {
     // }
 }
 
+const orderDelFu = () => {
+    emit('orderDelFu', tableDetail.value.id)
+}
 
 
 defineExpose({
@@ -194,6 +203,9 @@ defineExpose({
                         <button class="order_unit">1手/{{ tableDetail.unitQuantity }}件</button>
                     </view>
                 </template>
+            </template>
+            <template #del>
+                <image v-if="deleteBtn" class="order_del_icon" :src="del_icon" @click="orderDelFu"></image>
             </template>
         </com-orderInfo>
         <view class="table_container">
@@ -332,10 +344,12 @@ defineExpose({
 
                 .table_cell_btn_minus {
                     border-right: 1rpx solid #E0E0E7;
+                    background-clip: padding-box;
                 }
 
                 .table_cell_btn_plus {
                     border-left: 1rpx solid #E0E0E7;
+                    background-clip: padding-box;
                 }
 
                 .table_cell_disabled {
@@ -369,6 +383,11 @@ defineExpose({
         font-size: 24rpx;
         color: #202020;
     }
+}
 
+.order_del_icon {
+    width: 40rpx;
+    height: 40rpx;
+    margin-top: 20rpx;
 }
 </style>

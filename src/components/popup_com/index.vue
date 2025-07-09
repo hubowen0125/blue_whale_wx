@@ -142,11 +142,12 @@ defineExpose({
             width: 452rpx;
             height: 96rpx;
             border-radius: 12rpx;
-            border: 1rpx solid #C0C0C0;
+            border: 1px solid #C0C0C0;
             padding: 0 32rpx;
             box-sizing: border-box;
             margin: 24rpx auto 0;
             text-align: left;
+            background-clip: padding-box;
         }
     }
 

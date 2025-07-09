@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { selectByShareApi, getInfoApi } from "@/http/api/all"
+import { selectByShareApi, getInfoApi, editCardApi, delProductApi } from "@/http/api/all"
 import position_1 from "@/static/images/position_2.png"
 import { formatNumber } from "@/utils/utils";
 import { useUserStore } from '@/store/modules/user';
@@ -117,11 +117,39 @@ const getInfoFu = () => {
  * 立即下单
  */
 const handleOrderFu = () => {
-    uni.navigateTo({
-        url: `/wholesaler/orderCardInformation/index?type=share&cardNo=${cardNo.value}`
-    })
+    editCardApi(cardOrderDetail.value).then((res: any) => {
+        const { code, data, msg } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            uni.navigateTo({
+                url: `/wholesaler/orderCardInformation/index?type=share&cardNo=${cardNo.value}`
+            })
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
 }
 
+const orderDelFu = (id: number) => {
+    delProductApi({ id: id, cardNo: cardNo.value }).then((res: any) => {
+        const { code, msg } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            const index = cardOrderDetail.value.cardProductsList.findIndex((item: { id: number; }) => item.id === id)
+            if (index !== -1) {
+                cardOrderDetail.value.cardProductsList.splice(index, 1)
+            }
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}   
 </script>
 
 
@@ -146,7 +174,9 @@ const handleOrderFu = () => {
                         <com-orderTable
                             miniRole="wholesaler"
                             orderType="handleOrder"
-                            :productDetail="item">
+                            :deleteBtn="true"
+                            :productDetail="item"
+                            @orderDelFu="orderDelFu">
                         </com-orderTable>
                     </view>
                 </template>

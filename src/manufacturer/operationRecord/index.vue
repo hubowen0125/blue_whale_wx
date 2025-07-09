@@ -188,7 +188,7 @@ const scrolltolower = () => {
                         <view class="record_item cashier_record flex_align">
                             <image class="cashier_img" :src="item.icon"></image>
                             <view class="flex_column flex_1 cashier_record_content">
-                                <view>{{ item.payUserName }}</view>
+                                <view>{{ item.userName }}</view>
                                 <view class="flex_between flex_align">
                                     <view class="record_item_time">{{ dateStrToDateFormat(item.payTime, '') }}</view>
                                     <view class="cashier_record_price">
@@ -219,7 +219,7 @@ const scrolltolower = () => {
     <uni-popup ref="codePopupRef">
         <view class="popup_main flex_column flex_align">
             <view>查看二维码</view>
-            <image class="popup_img" :src="qrcodeIcon"></image>
+            <image class="popup_img" :show-menu-by-longpress="true" :src="qrcodeIcon"></image>
         </view>
         <image class="close_icon" :src="close_icon_1" @click="closePopupFu"></image>
     </uni-popup>

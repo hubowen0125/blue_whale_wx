@@ -51,8 +51,19 @@ const tabbarList = [
     },
 ]
 const tabBarIndex = ref(0)
+const sharePopupData = reactive({
+    popupTitle: '提示',
+    pupupType: 'default',
+    popupContent: [
+        {
+            text: '您无权限打开该订货卡，请联系对方进行调整'
+        }
+    ],
+    confirmText: '我知道了',
+})
+const sharePopupCom = ref()
 
-onLoad(() => {
+onLoad((e: any) => {
     // proxy.$Loading()
     // useDataBoard.setTabBarIndex(0)
     // if (![2, 8].includes(useUser.userInfo.userType)) {
@@ -60,6 +71,11 @@ onLoad(() => {
     // } else {
     //     useDataBoard.getDealerDeviceInfoFu()
     // }
+    if (e.popup) {
+        setTimeout(() => {
+            sharePopupCom.value.showPopup()
+        }, 200)
+    }
 })
 
 const setTabBarIndex = (index: number) => {
@@ -95,6 +111,7 @@ provide('tabBarIndex', tabBarIndex);
             </com-tabBar>
         </view>
     </view>
+    <com-popup_com ref="sharePopupCom" :popupData="sharePopupData"></com-popup_com>
 </template>
 
 

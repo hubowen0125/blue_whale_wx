@@ -67,7 +67,6 @@ const getByCardNoFu = (cardNo: string) => {
             if (data.cardProductsList && data.cardProductsList.length > 0) {
                 data.cardProductsList.map((item: { productColorsList: any; cardProductsDetailList: any; id: any; productId: any; }) => {
                     item.productColorsList = item.cardProductsDetailList
-                    item.id = item.productId
                     return item
                 })
             }

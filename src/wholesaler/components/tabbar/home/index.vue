@@ -20,7 +20,7 @@ const orderType = reactive([
         value: computed(() => statistic.value.orderToday || 0),
     },
     {
-        title: '未发货订单',
+        title: '待发货订单',
         value: computed(() => statistic.value.orderNotShipped || 0),
     },
     {

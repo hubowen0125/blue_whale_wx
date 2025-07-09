@@ -86,15 +86,14 @@ const deliverGoodsFu = () => {
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
             console.log(data);
-            uni.showToast({ title: '发货成功'})
+            proxy.$Toast({ title: '发货成功' })
             const { orderNo, packagingId } = orderDetails.value
-            const id = ''
             // 生成二维码
             new QRCode({
                 width: 140,
                 height: 140,
                 canvasId: 'qrcode',
-                text: `shipId=${id}&orderNo=${orderNo}&packagingId=${packagingId}`, // 二维码内容动态化
+                text: `shipId=${data}&orderNo=${orderNo}&packagingId=${packagingId}`, // 二维码内容动态化
                 callback: (res: any) => {
                     console.log(res)
                     uni.canvasToTempFilePath({
@@ -135,7 +134,7 @@ const closePopupFu = () => {
                 </view>
                 <view class="flex_column order_info_item">
                     <view>{{ orderDetails.unSendHandNum }}手/{{ orderDetails.unSendNum }}件</view>
-                    <view class="order_info_title">未发货</view>
+                    <view class="order_info_title">待发货</view>
                 </view>
             </view>
             <view class="flex_align" @click="selectAllFu(!selectAll)">
@@ -172,7 +171,7 @@ const closePopupFu = () => {
     <uni-popup ref="codePopupRef">
         <view class="popup_main flex_column flex_align">
             <view>发货成功</view>
-            <image class="popup_img" :src="qrcodeIcon"></image>
+            <image class="popup_img" :src="qrcodeIcon" :show-menu-by-longpress="true"></image>
             <view class="popup_tips popup_text">请下载或打印该二维码</view>
             <view class="popup_text">已便于打包站扫码入库</view>
             <view class="popup_text">在发货记录中也可查看该二维码</view>

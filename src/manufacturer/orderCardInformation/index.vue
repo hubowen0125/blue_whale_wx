@@ -34,6 +34,18 @@ const orderDetails = ref<any>({
     remark: ''
 })
 const type = ref('')
+const payList = [
+    {
+        name: '线下',
+        id: 1
+    },
+    {
+        name: '线上',
+        id: 2
+    }
+]
+const payTitle = ref('')
+
 
 onLoad((e: any) => {
     if (e.type == 'share') {
@@ -64,6 +76,11 @@ const getByCardNoFu = (cardNo: string) => {
         proxy.$CloseLoading();
         proxy.$Toast({ title: req.msg })
     }))
+}
+
+const pickerChange = (event: any) => {
+    const { value } = event.detail
+    payTitle.value = payList[value].name
 }
 
 const createOrderFu = () => {
@@ -110,12 +127,15 @@ const createOrderFu = () => {
             </view>
             <deliverGoodsInfo :deliverInfo="orderDetails.packaging" :edit="type == 'share' ? false : true">
                 <template #input>
-                    <view class="flex_align pay_way_item">
-                        <view>付款方式</view>
-                        <view class="flex_1 pay_way_value">请选择</view>
-                        <image class="arrow_right" :src="arrow_right">
-                        </image>
-                    </view>
+                    <picker class="flex_1" @change="pickerChange" :range="payList"
+                        range-key="name">
+                        <view class="flex_align pay_way_item">
+                            <view>付款方式</view>
+                            <view class="flex_1 pay_way_value">{{ payTitle || '请选择' }}</view>
+                            <image class="arrow_right" :src="arrow_right">
+                            </image>
+                        </view>
+                    </picker>
                     <view class="flex_align flex_between deliver_info_item">
                         <view>备注</view>
                         <input class="deliver_info_item_input" type="text" placeholder="请输入备注内容"
