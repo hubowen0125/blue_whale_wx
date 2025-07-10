@@ -28,11 +28,11 @@ const funList = [
     },
     {
         name: '用户协议',
-        path: '/packagingStation/myWholesaler/index'
+        path: '/pages/agreement/index?type=userAgreement'
     },
     {
         name: '隐私政策',
-        path: ''
+        path: '/pages/agreement/index?type=privacyAgreement'
     },
 ]
 const popupData = {

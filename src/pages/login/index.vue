@@ -211,9 +211,9 @@ const getUserInfoFu = () => {
  * 查看协议
  */
 const viewProtocolFu = (key: any) => {
-    // uni.navigateTo({
-    // url: `/pages/webView/index?key=${key}`
-    // })
+    uni.navigateTo({
+        url: `/pages/agreement/index?type=${key}`
+    })
 }
 
 /**
@@ -254,8 +254,8 @@ onUnmounted(() => {
                         :src="checked ? checkbox_active : checkbox" />
                 </view>
                 <span>
-                    我已阅读并同意<span class="protocol_btn" @click="viewProtocolFu('PRIVACY_URL')">《用户手册》</span>和<span
-                        class="protocol_btn" @click="viewProtocolFu('USER_AGREEMENT_URL')">《隐私政策》</span>
+                    我已阅读并同意<span class="protocol_btn" @click="viewProtocolFu('userAgreement')">《用户手册》</span>和<span
+                        class="protocol_btn" @click="viewProtocolFu('privacyAgreement')">《隐私政策》</span>
                 </span>
             </view>
             <button class="button_defalut" hover-class="pointer" hover-stay-time="2000" form-type="submit">

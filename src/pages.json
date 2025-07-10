@@ -41,6 +41,12 @@
             "style": {
                 "navigationStyle": "custom"
             }
+        },
+        {
+            "path": "pages/agreement/index",
+            "style": {
+                "navigationStyle": "custom"
+            }
         }
     ],
     "subPackages": [
