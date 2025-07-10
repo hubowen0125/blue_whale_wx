@@ -282,6 +282,16 @@
             ]
         }
     ],
+    "preloadRule": {
+        "pages/loading/index": {
+            "network": "all",
+            "packages": [
+                "manufacturer",
+                "wholesaler",
+                "packagingStation"
+            ]
+        }
+    },
     "globalStyle": {
         "navigationBarTextStyle": "black",
         "navigationBarBackgroundColor": "#ffffff",
