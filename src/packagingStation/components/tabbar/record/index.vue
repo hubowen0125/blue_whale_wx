@@ -159,6 +159,12 @@ const endChangeFu = (e: any) => {
     recordParams.endTime = value
 }
 
+const printerFu = (item: any) => {
+    uni.navigateTo({
+        url: `/packagingStation/printerSettings/index?type=storageInput&id=${item.id}`
+    })
+}
+
 /**
  * 滑动加载
  */
@@ -233,7 +239,7 @@ const scrolltolower = () => {
                             </view>
                             <view class="record_item_manufacturer">厂家: {{ item.manufacturerName }}</view>
                             <view class="record_item_num">入库数量: {{ item.checkHandNum }}手</view>
-                            <button class="record_item_button">打印</button>
+                            <button class="record_item_button" @click.stop="printerFu(item)">打印</button>
                         </view>
                     </view>
                     <com-no_data v-else noDataText="暂无批发商数据"></com-no_data>

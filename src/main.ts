@@ -84,6 +84,10 @@ export function createApp() {
     app.config.globalProperties.$CloseLoading = uni.hideLoading
     app.config.globalProperties.$successCode = 200
     app.config.globalProperties.cascaderOptions = []
+    app.config.globalProperties.bluetoothStatus = false  // 蓝牙状态
+    app.config.globalProperties.bluetoothList = []  // 蓝牙列表
+    app.config.globalProperties.bluetoothPrinting = false // 蓝牙打印状态
+
 
     app.use(pinia)
     app.mixin(shareMixin)

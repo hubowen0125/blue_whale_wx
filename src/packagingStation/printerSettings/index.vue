@@ -1,10 +1,10 @@
 <script lang="ts" setup>
+import { getByIdApi } from '../http/packagingStation';
+
 declare const wx: any;
 
-type PrintContent =
-    | { type: 'text'; text: string; align?: 'left' | 'center' | 'right'; bold?: boolean }
-    | { type: 'barcode'; content: string }
-    | { type: 'qrcode'; content: string }
+let timer: any = null;
+const { proxy } = getCurrentInstance() as any;
 
 const devices = ref<Array<any>>([])
 const status = ref('未连接')
@@ -14,13 +14,62 @@ const deviceId = ref('')
 const serviceId = ref('')
 const characteristicId = ref('')
 
-const canvasWidth = ref(432);
+const canvasWidth = ref(448);
 const canvasHeight = ref(310); // Adjust height as needed for the content.
 const labelImg = ref('')
+const inventoryId = ref('')
+const inventoryDetails = ref<any>({})
+const createTime = ref('')
+// 打印中
+const printing = ref(false)
 
-onMounted(() => {
-    generateCanvasFu()
+onLoad((e: any) => {
+    const currentDate = new Date();
+    const year = currentDate.getFullYear()
+    const month = currentDate.getMonth() + 1 < 10 ? '0' + (currentDate.getMonth() + 1) : currentDate.getMonth() + 1
+    const day = currentDate.getDate() < 10 ? '0' + currentDate.getDate() : currentDate.getDate()
+    const hours = currentDate.getHours() < 10 ? '0' + currentDate.getHours() : currentDate.getHours()
+    const minutes = currentDate.getMinutes() < 10 ? '0' + currentDate.getMinutes() : currentDate.getMinutes()
+    const seconds = currentDate.getSeconds() < 10 ? '0' + currentDate.getSeconds() : currentDate.getSeconds()
+    createTime.value = `${year}年${month}月${day}日${hours}:${minutes}`
+    if (e.id) {
+        inventoryId.value = e.id
+        getByIdFu()
+    } else {
+        generateCanvasFu()
+    }
 })
+
+onShow(() => {
+    if (proxy.bluetoothStatus) {
+        devices.value = proxy.bluetoothList
+        connected.value = true
+        if (proxy.bluetoothPrinting) {
+            status.value = '正在发送数据...';
+        } else {
+            status.value = '已连接'
+        }
+    }
+})
+
+
+const getByIdFu = () => {
+    proxy.$Loading()
+    getByIdApi({ id: inventoryId.value }).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            inventoryDetails.value = data
+            generateCanvasFu()
+            console.log(data, 'data');
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
 
 
 const generateCanvasFu = async () => {
@@ -31,7 +80,7 @@ const generateCanvasFu = async () => {
         const canvasH = canvasHeight.value
         const padding = 10
         const lineHeight = 28
-        let y = padding + 20
+        let y = padding + 30
         const leftColX = padding
         const rightColX = canvasW - padding - 120
         let colDividerX = 0
@@ -46,8 +95,8 @@ const generateCanvasFu = async () => {
         // === 标题 ===
         ctx.setFontSize(30)
         ctx.setTextAlign('center')
-        ctx.fillText('杭盛打包站', canvasW / 2, y)
-        y += lineHeight
+        ctx.fillText(`${inventoryDetails.value.wholesaleName || '杭盛打包站'}`, canvasW / 2, y)
+        y += lineHeight + 10
         // === 分隔线（标题下）===
         drawLine(0, y - lineHeight / 2, canvasW, y - lineHeight / 2)
         colDividerY = y - lineHeight / 2
@@ -55,7 +104,7 @@ const generateCanvasFu = async () => {
         // === 客户 / 仓位 ===
         ctx.setFontSize(28)
         ctx.setTextAlign('left')
-        ctx.fillText('客户：云南，潘石屹', leftColX, y)
+        ctx.fillText(`客户：${inventoryDetails.value.wholesaleName || '云南，潘石屹'}`, leftColX, y)
         ctx.fillText('仓位：', rightColX, y)
         y += lineHeight
         // === 分隔线 ===
@@ -65,27 +114,27 @@ const generateCanvasFu = async () => {
         // === 厂家 / 仓位号 ===
         ctx.setFontSize(32)
         ctx.fillText('厂家：木童巷多多', leftColX, y)
-        ctx.setFontSize(60)
+        ctx.setFontSize(50)
         ctx.setTextAlign('center')
         y += lineHeight
-        ctx.fillText('B38', colDividerX + (canvasW - colDividerX) / 2, y - lineHeight / 2)
+        ctx.fillText(`${inventoryDetails.value.storageNum || '仓位'}`, colDividerX + (canvasW - colDividerX) / 2, y - lineHeight / 2)
         // === 分隔线 ===
         drawLine(0, y - lineHeight / 2, rightColX - 10, y - lineHeight / 2)
         y += 36
         // === 数量 ===
         ctx.setFontSize(32)
         ctx.setTextAlign('left')
-        ctx.fillText('数量：135手', leftColX, y)
+        ctx.fillText(`数量：${inventoryDetails.value.orderHandNum || 0}手`, leftColX, y)
         y += lineHeight
         // === 横线 ===
         drawLine(0, y - lineHeight / 2, canvasW, y - lineHeight / 2)
         // === 竖线（分栏）===
         drawLine(colDividerX, colDividerY, colDividerX, y - lineHeight / 2)
-        y += 36
+        y += 20
         // === 打印时间 ===
         ctx.setFontSize(22)
         ctx.setTextAlign('center')
-        ctx.fillText('打印时间：2024年12月28日19:36', canvasW / 2, y)
+        ctx.fillText(`打印时间：${createTime.value}`, canvasW / 2, y)
         // === 渲染 ===
         await new Promise(resolve => ctx.draw(false, resolve))
         // === 辅助函数 ===
@@ -104,18 +153,6 @@ const generateCanvasFu = async () => {
                 console.error('生成临时文件失败', err)
             }
         })
-
-        // status.value = '正在将Canvas转为图片...';
-        // status.value = '正在生成打印指令...';
-        // const commands = await canvasGetImageDataFu()
-        // console.log(commands, 'commandscommandscommandscommandscommands');
-
-        // status.value = '正在发送数据...';
-        // await writeData(commands);
-
-        // status.value = '打印完成';
-        // uni.showToast({ title: '打印指令已发送', icon: 'success' });
-
     } catch (err: any) {
         status.value = `打印失败: ${err.message || err.errMsg}`;
         uni.showToast({ title: `打印失败: ${err.message || err.errMsg}`, icon: 'none' });
@@ -152,9 +189,8 @@ const startDiscovery = () => {
             console.log('开始搜索蓝牙设备')
             status.value = '正在搜索设备...'
             onDeviceFound()
-
             // 10秒后自动停止搜索
-            setTimeout(() => {
+            timer = setTimeout(() => {
                 stopDiscovery()
                 status.value = '搜索结束，请点击设备连接'
             }, 10000)
@@ -187,6 +223,10 @@ const onDeviceFound = () => {
  * 停止搜索设备
  */
 const stopDiscovery = () => {
+    if (timer) {
+        clearTimeout(timer)
+        timer = null
+    }
     wx.stopBluetoothDevicesDiscovery({
         success: () => {
             console.log('已停止搜索蓝牙设备')
@@ -309,16 +349,21 @@ wx.onBLEConnectionStateChange((res: { connected: any; }) => {
         connected.value = false
         status.value = '连接已断开'
         if (connectedDeviceId.value) {
-            uni.showToast({
-                title: '蓝牙连接已断开',
-                icon: 'none'
-            })
+            proxy.$Toast({ title: '蓝牙连接已断开' });
         }
     }
 })
 
 const printReceipt = async () => {
-
+    if (!connected.value) {
+        proxy.$Toast({ title: '请先连接打印机' });
+        return;
+    }
+    if (printing.value) {
+        proxy.$Toast({ title: '正在打印中，请稍候...' });
+        return;
+    }
+    printing.value = true; // 设置打印中状态
     status.value = '正在将Canvas转为图片...';
     status.value = '正在生成打印指令...';
     const commands = await canvasGetImageDataFu()
@@ -326,7 +371,7 @@ const printReceipt = async () => {
 
     status.value = '正在发送数据...';
     await writeData(commands);
-
+    printing.value = false; // 重置打印中状态
     status.value = '打印完成';
     uni.showToast({ title: '打印指令已发送', icon: 'success' });
 
@@ -372,21 +417,22 @@ const canvasGetImageDataFu = () => {
                         escPosData.push(byte)
                     }
                 }
-
                 // === ESC/POS header ===
                 const xL = bytesPerLine & 0xFF
                 const xH = (bytesPerLine >> 8) & 0xFF
                 const yL = canvasH & 0xFF
                 const yH = (canvasH >> 8) & 0xFF
                 const header = [0x1D, 0x76, 0x30, 0x00, xL, xH, yL, yH]
-
-                const printData = new Uint8Array(header.length + escPosData.length)
+                const gapCmd = [0x1B, 0x4A, 100]; // 往下走50点
+                const printData = new Uint8Array(header.length + escPosData.length + gapCmd.length);
                 printData.set(header, 0)
                 printData.set(escPosData, header.length)
+                printData.set(gapCmd, header.length + escPosData.length);
                 resolve(printData)
             },
             fail(err: any) {
                 console.error('canvasGetImageData failed', err)
+                printing.value = false; // 重置打印中状态
             }
         })
     })
@@ -412,12 +458,22 @@ const writeData = async (data: Uint8Array) => {
             // A small delay might be needed for some printers
             await new Promise(resolve => setTimeout(resolve, 20));
         } catch (err) {
+            printing.value = false; // 重置打印中状态
             console.error('Failed to write chunk:', err);
             throw err;
         }
     }
 };
 
+
+/**
+ * 页面
+ */
+onUnmounted(() => {
+    proxy.bluetoothList = devices.value
+    proxy.bluetoothStatus = connected.value
+    proxy.bluetoothPrinting = printing.value
+})
 
 </script>
 

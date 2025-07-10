@@ -81,7 +81,7 @@ const editInformationFu = () => {
                 <view>{{ infoDetails?.deptName }}</view>
             </view>
             <view>{{ infoDetails.address }}</view>
-            <view>{{ infoDetails.deptPhone }}</view>
+            <view>{{ infoDetails.userPhone }}</view>
             <button class="flex_align edit_btn" @click="editFu">
                 <image class="edit_icon" :src="edit_icon"></image>
                 <text>编辑</text>
