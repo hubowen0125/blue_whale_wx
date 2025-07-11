@@ -131,13 +131,13 @@ const inputValueFu = async (e: any, item: any, key: string) => {
     console.log(result, 'resultresultresult');
     if (result) {
         const num = parseInt(result, 10)
-        if (props.orderType == 'handleOrder' && num > item.stockNum) {
-            item[key] = item.stockNum
-        } else if (props.orderType == 'handleRefund' && num > item.unsentHandNum) {
-            item[key] = item.unsentHandNum
-        } else {
-            item[key] = num
-        }
+        // if (props.orderType == 'handleOrder' && num > item.stockNum) {
+        //     item[key] = item.stockNum
+        // } else if (props.orderType == 'handleRefund' && num > item.unsentHandNum) {
+        //     item[key] = item.unsentHandNum
+        // } else {
+        item[key] = num
+        // }
     } else {
         item[key] = 0
     }

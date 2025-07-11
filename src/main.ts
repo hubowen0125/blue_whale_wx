@@ -3,7 +3,7 @@ import App from "./App.vue";
 import pinia from "./store";
 import { toastFu, loadingFu } from "./utils/utils";
 import { useUserStore } from "@/store/modules/user";
-import share from "@/static/share.jpg"
+import share from "@/static/share_default.jpg"
 
 
 // 重置默认css
@@ -70,7 +70,7 @@ const shareMixin: ComponentOptions<any> = {
             return obj; // 如果页面已有定义，跳过全局 mixin
         }
         return {
-            title: '蓝鲸',
+            title: '您的好友给您分享了一个小程序，快来体验吧',
             path: '/pages/loading/index',
             imageUrl: share
         };
@@ -84,10 +84,6 @@ export function createApp() {
     app.config.globalProperties.$CloseLoading = uni.hideLoading
     app.config.globalProperties.$successCode = 200
     app.config.globalProperties.cascaderOptions = []
-    app.config.globalProperties.bluetoothStatus = false  // 蓝牙状态
-    app.config.globalProperties.bluetoothList = []  // 蓝牙列表
-    app.config.globalProperties.bluetoothPrinting = false // 蓝牙打印状态
-
 
     app.use(pinia)
     app.mixin(shareMixin)

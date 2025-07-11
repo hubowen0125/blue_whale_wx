@@ -290,6 +290,7 @@ const delByOrderNoFu = () => {
         font-weight: 400;
         font-size: 20rpx;
         color: #7C8191;
+        gap: 20rpx;
 
         .del_btn {
             margin-right: 16rpx;

@@ -147,7 +147,9 @@ const logoutFu = () => {
                 <image class="arrow_right_1" :src="arrow_right_1"></image>
             </view>
         </view>
-        <button class="logout_btn" @click="logoutFu">退出登录</button>
+        <view>
+            <button class="logout_btn" @click="logoutFu">退出登录</button>
+        </view>
     </view>
     <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="confirmPopupFu"></com-popup_com>
 </template>
@@ -179,6 +181,7 @@ const logoutFu = () => {
         border-radius: 24rpx;
         padding: 0 28rpx;
         margin: 20rpx 0;
+        position: relative;
 
         .fun_item {
             font-weight: 500;

@@ -16,6 +16,11 @@ export const useUserStore = defineStore('use', () => {
     const productDetail = ref<any>({})
     const servicePhone = ref('')
     const renewalFee = ref(0)
+    const bluetoothInfo = ref<{ status: boolean, list: any[], printing: boolean }>({
+        status: false, // 蓝牙状态
+        list: [], // 蓝牙列表
+        printing: false // 蓝牙打印状态
+    })
 
     const setTokenFu = (data: string) => {
         token.value = data
@@ -56,6 +61,10 @@ export const useUserStore = defineStore('use', () => {
         renewalFee.value = data
     }
 
+    const setBluetoothInfo = (data: { status: boolean, list: any[], printing: boolean }) => {
+        bluetoothInfo.value = data
+    }
+
     const resetState = () => {
         token.value = ''
         jump401.value = false
@@ -64,6 +73,11 @@ export const useUserStore = defineStore('use', () => {
         productDetail.value = []
         servicePhone.value = ''
         renewalFee.value = 0
+        bluetoothInfo.value = {
+            status: false,
+            list: [],
+            printing: false
+        }
     }
 
     return {
@@ -79,6 +93,7 @@ export const useUserStore = defineStore('use', () => {
         productDetail,
         servicePhone,
         renewalFee,
+        bluetoothInfo,
         setTokenFu,
         setNavHeagihtFu,
         setUserInfoFu,
@@ -88,6 +103,7 @@ export const useUserStore = defineStore('use', () => {
         setProductDetailFu,
         setservicePhoneFu,
         setRenewalFeeFu,
+        setBluetoothInfo,
         resetState
     }
 

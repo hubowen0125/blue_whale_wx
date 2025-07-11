@@ -43,21 +43,21 @@ const popupList = [
 const identityList = [
     {
         title: '我是厂家',
-        desc:'厂家',
+        desc: '厂家',
         iamge: manufacturer_icon,
         key: 'manufacturer',
         className: 'icon_1'
     },
     {
         title: '我是批发商',
-        desc:'批发商',
+        desc: '批发商',
         iamge: wholesale_icon,
         key: 'wholesale',
         className: 'icon_2',
     },
     {
         title: '我是打包站',
-        desc:'打包站',
+        desc: '打包站',
         iamge: packaging_icon,
         key: 'packaging',
         className: 'icon_3'
@@ -94,8 +94,13 @@ const confirmPopupFu = () => {
             console.log('code');
             getUserInfoFu()
             if (params.userRole == 'packaging') {
-                popupData.value = { ...popupList[1] }
-                popupCom.value.showPopup()
+                uni.redirectTo({
+                    url: '/pages/reviewPage/index'
+                })
+            } else if (params.userRole == 'wholesale') {
+                uni.redirectTo({
+                    url: '/wholesaler/home/index'
+                })
             } else {
                 uni.redirectTo({
                     url: '/manufacturer/home/index'
@@ -139,7 +144,9 @@ const getUserInfoFu = () => {
                 <image class="identity_item_checkbox" :src="params.userRole == item.key ? checkbox_active : checkbox" />
             </view>
         </view>
-        <button class="button_defalut" @click="handleConfirmFu">确认选择</button>
+        <view>
+            <button class="button_defalut" @click="handleConfirmFu">确认选择</button>
+        </view>
     </view>
     <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="confirmPopupFu"></com-popup_com>
 </template>
@@ -205,6 +212,7 @@ const getUserInfoFu = () => {
 
     .button_defalut {
         width: 606rpx;
+        margin-bottom: calc(26rpx + env(safe-area-inset-bottom));
     }
 }
 </style>

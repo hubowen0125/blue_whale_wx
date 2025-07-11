@@ -1,9 +1,11 @@
 <script lang="ts" setup>
 import { getByIdApi } from '../http/packagingStation';
+import { useUserStore } from '@/store/modules/user';
 
 declare const wx: any;
 
 let timer: any = null;
+const useUser = useUserStore()
 const { proxy } = getCurrentInstance() as any;
 
 const devices = ref<Array<any>>([])
@@ -41,10 +43,10 @@ onLoad((e: any) => {
 })
 
 onShow(() => {
-    if (proxy.bluetoothStatus) {
-        devices.value = proxy.bluetoothList
+    if (useUser.bluetoothInfo.status) {
+        devices.value = useUser.bluetoothInfo.list
         connected.value = true
-        if (proxy.bluetoothPrinting) {
+        if (useUser.bluetoothInfo.printing) {
             status.value = '正在发送数据...';
         } else {
             status.value = '已连接'
@@ -85,6 +87,8 @@ const generateCanvasFu = async () => {
         const rightColX = canvasW - padding - 120
         let colDividerX = 0
         let colDividerY = 0
+        // 👇 加这一句实现“整体左移”
+        // ctx.translate(-8, 0)
         ctx.setFillStyle('#FFFFFF')
         ctx.fillRect(0, 0, canvasW, canvasH)
         ctx.setStrokeStyle('#000000')
@@ -165,6 +169,44 @@ const generateCanvasFu = async () => {
  * 搜索蓝牙打印机
  */
 const searchPrinter = () => {
+    uni.getSetting({
+        success(res: any) {
+            if (!res.authSetting['scope.bluetooth']) {
+                uni.authorize({
+                    scope: 'scope.bluetooth',
+                    success() {
+                        openBluetoothAdapterFu()
+                    },
+                    fail() {
+                        uni.showModal({
+                            content: '检测到您没打开蓝牙权限，是否去设置打开？',
+                            success: function (res) {
+                                if (res.confirm) {
+                                    uni.openSetting({
+                                        success: (res) => {
+                                            if (!res.authSetting['scope.bluetooth']) {
+                                                proxy.$Toast({ title: '取消授权，蓝牙初始化失败' })
+                                            } else {
+                                                openBluetoothAdapterFu()
+                                            }
+                                        }
+                                    })
+                                } else {
+                                    uni.hideLoading()
+                                    proxy.$Toast({ title: '取消授权，蓝牙初始化失败' })
+                                }
+                            }
+                        });
+                    }
+                })
+            } else {
+                openBluetoothAdapterFu()
+            }
+        }
+    })
+}
+
+const openBluetoothAdapterFu = () => {
     status.value = '搜索中...'
     wx.openBluetoothAdapter({
         success: () => {
@@ -175,6 +217,9 @@ const searchPrinter = () => {
         fail: (err: any) => {
             console.error('蓝牙适配器初始化失败', err)
             status.value = '蓝牙初始化失败，请检查手机蓝牙是否开启'
+            // devices.value = ['HM-A300-0001']
+            // connected.value = true
+            // printing.value = true
         }
     })
 }
@@ -423,7 +468,7 @@ const canvasGetImageDataFu = () => {
                 const yL = canvasH & 0xFF
                 const yH = (canvasH >> 8) & 0xFF
                 const header = [0x1D, 0x76, 0x30, 0x00, xL, xH, yL, yH]
-                const gapCmd = [0x1B, 0x4A, 100]; // 往下走50点
+                const gapCmd = [0x1B, 0x4A, 78]; // 往下走50点
                 const printData = new Uint8Array(header.length + escPosData.length + gapCmd.length);
                 printData.set(header, 0)
                 printData.set(escPosData, header.length)
@@ -470,9 +515,11 @@ const writeData = async (data: Uint8Array) => {
  * 页面
  */
 onUnmounted(() => {
-    proxy.bluetoothList = devices.value
-    proxy.bluetoothStatus = connected.value
-    proxy.bluetoothPrinting = printing.value
+    useUser.setBluetoothInfo({
+        status: connected.value,
+        list: devices.value,
+        printing: printing.value
+    })
 })
 
 </script>
@@ -488,15 +535,18 @@ onUnmounted(() => {
                     <image class="label_img" :src="labelImg"></image>
                 </view>
             </view>
-            <button @click="searchPrinter">搜索蓝牙</button>
-            <view v-for="item in devices" :key="item.deviceId" class="device-item" @click="connectPrinter(item)">
-                {{ item.name || '未知设备' }} ({{ item.deviceId }})
-            </view>
-            <view class="status">状态: {{ status }}</view>
+            <template v-if="inventoryId">
+                <button @click="searchPrinter">搜索蓝牙</button>
+                <view v-for="item in devices" :key="item.deviceId" class="device-item" @click="connectPrinter(item)">
+                    {{ item.name || '未知设备' }} ({{ item.deviceId }})
+                </view>
+                <view class="status">状态: {{ status }}</view>
+            </template>
         </view>
         <canvas canvas-id="labelCanvas" id="labelCanvas"
             :style="{ width: canvasWidth + 'px', height: canvasHeight + 'px', transform: 'scale(.8)', position: 'absolute', left: '-99999px' }"></canvas>
-        <view class="footer_con"><button class="button_defalut" @click="printReceipt">打印</button></view>
+        <view v-if="inventoryId" class="footer_con"><button class="button_defalut" @click="printReceipt">打印</button>
+        </view>
     </view>
 </template>
 
@@ -524,8 +574,8 @@ onUnmounted(() => {
             padding: 20rpx 0;
 
             .label_img {
-                width: 432rpx;
-                height: 310rpx;
+                width: 550rpx;
+                height: 380rpx;
                 margin: auto;
                 display: block;
             }

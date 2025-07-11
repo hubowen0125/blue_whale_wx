@@ -159,19 +159,22 @@ const getUserInfoFu = () => {
             } else {
                 if (type.value) {
                     if (type.value == 'manufacturer') {
-                        if (useUser.miniRole == 'manufacturer' && typeId.value == useUser.userInfo.deptId) {
+                        if (useUser.miniRole == 'wholesale') {
                             uni.redirectTo({
-                                url: `/manufacturer/shareOrderCard/index?type=${type.value}&cardNo=${cardNo.value}`
+                                url: '/wholesaler/home/index?popup=true'
                             })
                         } else {
-                            if (useUser.miniRole == 'manufacturer') {
+                            if (!typeId.value) {
+                                uni.redirectTo({
+                                    url: `/manufacturer/shareOrderCard/index?type=${type.value}&cardNo=${cardNo.value}`
+                                })
+                            } else if (typeId.value == useUser.userInfo.deptId) {
+                                uni.redirectTo({
+                                    url: `/manufacturer/shareOrderCard/index?type=${type.value}&cardNo=${cardNo.value}`
+                                })
+                            } else {
                                 uni.redirectTo({
                                     url: '/manufacturer/home/index?popup=true'
-                                })
-                            }
-                            if (useUser.miniRole == 'wholesale') {
-                                uni.redirectTo({
-                                    url: '/wholesaler/home/index?popup=true'
                                 })
                             }
                         }
@@ -287,7 +290,7 @@ onUnmounted(() => {
     }
 
     .input_con {
-        padding: 34rpx 40rpx;
+        padding: 0 40rpx;
         background: #FFFFFF;
         border-radius: 48rpx;
         box-sizing: border-box;
@@ -316,6 +319,7 @@ onUnmounted(() => {
         .input {
             font-size: 28rpx;
             color: #111E36;
+            height: 100%;
         }
 
         .code_btn {

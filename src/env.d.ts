@@ -17,3 +17,6 @@ declare var process: {
 }
 
 declare module 'weapp-qrcode'
+
+
+declare const wx: any

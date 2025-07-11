@@ -20,6 +20,7 @@ const slideLoading = ref(true) // 是否需要滑动加载
 const popupRef = ref();
 const popupProductDetail = ref<any>({})
 const type = ref('') // goodsShelves 商品架  shoppingCart 购物车
+const isLoad = ref(false) // 是否加载
 
 const shoppingCartNum = computed(() => {
     return useWholesaler.shoppingCart.length
@@ -33,6 +34,21 @@ onLoad((e: any) => {
         type.value = e.type
     }
     wholesaleListByManufacturerIdFu()
+})
+
+onShow(() => {
+    if (isLoad.value) {
+        let arr = [...useWholesaler.shoppingCart]
+        productsList.value.map((item: any) => {
+            if (arr.some((cartItem: any) => cartItem.id === item.id)) {
+                item.isAdded = true
+            } else {
+                item.isAdded = false
+            }
+        })
+    } else {
+        isLoad.value = true
+    }
 })
 
 /**

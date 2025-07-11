@@ -19,6 +19,12 @@
             }
         },
         {
+            "path": "pages/reviewPage/index",
+            "style": {
+                "navigationStyle": "custom"
+            }
+        },
+        {
             "path": "pages/downLoadImages/index",
             "style": {
                 "navigationStyle": "custom"

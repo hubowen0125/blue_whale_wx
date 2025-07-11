@@ -41,12 +41,6 @@ const getByCardNoFu = (cardNo: string) => {
                 })
             }
             orderDetails.value = data
-            const title = `来自批发商: ${useUser.userInfo.dept.deptName}的订货卡，请立即查看`
-            useUser.setShareParamFu({
-                title,
-                path: `/pages/loading/index?type=manufacturer&cardNo=${cardNo}&manufacturerId=${data.manufacturerId}`,
-                imageUrl: share
-            })
         } else {
             proxy.$Toast({ title: msg })
         }
@@ -55,6 +49,22 @@ const getByCardNoFu = (cardNo: string) => {
         proxy.$Toast({ title: req.msg })
     }))
 }
+
+
+onShareAppMessage((res: any) => {
+    console.log(res, '............');
+    const title = `来自批发商: ${useUser.userInfo.dept.deptName}的订货卡，请立即查看`
+    useUser.setShareParamFu({
+        title,
+        path: `/pages/loading/index?type=manufacturer&cardNo=${orderDetails.value.cardNo}&manufacturerId=${orderDetails.value.manufacturerId}`,
+        imageUrl: share
+    })
+    return {
+        title,
+        path: `/pages/loading/index?type=manufacturer&cardNo=${orderDetails.value.cardNo}&manufacturerId=${orderDetails.value.manufacturerId}`,
+        imageUrl: share
+    };
+})
 </script>
 
 

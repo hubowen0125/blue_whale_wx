@@ -10,27 +10,36 @@ onLoad((e: any) => {
     if (useUser.token) {
         if (e.type) {
             if (e.type == 'manufacturer') {
-                if (useUser.miniRole == 'manufacturer' && e.manufacturerId == useUser.userInfo.deptId) {
+                if (useUser.miniRole == 'wholesale') {
                     uni.redirectTo({
-                        url: `/manufacturer/shareOrderCard/index?type=${e.type}&cardNo=${e.cardNo}`
+                        url: '/wholesaler/home/index?popup=true'
                     })
                 } else {
-                    if (useUser.miniRole == 'manufacturer') {
+                    if (!e.manufacturerId) {
+                        uni.redirectTo({
+                            url: `/manufacturer/shareOrderCard/index?type=${e.type}&cardNo=${e.cardNo}`
+                        })
+                    } else if (e.manufacturerId == useUser.userInfo.deptId) {
+                        uni.redirectTo({
+                            url: `/manufacturer/shareOrderCard/index?type=${e.type}&cardNo=${e.cardNo}`
+                        })
+                    } else {
                         uni.redirectTo({
                             url: '/manufacturer/home/index?popup=true'
-                        })
-                    }
-                    if (useUser.miniRole == 'wholesale') {
-                        uni.redirectTo({
-                            url: '/wholesaler/home/index?popup=true'
                         })
                     }
                 }
             }
             if (e.type == 'wholesale') {
-                uni.redirectTo({
-                    url: `/wholesaler/shareOrderCard/index?type=${e.type}&cardNo=${e.cardNo}`
-                })
+                if (useUser.miniRole == 'manufacturer') {
+                    uni.redirectTo({
+                        url: '/manufacturer/home/index?popup=true'
+                    })
+                } else {
+                    uni.redirectTo({
+                        url: `/wholesaler/shareOrderCard/index?type=${e.type}&cardNo=${e.cardNo}`
+                    })
+                }
             }
         } else {
             if (useUser.miniRole) {

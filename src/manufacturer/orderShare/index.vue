@@ -17,19 +17,14 @@ const orderDetails = ref<any>({
     cardProductsList: [],
     remark: ''
 })
+const orderNo = ref('')
 
 onLoad((e: any) => {
     if (e.orderNo) {
         getByCardNoFu(e.orderNo)
-        const title = `来自批发商: ${useUser.userInfo.dept.deptName}的订货卡，请立即查看`
-        useUser.setShareParamFu({
-            title,
-            path: `/pages/loading/index?type=wholesale&cardNo=${e.orderNo}`,
-            imageUrl: share
-        })
+        orderNo.value = e.orderNo
     }
 })
-
 
 /**
  * 获取订单详情
@@ -57,6 +52,19 @@ const getByCardNoFu = (cardNo: string) => {
     }))
 }
 
+onShareAppMessage(() => {
+    const title = `来自批发商: ${useUser.userInfo.dept.deptName}的订货卡，请立即查看`
+    useUser.setShareParamFu({
+        title,
+        path: `/pages/loading/index?type=wholesale&cardNo=${orderNo.value}`,
+        imageUrl: share
+    })
+    return {
+        title,
+        path: `/pages/loading/index?type=wholesale&cardNo=${orderNo.value}`,
+        imageUrl: share
+    };
+})
 </script>
 
 <template>

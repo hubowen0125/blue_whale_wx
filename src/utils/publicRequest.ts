@@ -56,7 +56,12 @@ export const savePhoto = () => {
                     if (res.confirm) {
                         uni.openSetting({
                             success: (res) => {
-                                resolve();
+                                if (!res.authSetting['scope.writePhotosAlbum']) {
+                                    uni.hideLoading()
+                                    toastFu({ title: '取消授权，下载失败' })
+                                } else {
+                                    resolve();
+                                }
                             }
                         })
                     } else {

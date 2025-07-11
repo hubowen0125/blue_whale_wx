@@ -95,7 +95,7 @@ const confirmPopupFu = () => {
     console.log('1111');
     orderDetails.value.orderProductsList.map((item: any) => {
         const obj: any = {
-            orderProductId: item.productId,
+            orderProductId: item.id,
             productsDetailParams: []
         }
         item.orderProductsDetailList.map((items: any) => {
@@ -132,11 +132,11 @@ const confirmPopupFu = () => {
         <view class="order_info flex_align flex_between">
             <view class="flex_align order_info_con">
                 <view class="flex_column order_info_item">
-                    <view>2手/10件</view>
+                    <view>{{ orderDetails.totalHandNum }}手/{{ orderDetails.totalNum }}件</view>
                     <view class="order_info_title">总件数</view>
                 </view>
                 <view class="flex_column order_info_item">
-                    <view>2手/10件</view>
+                    <view>{{ orderDetails.unSendHandNum }}手/{{ orderDetails.unSendNum }}件</view>
                     <view class="order_info_title">待发货</view>
                 </view>
             </view>
