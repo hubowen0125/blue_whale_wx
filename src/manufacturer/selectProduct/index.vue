@@ -6,6 +6,8 @@ import order_fixed from "@/static/images/wholesaler/order_fixed.png"
 import { useManufacturerStore } from "@/manufacturer/store/manufacturer";
 import { useUserStore } from "@/store/modules/user";
 
+
+let timer: any
 const useUser = useUserStore()
 const useManufacturer = useManufacturerStore()
 const { proxy } = getCurrentInstance() as any;
@@ -60,6 +62,7 @@ onLoad((e: any) => {
 onShow(() => {
     if (selectProductType.value && isLoad.value) {
         if (selectProductType.value !== 'orderCard') {
+            shareCradList.value = []
             productList.value = []
             paramsPage.pageNum = 1
             slideLoading.value = true
@@ -87,7 +90,6 @@ const productListFu = async () => {
         if (code == proxy.$successCode) {
             if (data.datas && data.datas.length > 0) {
                 productList.value = [...productList.value, ...data.datas]
-                console.log(productList.value, '00000');
                 if (data.datas.length < paramsPage.pageSize) {
                     slideLoading.value = false
                 }
@@ -172,7 +174,6 @@ const showPopupFu = (data: any) => {
         useManufacturer.setOrderCardFu(arr)
     } else {
         popupProductDetail.value = data
-        // shareCradList.value = arr
         popupRef.value.open('bottom');
     }
 }
@@ -207,10 +208,8 @@ const addToCartFu = () => {
     }
     useManufacturer.setShoppingCartFu(arr)
     popupProductDetail.value.isAdded = true
-    shareCradList.value = arr
-    console.log(arr, '2123');
-    addProductParams.value.cardProductsParams = []
-    addProductFu()
+    shareCradList.value = shareCradList.value.concat(arr)
+    popupRef.value.close()
 }
 
 /**
@@ -220,6 +219,7 @@ const addProductFu = () => {
     if (!shareCradList.value.length) {
         return proxy.$Toast({ title: '请选择商品' })
     }
+    addProductParams.value.cardProductsParams = []
     shareCradList.value.map((item) => {
         addProductParams.value.cardProductsParams.push({
             productId: item.id,
@@ -237,8 +237,14 @@ const addProductFu = () => {
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
             console.log(data);
-            proxy.$Toast({ title: '添加成功' })
-            popupRef.value.close()
+            proxy.$Toast({
+                title: '添加成功',
+                successCB: () => {
+                    timer = setTimeout(() => {
+                        uni.navigateBack()
+                    }, 1500)
+                }
+            })
         } else {
             proxy.$Toast({ title: msg })
         }
@@ -286,6 +292,17 @@ const scrolltolower = () => {
     }
 }
 
+/**
+ * 页面
+ */
+onUnmounted(() => {
+    // 清除定时器
+    if (timer) {
+        clearTimeout(timer);
+        timer = null;
+    }
+})
+
 </script>
 
 
@@ -322,16 +339,19 @@ const scrolltolower = () => {
                 <image class="order_fixed_img" :src="order_fixed"></image>
             </uni-badge>
         </view>
-        <view v-if="selectProductType == 'shareCrad'" class="footer_con">
+        <view v-if="selectProductType == 'shareCrad'" class="footer_con flex_align">
+            <button class="button_submit" @click="addProductFu">确定</button>
             <button class="button_defalut" @click="newProductFu">添加商品</button>
         </view>
     </view>
 
-    <uni-popup ref="popupRef" :safe-area="false">
+    <uni-popup ref="popupRef" :safe-area="false" :mask-click="false">
         <view class="popup_content flex_column">
             <view class="popup_header flex_align flex_between">
                 <text>加入订货单</text>
-                <image class="off_icon" :src="off_icon" @click="closePopupFu"></image>
+                <view class="off_con" @click="closePopupFu">
+                    <image class="off_icon" :src="off_icon"></image>
+                </view>
             </view>
             <view class="flex_1 poupo_main">
                 <com-orderTable ref="orderTableRef" orderType="handleOrder" miniRole="manufacturer"
@@ -408,6 +428,22 @@ const scrolltolower = () => {
     }
 }
 
+.footer_con {
+    gap: 16rpx;
+
+    .button_submit {
+        width: 290rpx;
+        height: 96rpx;
+        background: #fff;
+        border-radius: 48rpx;
+        border: 1rpx solid #ACACAC;
+        font-weight: 500;
+        font-size: 30rpx;
+        color: #202020;
+        line-height: 96rpx;
+    }
+}
+
 .popup_content {
     background-color: #fff;
     padding: 40rpx 24rpx calc(26rpx + env(safe-area-inset-bottom));
@@ -422,9 +458,15 @@ const scrolltolower = () => {
         color: #202020;
         margin-bottom: 40rpx;
 
-        .off_icon {
-            width: 28rpx;
-            height: 28rpx;
+        .off_con {
+            width: 50rpx;
+            height: 50rpx;
+            text-align: center;
+
+            .off_icon {
+                width: 28rpx;
+                height: 28rpx;
+            }
         }
 
     }

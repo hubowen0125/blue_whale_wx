@@ -95,7 +95,7 @@ defineExpose({
 
 <template>
 
-    <uni-popup ref="popupRef" :safe-area="false">
+    <uni-popup ref="popupRef" :safe-area="false" :mask-click="false">
         <view class="popup_main flex_column">
             <view class="flex_between popup_btn_con">
                 <view class="btn_1" @click="onClose">取消</view>

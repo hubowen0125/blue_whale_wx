@@ -142,7 +142,7 @@ const closePopupFu = () => {
                 <text class="checkbox_text">全选</text>
             </view>
         </view>
-        <view class="mian_con flex_1">
+        <view class="main_con flex_1">
             <scroll-view class="scroll_con " scroll-y="true"
                 lower-threshold="50">
                 <view class="order_list flex_column">
@@ -168,7 +168,7 @@ const closePopupFu = () => {
             style="width: 140px; height: 140px;position: absolute;left: -9999px;"></canvas>
     </view>
 
-    <uni-popup ref="codePopupRef">
+    <uni-popup ref="codePopupRef" :mask-click="false">
         <view class="popup_main flex_column flex_align">
             <view>发货成功</view>
             <image class="popup_img" :src="qrcodeIcon" :show-menu-by-longpress="true"></image>
@@ -250,7 +250,7 @@ const closePopupFu = () => {
         }
     }
 
-    .mian_con {
+    .main_con {
         overflow: hidden;
         margin-top: 50rpx;
 

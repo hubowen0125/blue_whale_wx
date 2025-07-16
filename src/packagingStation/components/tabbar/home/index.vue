@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { stockInApi } from "@/packagingStation/http/packagingStation";
+import { scanCodeApi, stockInApi } from "@/packagingStation/http/packagingStation";
 import { getInfoApi, packagingWholesalePageApi } from "@/http/api/all";
 import position_1 from "@/static/images/position_1.png"
 import scan_code_icon from "@/static/images/packagingStation/scan_code_icon.png"
@@ -28,9 +28,7 @@ const stockInParams = reactive<STOCKINPARAMS>({
     checkHandNum: ''
 })
 const wholesaleList = ref<any[]>([])
-const wholesaleDetail = ref<any>({
-    wholesaleName: ''
-})
+const wholesaleName = ref('')
 const selectWholesalerRef = ref<any>()
 const popupData = reactive({
     popupTitle: '续费提醒',
@@ -133,7 +131,7 @@ const showWholesalerFu = () => {
  * @param e 
  */
 const selectSubmitFu = (e: any) => {
-    wholesaleDetail.value = e
+    wholesaleName.value = e.wholesaleName
     stockInParams.packagingWholesaleId = e.id
     stockInParams.storageNum = e.storageNum
 }
@@ -168,7 +166,7 @@ const stockInFu = () => {
     }
     proxy.$Loading()
     stockInApi(stockInParams).then((res: any) => {
-        const { code, data, msg, token } = res
+        const { code, data, msg } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
             console.log(data, '0000');
@@ -189,7 +187,7 @@ const resetStockInParamsFu = () => {
     stockInParams.packagingWholesaleId = ''
     stockInParams.storageNum = ''
     stockInParams.checkHandNum = ''
-    wholesaleDetail.value.wholesaleName = ''
+    wholesaleName.value = ''
 }
 
 const scanCodeFu = () => {
@@ -209,12 +207,9 @@ const scanCodeFu = () => {
                         params[keyValueArr[0]] = keyValueArr[1];
                     }
                 });
-                console.log(params, 'params');
                 const { packagingId, shipId, orderNo } = params
                 if (packagingId == useUser.userInfo.dept.deptId) {
-                    uni.navigateTo({
-                        url: `/packagingStation/scanningResults/index?shipId=${shipId}&orderNo=${orderNo}`
-                    })
+                    queryScanCodeFu(orderNo, shipId)
                 } else {
                     codePopupCom.value.showPopup()
                 }
@@ -226,6 +221,29 @@ const scanCodeFu = () => {
             proxy.$Toast('扫描失败，请扫描正确的二维码！')
         }
     });
+}
+
+/**
+ * 扫码按钮点击事件
+ */
+const queryScanCodeFu = (orderNo: string, shipId: string) => {
+    scanCodeApi({ orderNo, shipId }).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data, '0000');
+            const { manufacturerName, packagingWholesaleId, storageNum, wholesaleName: name } = data
+            stockInParams.manufacturerName = manufacturerName
+            stockInParams.packagingWholesaleId = packagingWholesaleId
+            stockInParams.storageNum = storageNum
+            wholesaleName.value = name
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
 }
 
 // 确认弹窗
@@ -254,7 +272,7 @@ const confirmPopupFu = () => {
                     <view class="flex_align table_input table_input_item" @click="showWholesalerFu">
                         <input class=" flex_1" type="text"
                             placeholder="选择批发商" disabled
-                            v-model="wholesaleDetail.wholesaleName">
+                            v-model="wholesaleName">
                         <image class="arrow_bottom" :src="arrow_bottom"></image>
                     </view>
                     <input class="table_input flex_1" type="number" placeholder="请输入仓位"

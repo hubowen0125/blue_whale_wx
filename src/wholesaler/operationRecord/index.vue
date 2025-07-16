@@ -147,7 +147,7 @@ const scrolltolower = () => {
                     <template v-else-if="activeState == 1 && cashierRecord.length > 0" v-for="item in cashierRecord"
                         :key="`cashier_${item.id}`">
                         <view class="record_item cashier_record flex_align">
-                            <image class="cashier_img"></image>
+                            <image class="cashier_img" :src="item.icon"></image>
                             <view class="flex_column flex_1 cashier_record_content">
                                 <view>{{ item.payUserName }}</view>
                                 <view class="flex_between flex_align">
@@ -275,7 +275,6 @@ const scrolltolower = () => {
                     width: 64rpx;
                     height: 64rpx;
                     border-radius: 50%;
-                    border: 1px solid #000;
                 }
 
                 .cashier_record_content {

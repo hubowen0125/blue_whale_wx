@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { createAddApi } from "@/http/api/all";
 import del_icon from "@/static/images/del_icon.png"
-import off_icon from "@/static/images/off_icon.png"
 import hint_icon from "@/static/images/hint_icon.png"
 import { useManufacturerStore } from "@/manufacturer/store/manufacturer";
 import { useUserStore } from "@/store/modules/user";

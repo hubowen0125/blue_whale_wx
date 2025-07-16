@@ -145,7 +145,7 @@ const confirmPopupFu = () => {
                 <text class="checkbox_text">全选</text>
             </view>
         </view>
-        <view class="mian_con flex_1">
+        <view class="main_con flex_1">
             <scroll-view class="scroll_con " scroll-y="true"
                 lower-threshold="50">
                 <view class="order_list flex_column">
@@ -257,7 +257,7 @@ const confirmPopupFu = () => {
         }
     }
 
-    .mian_con {
+    .main_con {
         overflow: hidden;
         margin-top: 50rpx;
 

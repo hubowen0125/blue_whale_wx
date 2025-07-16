@@ -70,12 +70,14 @@ defineExpose({
         <view class="popup_content flex_column ">
             <view class="popup_header flex_align flex_between">
                 <text>选择厂家</text>
-                <image class="off_icon" :src="off_icon" @click="closePopupFu"></image>
+                <view class="off_con" @click="closePopupFu">
+                    <image class="off_icon" :src="off_icon"></image>
+                </view>
             </view>
-            <view class="mian_con flex_1">
+            <view class="main_con flex_1">
                 <scroll-view class="scroll_con" scroll-y="true" lower-threshold="50" @scrolltolower="scrolltolower">
                     <view class="manufacturer_list flex_column" v-if="manufacturerList.length > 0">
-                        <template v-for="(item , index) in manufacturerList" :key="index">
+                        <template v-for="(item, index) in manufacturerList" :key="index">
                             <view class="manufacturer_item flex_align flex_between"
                                 :class="{ 'manufacturer_item_active': item.dept.deptId == selectData.deptId }"
                                 @click="checkboxFu(item.dept)">
@@ -115,14 +117,19 @@ defineExpose({
         color: #202020;
         margin-bottom: 40rpx;
 
-        .off_icon {
-            width: 28rpx;
-            height: 28rpx;
-        }
+        .off_con {
+            width: 50rpx;
+            height: 50rpx;
+            text-align: center;
 
+            .off_icon {
+                width: 28rpx;
+                height: 28rpx;
+            }
+        }
     }
 
-    .mian_con {
+    .main_con {
         overflow-x: hidden;
         overflow-y: auto;
 

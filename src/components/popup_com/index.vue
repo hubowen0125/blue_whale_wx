@@ -73,7 +73,7 @@ defineExpose({
 
 <template>
     <view class="popup_con">
-        <uni-popup ref="popupRef">
+        <uni-popup ref="popupRef" :mask-click="false">
             <view class="popup_content flex_column text_align">
                 <view class="popup_title">{{ popupData.popupTitle }}</view>
                 <view class="popup_main flex_column" v-if="popupData.pupupType === 'default'">

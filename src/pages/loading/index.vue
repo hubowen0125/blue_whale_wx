@@ -15,7 +15,7 @@ onLoad((e: any) => {
                         url: '/wholesaler/home/index?popup=true'
                     })
                 } else {
-                    if (!e.manufacturerId) {
+                    if (e.manufacturerId == 'null' || !e.manufacturerId) {
                         uni.redirectTo({
                             url: `/manufacturer/shareOrderCard/index?type=${e.type}&cardNo=${e.cardNo}`
                         })

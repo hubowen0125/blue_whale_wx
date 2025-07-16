@@ -125,7 +125,7 @@ const scrolltolower = () => {
     <view class="container flex_column">
         <view class="bg"></view>
         <com-header header-title="我的批发商" :backColor="false" :titleColor="true"></com-header>
-        <view class="mian_con flex_1 flex_column">
+        <view class="main_con flex_1 flex_column">
             <view class="wholesaler_info">
                 <view class="wholesaler_info_item flex_column flex_align flex_center"
                     v-for="item in wholesalerInfoList"
@@ -182,7 +182,7 @@ const scrolltolower = () => {
         top: 0;
     }
 
-    .mian_con {
+    .main_con {
         padding: 24rpx;
         gap: 20rpx;
         position: relative;

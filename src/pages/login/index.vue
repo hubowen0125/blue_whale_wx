@@ -164,7 +164,7 @@ const getUserInfoFu = () => {
                                 url: '/wholesaler/home/index?popup=true'
                             })
                         } else {
-                            if (!typeId.value) {
+                            if (typeId.value == 'null' || !typeId.value) {
                                 uni.redirectTo({
                                     url: `/manufacturer/shareOrderCard/index?type=${type.value}&cardNo=${cardNo.value}`
                                 })

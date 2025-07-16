@@ -44,7 +44,7 @@ const columns = reactive([
         key: 'sizeName'
     },
     {
-        title: '数量',
+        title: '数量(件)',
         key: 'unitQuantity'
     },
     {

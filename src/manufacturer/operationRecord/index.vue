@@ -216,7 +216,7 @@ const scrolltolower = () => {
         <canvas class="code_icon" canvas-id="qrcode"
             style="width: 140px; height: 140px;position: absolute;left: -9999px;"></canvas>
     </view>
-    <uni-popup ref="codePopupRef">
+    <uni-popup ref="codePopupRef" :mask-click="false">
         <view class="popup_main flex_column flex_align">
             <view>查看二维码</view>
             <image class="popup_img" :show-menu-by-longpress="true" :src="qrcodeIcon"></image>

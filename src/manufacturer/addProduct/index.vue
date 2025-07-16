@@ -10,20 +10,20 @@ const { proxy } = getCurrentInstance() as any
 
 const productDetail = [
     {
-        title: '商品名称',
-        value: 'productName',
-        type: 'input',
-        inputType: 'text',
-        required: true,
-        placeholder: '请输入商品名称'
-    },
-    {
         title: '商品款号',
         value: 'styleNumber',
         type: 'input',
         inputType: 'text',
         required: true,
         placeholder: '请输入商品款号'
+    },
+    {
+        title: '商品名称',
+        value: 'productName',
+        type: 'input',
+        inputType: 'text',
+        required: false,
+        placeholder: '请输入商品名称'
     },
     {
         title: '尺码',
@@ -243,10 +243,10 @@ const addParamFu = (item: any) => {
 const formSubmit = (e: any) => {
     const { productName, styleNumber, sizeName, productColorsList, price, unitQuantity } = orderParams.value
     console.log(orderParams.value, 'orderParams.value');
-    if (!productName) {
-        proxy.$Toast({ title: '请填写商品名称' })
-        return
-    }
+    // if (!productName) {
+    //     proxy.$Toast({ title: '请填写商品名称' })
+    //     return
+    // }
     if (!styleNumber) {
         proxy.$Toast({ title: '请填写款号' })
         return

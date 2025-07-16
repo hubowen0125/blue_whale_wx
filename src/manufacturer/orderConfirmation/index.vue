@@ -2,10 +2,6 @@
 import { manufacturerWholesalePageApi } from "../http/manufacturer"
 import { packagingWholesalePageApi } from "@/http/api/all"
 import arrow_right from "@/static/images/arrow_right.png"
-import off_icon from "@/static/images/off_icon.png"
-import position_1 from "@/static/images/position_1.png"
-import checkbox from "@/static/images/checkbox.png"
-import checkbox_active from "@/static/images/checkbox_active.png"
 import deliverGoodsInfo from "../components/deliverGoodsInfo/index.vue"
 import { useManufacturerStore } from "@/manufacturer/store/manufacturer";
 import { formatNumber } from "@/utils/utils"
@@ -35,7 +31,6 @@ const orderTextList = reactive([
 ])
 
 const wholesalerRef = ref();
-const popupRef = ref();
 const orderDetails = ref<any>({
     totalHandNum: computed(() => {
         let total = 0
@@ -83,13 +78,14 @@ const orderDetails = ref<any>({
 const type = ref('')
 const wholesaleList = ref<any[]>([])
 const wholesaleDetail = ref<any>({})
-const packagingList = ref<any[]>([])
+const packagingStationList = ref<any[]>([])
 const packagingDetail = ref<any>({})
 const paramsPage = reactive({
     pageNum: 1,
     pageSize: 10,
 })
-
+const selectPackagingStationRef = ref()
+const selectWholesalerRef = ref<any>()
 
 onLoad(() => {
     manufacturerWholesalePageFu()
@@ -123,34 +119,16 @@ const manufacturerWholesalePageFu = () => {
 // 显示批发商弹窗
 const showWholesalerFu = () => {
     console.log('显示批发商弹窗');
-    wholesalerRef.value.open('bottom')
+    selectWholesalerRef.value.showPopupFu()
 }
 
-/**
- * 选择批发商
- * @param item 
- */
-const selectWholesalerFu = (item: any) => {
-    // wholesaleDetail.value = item;
-    wholesaleList.value.forEach((item: any) => {
-        item.active = false
-    })
-    item.active = true
-}
-
-const submitWholesalerFu = () => {
-    const obj = wholesaleList.value.find((item: any) => item.active)
-    wholesaleDetail.value = obj;
-    if (!wholesaleDetail.value?.wholesaleId) {
-        return proxy.$Toast({ title: '请选择批发商' })
-    }
+const submitWholesalerFu = (e: any) => {
+    wholesaleDetail.value = e;
     orderDetails.value.wholesaleId = wholesaleDetail.value.wholesaleId;
+
+    packagingDetail.value = {};
+    orderDetails.value.packagingId = '';
     packagingWholesalePageFu()
-    closeWholesalerFu();
-}
-// 关闭弹窗
-const closeWholesalerFu = () => {
-    wholesalerRef.value.close();
 }
 
 /**
@@ -166,7 +144,7 @@ const packagingWholesalePageFu = () => {
                 data.forEach((item: any) => {
                     item.active = false
                 })
-                packagingList.value = data;
+                packagingStationList.value = data;
             }
         } else {
             proxy.$Toast({ title: msg })
@@ -184,29 +162,12 @@ const showPopup = () => {
         return proxy.$Toast({ title: '请选择批发商' })
     }
     console.log('显示弹窗');
-    popupRef.value.open('bottom')
+    selectPackagingStationRef.value.showPopupFu()
 }
 
-const selectPackagingFu = (item: any) => {
-    packagingList.value.forEach((item: any) => {
-        item.active = false
-    })
-    item.active = true
-}
-
-const submitPackagingFu = () => {
-    const obj = packagingList.value.find((item: any) => item.active)
-    packagingDetail.value = obj;
-    if (!packagingDetail.value?.packagingId) {
-        return proxy.$Toast({ title: '请选择打包站' })
-    }
+const submitPackagingFu = (e: any) => {
+    packagingDetail.value = e;
     orderDetails.value.packagingId = packagingDetail.value.packagingId;
-    closePopupFu();
-}
-
-// 关闭弹窗
-const closePopupFu = () => {
-    popupRef.value.close();
 }
 
 const createOrderFu = () => {
@@ -291,62 +252,11 @@ const createOrderFu = () => {
             <button class="button_defalut" @click="createOrderFu">生成订单</button>
         </view>
     </view>
+    <com-selectPackagingStation ref="selectPackagingStationRef" :packagingStationList="packagingStationList"
+        @selectSubmitFu="submitPackagingFu"></com-selectPackagingStation>
 
-    <uni-popup ref="popupRef" :safe-area="false">
-        <view class="popup_content flex_column ">
-            <view class="popup_header flex_align flex_between">
-                <text>选择打包站</text>
-                <image class="off_icon" :src="off_icon" @click="closePopupFu"></image>
-            </view>
-            <view class="packaging_station_list flex_column flex_1">
-                <template v-for="item in packagingList" :key="item.packagingId">
-                    <view class="packaging_station_item flex_align flex_between"
-                        :class="{ 'packaging_station_item_active': item.active }"
-                        @click="selectPackagingFu(item)">
-                        <view class="flex_column">
-                            <view class="flex_align packaging_station_info">
-                                <image class="position_icon" :src="position_1"></image>
-                                <view class="packaging_station_name">{{ item.packagingName }}</view>
-                            </view>
-                            <view>{{ item.packagingAddress }}</view>
-                            <view>{{ item.packagingPhone }}</view>
-                        </view>
-                        <image class="checkbox_icon" :src="item.active ? checkbox_active : checkbox"></image>
-                    </view>
-                </template>
-            </view>
-            <button class="button_defalut" @click="submitPackagingFu">确认</button>
-        </view>
-    </uni-popup>
-
-
-    <uni-popup ref="wholesalerRef" :safe-area="false">
-        <view class="popup_content flex_column ">
-            <view class="popup_header flex_align flex_between">
-                <text>选择批发商</text>
-                <image class="off_icon" :src="off_icon" @click="closeWholesalerFu"></image>
-            </view>
-            <view class="packaging_station_list flex_column flex_1">
-                <template v-for="item in wholesaleList" :key="item.id">
-                    <view class="packaging_station_item flex_align flex_between"
-                        :class="{ 'packaging_station_item_active': item.active }"
-                        @click="selectWholesalerFu(item)">
-                        <view class="flex_column">
-                            <view class="flex_align packaging_station_info">
-                                <image class="position_icon" :src="position_1"></image>
-                                <view class="packaging_station_name">{{ item.wholesaleName }}</view>
-                            </view>
-                            <view>{{ item.address }}</view>
-                            <view>{{ item.wholesalePhone }}</view>
-                        </view>
-                        <image class="checkbox_icon"
-                            :src="item.active ? checkbox_active : checkbox"></image>
-                    </view>
-                </template>
-            </view>
-            <button class="button_defalut" @click="submitWholesalerFu">确认</button>
-        </view>
-    </uni-popup>
+    <com-selectWholesaler ref="selectWholesalerRef" :wholesaleList="wholesaleList"
+        @selectSubmitFu="submitWholesalerFu"></com-selectWholesaler>
 </template>
 
 <style lang="scss" scoped>
@@ -473,80 +383,4 @@ const createOrderFu = () => {
     }
 }
 
-.popup_content {
-    background-color: #fff;
-    padding: 40rpx 24rpx calc(26rpx + env(safe-area-inset-bottom));
-    border-radius: 32rpx 32rpx 0 0;
-    height: 60vh;
-    overflow: hidden;
-
-    .popup_header {
-        font-weight: bold;
-        font-size: 40rpx;
-        color: #202020;
-        margin-bottom: 40rpx;
-
-        .off_icon {
-            width: 28rpx;
-            height: 28rpx;
-        }
-
-    }
-
-    .packaging_station_list {
-        gap: 20rpx;
-        overflow-x: hidden;
-        overflow-y: auto;
-
-        .packaging_station_item {
-            background: #F7F8FA;
-            border: 2rpx solid F7F8FA;
-            border-radius: 24rpx;
-            padding: 32rpx;
-            font-weight: 400;
-            font-size: 24rpx;
-            color: #7C8191;
-            gap: 12rpx;
-            box-sizing: border-box;
-
-            .packaging_station_info {
-                margin-bottom: 8rpx;
-
-                .packaging_station_name {
-                    font-weight: 500;
-                    font-size: 32rpx;
-                    color: #202020;
-                }
-
-                .position_icon {
-                    width: 28rpx;
-                    height: 28rpx;
-                    margin-right: 8rpx;
-                }
-            }
-
-            .checkbox_icon {
-                width: 36rpx;
-                height: 36rpx;
-            }
-        }
-
-        .packaging_station_item_active {
-            border: 2rpx solid rgba(1, 163, 255, 1);
-            background: #FFFFFF;
-        }
-    }
-
-
-    .button_defalut {
-        height: 96rpx;
-        background: linear-gradient(90deg, #0D5DFF 0%, #00AAFF 100%);
-        font-weight: 500;
-        font-size: 30rpx;
-        color: #FFFFFF;
-        line-height: 96rpx;
-        border-radius: 48rpx;
-        margin-top: 48rpx;
-    }
-}
 </style>

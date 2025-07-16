@@ -85,11 +85,11 @@ onShareAppMessage((res: any) => {
                 </view>
                 <view class="select_station_con flex_align">
                     <view>打包站</view>
-                    <view class="select_station flex_1">{{ orderDetails.packaging?.deptName }}</view>
+                    <view class="select_station flex_1">{{ orderDetails.packaging?.deptName || '暂无' }}</view>
                 </view>
                 <view class="select_station_con flex_align">
                     <view>厂家</view>
-                    <view class="select_station flex_1">{{ orderDetails.manufacturer?.deptName }}</view>
+                    <view class="select_station flex_1">{{ orderDetails.manufacturer?.deptName || '暂无' }}</view>
                 </view>
             </view>
             <view class="product_list flex_column">

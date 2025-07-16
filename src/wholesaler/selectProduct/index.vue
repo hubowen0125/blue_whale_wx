@@ -201,11 +201,13 @@ const scrolltolower = () => {
             </uni-badge>
         </view>
     </view>
-    <uni-popup ref="popupRef" :safe-area="false">
+    <uni-popup ref="popupRef" :safe-area="false" :mask-click="false">
         <view class="popup_content flex_column">
             <view class="popup_header flex_align flex_between">
                 <text>加入订货单</text>
-                <image class="off_icon" :src="off_icon" @click="closePopupFu"></image>
+                <view class="off_con" @click="closePopupFu">
+                    <image class="off_icon" :src="off_icon"></image>
+                </view>
             </view>
             <view class="flex_1 poupo_main">
                 <com-orderTable ref="orderTableRef" orderType="handleOrder" miniRole="wholesaler"
@@ -307,9 +309,15 @@ const scrolltolower = () => {
         color: #202020;
         margin-bottom: 40rpx;
 
-        .off_icon {
-            width: 28rpx;
-            height: 28rpx;
+        .off_con {
+            width: 50rpx;
+            height: 50rpx;
+            text-align: center;
+
+            .off_icon {
+                width: 28rpx;
+                height: 28rpx;
+            }
         }
 
     }

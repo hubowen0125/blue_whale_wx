@@ -182,7 +182,9 @@ defineExpose({
         <view class="popup_content">
             <view class="popup_header">
                 <view class="popup_title">编辑信息</view>
-                <image class="off_icon" :src="off_icon" @click="closePopupFu"></image>
+                <view class="off_con" @click="closePopupFu">
+                    <image class="off_icon" :src="off_icon"></image>
+                </view>
             </view>
             <form @submit="formSubmit">
                 <view class="form_item">
@@ -224,13 +226,19 @@ defineExpose({
         text-align: center;
         position: relative;
 
-        .off_icon {
-            width: 28rpx;
-            height: 28rpx;
+        .off_con {
+            width: 50rpx;
+            height: 50rpx;
+            text-align: center;
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
             right: 0;
+
+            .off_icon {
+                width: 28rpx;
+                height: 28rpx;
+            }
         }
     }
 

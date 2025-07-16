@@ -13,7 +13,8 @@ const props = defineProps({
             statusMsg: string,
             paymentStatusMsg: string
             wholesale: {
-                deptName: string
+                deptName: string,
+                districtName: string
             }
         },
         default: () => ({})
@@ -40,8 +41,8 @@ const viewOrderDetailFu = () => {
             <view class="order_item_status">{{ orderData.statusMsg }}</view>
         </view>
         <view class="order_item_info flex">
-            <view>{{ orderData?.wholesale?.deptName }}</view>
-            <view class="flex_1 order_item_info_address">上海</view>
+            <view class="order_item_info_address">{{ orderData?.wholesale?.districtName }}</view>
+            <view class="flex_1 ">{{ orderData?.wholesale?.deptName }}</view>
             <view>{{ orderData.totalHandNum }}手</view>
         </view>
         <view class="flex_align order_item_price">
