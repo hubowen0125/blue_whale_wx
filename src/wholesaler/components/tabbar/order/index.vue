@@ -38,6 +38,7 @@ const paramsPage = reactive({
     pageSize: 10,
 })
 const orderList = ref<any[]>([])
+const triggered = ref(false) // 下拉刷新
 
 
 watch(() => tabBarIndex.value, (newVal) => {
@@ -54,6 +55,7 @@ const getOrderPageFu = () => {
     proxy.$Loading()
     getOrderPageApi({ status: activeState.value }, paramsPage).then((res: any) => {
         const { code, data, msg, token } = res
+        triggered.value = false
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
             console.log(data, '0000');
@@ -69,6 +71,7 @@ const getOrderPageFu = () => {
             proxy.$Toast({ title: msg })
         }
     }, (req => {
+        triggered.value = false
         proxy.$CloseLoading();
         proxy.$Toast({ title: req.msg })
     }))
@@ -95,8 +98,16 @@ const scrolltolower = () => {
     console.log('++++++++');
     paramsPage.pageNum += 1
     getOrderPageFu()
-    // resetManageDevicesParams()
 }
+
+const refresherrefreshFu = () => {
+    triggered.value = true
+    paramsPage.pageNum = 1
+    orderList.value = []
+    slideLoading.value = true
+    getOrderPageFu()
+}
+
 </script>
 
 
@@ -114,6 +125,9 @@ const scrolltolower = () => {
         <view class="main_con flex_1">
             <scroll-view class="scroll_con " scroll-y="true"
                 lower-threshold="50"
+                :refresher-enabled="true"
+                :refresher-triggered="triggered"
+                @refresherrefresh="refresherrefreshFu"
                 @scrolltolower="scrolltolower">
                 <view class="order_list flex_column" v-if="orderList.length > 0">
                     <template v-for="item in orderList" :key="item.id">

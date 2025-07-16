@@ -26,7 +26,7 @@ const viewDetailFu = () => {
             <view class="order_item_status">{{ orderData?.statusMsg }}</view>
         </view>
         <view class="order_item_info flex_align">
-            <view class="flex_1">{{ orderData?.manufacturer?.leader }}</view>
+            <view class="flex_1">{{ orderData?.manufacturer?.deptName }}</view>
             <image class="long_arrow" :src="long_arrow"></image>
             <view class="flex_column flex_align">
                 <view>{{ orderData?.checkHandNum }}手</view>

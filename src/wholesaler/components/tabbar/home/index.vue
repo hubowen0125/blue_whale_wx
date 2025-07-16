@@ -4,7 +4,6 @@ import { getInfoApi } from "@/http/api/all"
 import { getWholesaleOrderStatisticsApi } from "@/wholesaler/http/wholesaler"
 import position_1 from "@/static/images/position_1.png"
 import arrow_right_1 from "@/static/images/arrow_right_1.png"
-import long_arrow from "@/static/images/long_arrow.png"
 import orderItem from "../../orderItem/idnex.vue"
 import { useUserStore } from '@/store/modules/user';
 import { calculateTimeDifference } from "@/utils/utils";
@@ -46,18 +45,18 @@ const popupData = reactive({
 })
 
 const popupCom = ref()
-const tabBarIndex = inject("tabBarIndex") as Ref<number>
 const paramsPage = reactive({
     pageNum: 1,
     pageSize: 10,
 })
 const orderList = ref<any[]>([])
-const slideLoading = ref(true) // 是否需要滑动加载
 const statistic = ref<any>({
     orderToday: 0,
     orderNotShipped: 0,
     abnormalOrderNum: 0
 })
+const triggered = ref(false) // 下拉刷新
+const isLoad = ref(false) // 是否加载
 
 onMounted(() => {
     getOrderPageFu()
@@ -98,16 +97,13 @@ const getInfoFu = () => {
 const getOrderPageFu = async () => {
     proxy.$Loading()
     await getOrderPageApi({ status: '' }, paramsPage).then((res: any) => {
-        const { code, data, msg, token } = res
+        const { code, data, msg } = res
         if (code == proxy.$successCode) {
             console.log(data, '0000');
             if (data.datas && data.datas.length > 0) {
-                orderList.value = [...orderList.value, ...data.datas]
-                if (data.datas.length < paramsPage.pageSize) {
-                    slideLoading.value = false
-                }
+                orderList.value = data.datas
             } else {
-                slideLoading.value = false
+                orderList.value = []
             }
         } else {
             proxy.$CloseLoading();
@@ -117,7 +113,12 @@ const getOrderPageFu = async () => {
         proxy.$CloseLoading();
         proxy.$Toast({ title: req.msg })
     }))
-    getInfoFu()
+    if (!isLoad.value) {
+        getInfoFu()
+        isLoad.value = true
+    } else {
+        proxy.$CloseLoading();
+    }
 }
 
 const getWholesaleOrderStatisticsFu = () => {
@@ -143,19 +144,14 @@ const viewAllOrderFu = () => {
     emit('setTabBarIndex', 1)
 }
 
-/**
- * 滑动加载
- */
-const scrolltolower = () => {
-    // if (!slideLoading.value) return
-    console.log('++++++++');
-    // manageDevicesParams.value.page += 1
-    // resetManageDevicesParams()
-}
-
 // 确认弹窗
 const confirmPopupFu = () => {
     console.log('1111');
+}
+
+const refresherrefreshFu = () => {
+    triggered.value = true
+    getOrderPageFu()
 }
 </script>
 
@@ -164,7 +160,7 @@ const confirmPopupFu = () => {
     <view class="home_com flex_column">
         <view class="header_con flex_align">
             <image class="header_img" :src="position_1"></image>
-            <view class="header_title">{{useUser.userInfo?.dept?.deptName}}</view>
+            <view class="header_title">{{ useUser.userInfo?.dept?.deptName }}</view>
         </view>
         <view class="order_type_con flex">
             <view class="order_type_item flex_column flex_align flex_center" v-for="item in orderType"
@@ -183,7 +179,9 @@ const confirmPopupFu = () => {
         <view class="main_con flex_1">
             <scroll-view class="scroll_con " scroll-y="true"
                 lower-threshold="50"
-                @scrolltolower="scrolltolower">
+                :refresher-enabled="true"
+                :refresher-triggered="triggered"
+                @refresherrefresh="refresherrefreshFu">
                 <view class="order_list flex_column">
                     <template v-for="item in orderList" :key="item.id">
                         <orderItem :orderData="item"></orderItem>
