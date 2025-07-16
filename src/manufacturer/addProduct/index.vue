@@ -111,24 +111,27 @@ onShow(() => {
     if (currentPage.$vm.sizeActive) {
         orderParams.value.sizeName = currentPage.$vm.sizeActive.size
         activeSizeList.value = currentPage.$vm.sizeActive
+        currentPage.$vm.sizeActive = ''
     }
     if (currentPage.$vm.colorsActive) {
         let colors = ''
-        orderParams.value.productColorsList = []
+        let objList: any = []
         currentPage.$vm.colorsActive.map((item: any) => {
-            orderParams.value.productColorsList.push({
-                colorName: item.color,
-                stockNum: 0,
+            objList.push({
+                color: item.color,
+                stockNum: orderParams.value.productColorsList.find((color: any) => color.colorName == item.color)?.stockNum || 0,
+                colorName: item.color
             })
             colors += item.color + '、'
         })
+        orderParams.value.productColorsList = objList
         activeColorList.value = currentPage.$vm.colorsActive
         orderParams.value.colors = colors.substring(0, colors.length - 1)
         currentPage.$vm.colorsActive = ''
     }
     if (currentPage.$vm.productColorsList) {
         orderParams.value.productColorsList = currentPage.$vm.productColorsList
-        currentPage.$vm.productColorsList = []
+        currentPage.$vm.productColorsList = ''
     }
 })
 
@@ -139,15 +142,19 @@ const getByIdFu = () => {
         const { code, data, msg, token } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
-            console.log(data, '0000');
             let colors = ''
+            let objList: any = []
             data.productColorsList.map((item: any) => {
                 colors += item.colorName + '、'
+                objList.push({
+                    color: item.colorName,
+                })
             })
             data.colors = colors.substring(0, colors.length - 1)
             data.productImagesList.map((item: any) => {
                 fileList.value.push(item.imageUrlFull)
             })
+            activeColorList.value = objList
             orderParams.value = data
         } else {
             proxy.$Toast({ title: msg })

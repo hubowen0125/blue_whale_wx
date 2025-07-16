@@ -17,6 +17,7 @@ const inputList = [
         maxlength: 20,
         inputType: 'text',
         disabled: false,
+        required: true,
     },
     {
         label: '批发商地区',
@@ -26,6 +27,7 @@ const inputList = [
         inputType: 'text',
         maxlength: 100,
         disabled: true,
+        required: true,
     },
     {
         label: '详细地址',
@@ -35,6 +37,7 @@ const inputList = [
         maxlength: 100,
         inputType: 'text',
         disabled: false,
+        required: false,
     },
     {
         label: '批发商手机号',
@@ -44,6 +47,7 @@ const inputList = [
         maxlength: 11,
         inputType: 'number',
         disabled: false,
+        required: true,
     },
     {
         label: '批发商仓位',
@@ -53,6 +57,7 @@ const inputList = [
         maxlength: 20,
         inputType: 'text',
         disabled: false,
+        required: true,
     },
 ]
 const addParams = reactive<any>({
@@ -124,10 +129,10 @@ const formSubmit = (e: any) => {
         proxy.$Toast({ title: '请选择批发商地区' })
         return
     }
-    if (!address) {
-        proxy.$Toast({ title: '请输入详情地址' })
-        return
-    }
+    // if (!address) {
+    //     proxy.$Toast({ title: '请输入详情地址' })
+    //     return
+    // }
     if (!checkStr(wholesalePhone)) {
         proxy.$Toast({ title: '请输入批发商手机号' })
         return
@@ -161,7 +166,7 @@ const formSubmit = (e: any) => {
             <form @submit="formSubmit">
                 <view class="form_con flex_column">
                     <view class="form_item " v-for="item in inputList" :key="item.label">
-                        <text class="form_label">{{ item.label }}</text>
+                        <text class="form_label" :class="{ 'required': item.required }">{{ item.label }}</text>
                         <view class="form_input flex_align" @click=" item.type === 'select' && showSelectAreaFu()">
                             <input class="flex_1" :placeholder="item.placeholder" :maxlength="item.maxlength"
                                 v-model.trim="addParams[item.value]" :type="item.inputType" :disabled="item.disabled">
@@ -195,7 +200,8 @@ const formSubmit = (e: any) => {
                     font-size: 28rpx;
                     color: #202020;
                     position: relative;
-
+                }
+                .required{
                     &::after {
                         content: '*';
                         position: absolute;

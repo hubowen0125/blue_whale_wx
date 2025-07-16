@@ -160,7 +160,7 @@ const orderDelFu = (id: number) => {
             <view class="my_header_info flex_column ">
                 <view class="flex_align position_info">
                     <image class="position_icon" :src="position_1"></image>
-                    <view>{{ infoDetails.username }}</view>
+                    <view>{{ infoDetails.deptName }}</view>
                 </view>
                 <view>{{ infoDetails.address }}</view>
                 <view>{{ infoDetails.userPhone }}</view>

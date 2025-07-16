@@ -1,13 +1,14 @@
 <script lang="ts" setup>
 import checkbox from "@/static/images/checkbox.png"
 import checkbox_active from "@/static/images/checkbox_active.png"
-import { handleInput, formatNumber } from "@/utils/utils"
+import { handleInput, formatNumber, preciseMath } from "@/utils/utils"
 import { useUserStore } from "@/store/modules/user"
 import del_icon from "@/static/images/del_icon.png"
 
 
 const emit = defineEmits(['deselectAllFu', 'orderDelFu'])
 
+const preciseMathFu = preciseMath()
 const useUser = useUserStore()
 
 const props = defineProps({
@@ -238,6 +239,9 @@ defineExpose({
                     </view>
                     <view class="table_cell" v-else-if="col.key == 'sizeName' && miniRole == 'manufacturer'">
                         {{ tableDetail.sizeName }}({{ row.stockNum }})
+                    </view>
+                    <view class="table_cell" v-else-if="col.key == 'unitQuantity'">
+                          {{ preciseMathFu.multiply(tableDetail.unitQuantity , row.handNum) }}
                     </view>
                     <view :class="['table_cell', orderType == 'show' && col.key == 'handNum' ? 'table_cell_color' : '']"
                         v-else>{{

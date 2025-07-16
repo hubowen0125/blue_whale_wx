@@ -136,7 +136,7 @@ const selectSizeFu = (item: any) => {
  * @param item 
  */
 const selectColorsFu = (item: any) => {
-    const index = colorsActive.value.findIndex((color: any) => color.id == item.id)
+    const index = colorsActive.value.findIndex((color: any) => color.color == item.color)
     if (index > -1) {
         colorsActive.value.splice(index, 1)
     } else {
@@ -151,7 +151,7 @@ const selectColorsFu = (item: any) => {
  * @param item 
  */
 const setColorClassFu = (item: any) => {
-    const index = colorsActive.value.findIndex((color: any) => color.id == item.id)
+    const index = colorsActive.value.findIndex((color: any) => color.color == item.color)
     if (index > -1) {
         return true
     } else {
@@ -312,7 +312,12 @@ const inputValueFu = async (e: any, index: any) => {
 
 
 <style lang="scss" scoped>
+.container{
+    overflow: hidden;
+}
 .main_con {
+    overflow-x: hidden;
+    overflow-y: auto;
     padding: 32rpx 24rpx;
 
     .parameter_container {

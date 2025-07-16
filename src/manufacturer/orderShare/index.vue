@@ -53,7 +53,7 @@ const getByCardNoFu = (cardNo: string) => {
 }
 
 onShareAppMessage(() => {
-    const title = `来自批发商: ${useUser.userInfo.dept.deptName}的订货卡，请立即查看`
+    const title = `来自厂家: ${useUser.userInfo.dept.deptName}的订货卡，请立即查看`
     useUser.setShareParamFu({
         title,
         path: `/pages/loading/index?type=wholesale&cardNo=${orderNo.value}`,
