@@ -156,14 +156,15 @@ const orderDelFu = (id: number) => {
 <template>
     <view class="container flex_column">
         <view class="bg"></view>
-        <view class="my_header  flex_between">
+        <com-header header-title="订货卡" :backColor="false" :titleColor="true"></com-header>
+        <view class="my_header flex_between">
             <view class="my_header_info flex_column ">
                 <view class="flex_align position_info">
                     <image class="position_icon" :src="position_1"></image>
-                    <view>{{ infoDetails.deptName }}</view>
+                    <view>{{ infoDetails?.deptName }}</view>
                 </view>
-                <view>{{ infoDetails.address }}</view>
-                <view>{{ infoDetails.userPhone }}</view>
+                <view>{{ infoDetails?.address }}</view>
+                <view>{{ infoDetails?.userPhone }}</view>
             </view>
         </view>
         <view class="main_con flex_1 flex_column">
@@ -198,9 +199,6 @@ const orderDelFu = (id: number) => {
 
 <style lang="scss" scoped>
 .container {
-    padding-top: v-bind('`${useUser.statusBarHeight + useUser.navHeight}px`');
-    box-sizing: border-box;
-
     .bg {
         width: 750rpx;
         height: 524rpx;

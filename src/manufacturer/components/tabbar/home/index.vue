@@ -45,6 +45,19 @@ const popupData = {
     confirmText: '立即续费',
     callBack: true
 }
+const renewPopupData = reactive({
+    popupTitle: '立即续费',
+    pupupType: 'default',
+    popupContent: [
+        {
+            text: '请联系',
+            desc: '',
+            text1: '进行续费'
+        }
+    ],
+    confirmText: '我知道了',
+})
+const renewPopup = ref()
 
 const popupCom = ref()
 const orderList = ref<Array<any>>([])
@@ -57,11 +70,21 @@ const paramsPage = reactive({
     pageNum: 1,
     pageSize: 10,
 })
+const tabBarIndex = inject("tabBarIndex") as Ref<number>
 
 onMounted(() => {
     getOrderStatisticsFu()
     getOrderPageFu()
     getInfoFu()
+})
+
+
+watch(() => tabBarIndex.value, (newVal) => {
+    if (newVal == 0) {
+        getOrderStatisticsFu()
+        getOrderPageFu()
+        getInfoFu()
+    }
 })
 
 /**
@@ -133,6 +156,8 @@ const getInfoFu = () => {
 // 确认弹窗
 const confirmPopupFu = () => {
     console.log('1111');
+    renewPopupData.popupContent[0].desc = useUser.servicePhone
+    renewPopup.value.showPopup()
 }
 
 // 查看全部
@@ -175,6 +200,7 @@ const lookAll = () => {
             </scroll-view>
         </view>
         <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="confirmPopupFu"></com-popup_com>
+        <com-popup_com ref="renewPopup" :popupData="renewPopupData"></com-popup_com>
     </view>
 </template>
 

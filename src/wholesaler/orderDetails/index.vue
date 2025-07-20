@@ -10,7 +10,10 @@ const orderText = reactive([
     {
         title: '厂家',
         value: computed(() => orderDetails.value?.manufacturer?.deptName),
-        value1: computed(() => orderDetails.value?.manufacturer?.phone),
+    },
+    {
+        title: '厂家手机号',
+        value: computed(() => orderDetails.value?.manufacturer?.phone),
     },
     {
         title: '总件数',
@@ -18,7 +21,7 @@ const orderText = reactive([
     },
     {
         title: '核点',
-        value: computed(() => `${orderDetails.value?.checkHandNum}手/${orderDetails.value?.checkNum}件`),
+        value: computed(() => `${orderDetails.value?.checkHandNum}手`),
     },
     {
         title: '总金额',
@@ -144,14 +147,14 @@ const delByOrderNoFu = () => {
         <view class="bg"></view>
         <com-header :backColor="false"></com-header>
         <view class="main_con flex_1 flex_column">
-            <view class="wait_con">
-                <view class="flex_align flex_center">
-                    <image class="wait_icon" :src="wait_icon"></image>
-                    <text>{{ orderDetails.statusMsg }}</text>
-                </view>
-                <view class="wait_num">已发货{{ orderDetails.unSendHandNum }}/{{ orderDetails.unSendNum }}</view>
-            </view>
             <view class="order_details">
+                <view class="wait_con flex_between">
+                    <view class="flex_align flex_center">
+                        <image class="wait_icon" :src="wait_icon"></image>
+                        <text>{{ orderDetails.statusMsg }}</text>
+                    </view>
+                    <view class="wait_num">已发货{{ orderDetails.unSendHandNum }}/{{ orderDetails.unSendNum }}</view>
+                </view>
                 <view class="order_details_item flex_align flex_between" v-for="item, index in orderText"
                     :key="index">
                     <view class="flex_align order_details_item_title">{{ item.title }}</view>
@@ -159,7 +162,6 @@ const delByOrderNoFu = () => {
                         <view v-if="item.type === 'price'" class="order_details_item_value_price">¥{{ item.value }}
                         </view>
                         <view v-else>{{ item.value }}</view>
-                        <view v-if="item.value1">{{ item.value1 }}</view>
                     </view>
                 </view>
             </view>
@@ -215,49 +217,44 @@ const delByOrderNoFu = () => {
         overflow: auto;
         gap: 20rpx;
 
-
-        .wait_con {
-            font-weight: bold;
-            font-size: 48rpx;
-            color: #FFFFFF;
-            text-align: center;
-            position: relative;
-            margin-bottom: 16rpx;
-
-            .wait_icon {
-                width: 48rpx;
-                height: 48rpx;
-                margin-right: 6rpx;
-            }
-
-            .wait_num {
-                font-weight: 400;
-                font-size: 26rpx;
-                color: #BAE1FF;
-                margin-top: 10rpx;
-            }
-        }
-
         .order_details {
             background: #FFFFFF;
             border-radius: 24rpx;
-            padding: 0 28rpx;
+            padding: 40rpx 28rpx;
+
+            .wait_con {
+                font-weight: bold;
+                font-size: 48rpx;
+                color: #202020;
+                align-items: baseline;
+
+                .wait_icon {
+                    width: 48rpx;
+                    height: 48rpx;
+                    margin-right: 6rpx;
+                }
+
+                .wait_num {
+                    font-weight: 500;
+                    font-size: 28rpx;
+                    color: #0C62FF;
+                }
+            }
 
             .order_details_item {
-                padding: 34rpx 0;
-                border-bottom: 1rpx solid #EFEFEF;
+                margin-top: 20rpx;
 
                 .order_details_item_title {
                     width: 200rpx;
-                    font-weight: 500;
-                    font-size: 28rpx;
-                    color: #202020;
+                    font-weight: 400;
+                    font-size: 26rpx;
+                    color: #7C8191;
                 }
 
                 .order_details_item_value {
                     font-weight: 400;
-                    font-size: 28rpx;
-                    color: #7C8191;
+                    font-size: 26rpx;
+                    color: #202020;
                     text-align: right;
 
                     .order_details_item_value_price {

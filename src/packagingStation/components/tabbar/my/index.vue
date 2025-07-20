@@ -37,22 +37,8 @@ const funList = [
         path: '/pages/agreement/index?type=privacyAgreement'
     },
 ]
-const popupData = {
-    popupTitle: '立即续费',
-    pupupType: 'default',
-    popupContent: [
-        {
-            text: '请联系',
-            desc: '15618257147',
-            text1: '进行续费'
-        },
-    ],
-    confirmText: '确定',
-    caalBack: true
-}
 
 const tabBarIndex = inject("tabBarIndex") as Ref<number>
-const popupCom = ref()
 const infoDetails = ref<any>({})
 
 watch(() => tabBarIndex.value, (newVal) => {
@@ -142,7 +128,6 @@ const logoutFu = () => {
         </view>
         <button class="logout_btn" @click="logoutFu">退出登录</button>
     </view>
-    <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="confirmPopupFu"></com-popup_com>
 </template>
 
 

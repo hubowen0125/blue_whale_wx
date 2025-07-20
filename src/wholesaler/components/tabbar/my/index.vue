@@ -27,37 +27,13 @@ const funList = [
         path: '/pages/agreement/index?type=privacyAgreement'
     },
 ]
-const popupData = {
-    popupTitle: '立即续费',
-    pupupType: 'default',
-    popupContent: [
-        {
-            text: '请联系',
-            desc: '15618257147',
-            text1: '进行续费'
-        },
-    ],
-    confirmText: '确定',
-    caalBack: true
-}
 
 const tabBarIndex = inject("tabBarIndex") as Ref<number>
-const popupCom = ref()
 const infoDetails = ref<any>({})
-
-
-onMounted(() => {
-    // popupCom.value.showPopup()
-    // getInfoFu()
-    // console.log('222');
-})
 
 watch(() => tabBarIndex.value, (newVal) => {
     if (newVal == 4) {
-        // useDataBoard.setConditionIndex(0)
         getInfoFu()
-        console.log('111111');
-
     }
 })
 
@@ -151,7 +127,6 @@ const logoutFu = () => {
             <button class="logout_btn" @click="logoutFu">退出登录</button>
         </view>
     </view>
-    <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="confirmPopupFu"></com-popup_com>
 </template>
 
 

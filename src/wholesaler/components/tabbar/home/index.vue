@@ -41,8 +41,21 @@ const popupData = reactive({
     ],
     cancelText: '稍后处理',
     confirmText: '立即续费',
-    caalBack: true
+    callBack: true
 })
+const renewPopupData = reactive({
+    popupTitle: '立即续费',
+    pupupType: 'default',
+    popupContent: [
+        {
+            text: '请联系',
+            desc: '',
+            text1: '进行续费'
+        }
+    ],
+    confirmText: '我知道了',
+})
+const renewPopup = ref()
 
 const popupCom = ref()
 const paramsPage = reactive({
@@ -147,6 +160,8 @@ const viewAllOrderFu = () => {
 // 确认弹窗
 const confirmPopupFu = () => {
     console.log('1111');
+    renewPopupData.popupContent[0].desc = useUser.servicePhone
+    renewPopup.value.showPopup()
 }
 
 const refresherrefreshFu = () => {
@@ -190,6 +205,7 @@ const refresherrefreshFu = () => {
             </scroll-view>
         </view>
         <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="confirmPopupFu"></com-popup_com>
+        <com-popup_com ref="renewPopup" :popupData="renewPopupData"></com-popup_com>
     </view>
 </template>
 

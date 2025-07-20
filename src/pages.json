@@ -250,12 +250,6 @@
                     }
                 },
                 {
-                    "path": "orderDetails/index",
-                    "style": {
-                        "navigationStyle": "custom"
-                    }
-                },
-                {
                     "path": "myWholesaler/index",
                     "style": {
                         "navigationStyle": "custom"

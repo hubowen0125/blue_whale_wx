@@ -46,7 +46,7 @@ const popupData = {
     cancelText: '取消',
     confirmText: '确认',
     placeholder: '请输入新仓位',
-    caalBack: true
+    callBack: true
 }
 const popupCom = ref()
 const activeTabs = ref(0)

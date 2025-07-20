@@ -25,7 +25,9 @@ const stockInParams = reactive<STOCKINPARAMS>({
     manufacturerName: '',
     packagingWholesaleId: '',
     storageNum: '',
-    checkHandNum: ''
+    checkHandNum: '',
+    orderNo: '',
+    shipId: ''
 })
 const wholesaleList = ref<any[]>([])
 const wholesaleName = ref('')
@@ -44,7 +46,7 @@ const popupData = reactive({
     ],
     cancelText: '稍后处理',
     confirmText: '立即续费',
-    caalBack: true
+    callBack: true
 })
 const codePopupData = reactive({
     popupTitle: '提示',
@@ -56,6 +58,19 @@ const codePopupData = reactive({
     ],
     confirmText: '我知道了',
 })
+const renewPopupData = reactive({
+    popupTitle: '立即续费',
+    pupupType: 'default',
+    popupContent: [
+        {
+            text: '请联系',
+            desc: '',
+            text1: '进行续费'
+        }
+    ],
+    confirmText: '我知道了',
+})
+const renewPopup = ref()
 const codePopupCom = ref()
 const popupCom = ref()
 
@@ -187,6 +202,8 @@ const resetStockInParamsFu = () => {
     stockInParams.packagingWholesaleId = ''
     stockInParams.storageNum = ''
     stockInParams.checkHandNum = ''
+    stockInParams.orderNo = ''
+    stockInParams.shipId = ''
     wholesaleName.value = ''
 }
 
@@ -208,11 +225,11 @@ const scanCodeFu = () => {
                     }
                 });
                 const { packagingId, shipId, orderNo } = params
-                if (packagingId == useUser.userInfo.dept.deptId) {
-                    queryScanCodeFu(orderNo, shipId)
-                } else {
-                    codePopupCom.value.showPopup()
-                }
+                // if (packagingId == useUser.userInfo.dept.deptId) {
+                queryScanCodeFu(orderNo, shipId)
+                // } else {
+                //     codePopupCom.value.showPopup()
+                // }
             }
         },
         fail: function (res) {
@@ -236,6 +253,8 @@ const queryScanCodeFu = (orderNo: string, shipId: string) => {
             stockInParams.manufacturerName = manufacturerName
             stockInParams.packagingWholesaleId = packagingWholesaleId
             stockInParams.storageNum = storageNum
+            stockInParams.orderNo = orderNo
+            stockInParams.shipId = shipId
             wholesaleName.value = name
         } else {
             proxy.$Toast({ title: msg })
@@ -249,6 +268,8 @@ const queryScanCodeFu = (orderNo: string, shipId: string) => {
 // 确认弹窗
 const confirmPopupFu = () => {
     console.log('1111');
+    renewPopupData.popupContent[0].desc = useUser.servicePhone
+    renewPopup.value.showPopup()
 }
 
 </script>
@@ -300,6 +321,7 @@ const confirmPopupFu = () => {
         :wholesaleList="wholesaleList" @selectSubmitFu="selectSubmitFu"></com-selectWholesaler>
     <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="confirmPopupFu"></com-popup_com>
     <com-popup_com ref="codePopupCom" :popupData="codePopupData"></com-popup_com>
+    <com-popup_com ref="renewPopup" :popupData="renewPopupData"></com-popup_com>
 </template>
 
 <style lang="scss" scoped>

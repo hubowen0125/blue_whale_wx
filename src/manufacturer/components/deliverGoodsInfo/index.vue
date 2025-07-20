@@ -33,10 +33,10 @@ const selectPackagingFu = () => {
         </view>
         <view class="flex_align deliver_goods_info_item">
             <view>配送站信息</view>
-            <view class="flex_1" v-if="deliverInfo.deptName || deliverInfo.packagingName">
+            <view class="flex_1" v-if="deliverInfo?.deptName || deliverInfo?.packagingName">
                 <view class="deliver_goods_title">{{ deliverInfo.deptName || deliverInfo.packagingName }}</view>
                 <view class="deliver_goods_address">{{ deliverInfo.address || deliverInfo.packagingAddress }}</view>
-                <view class="deliver_goods_tel">{{ deliverInfo.phone || deliverInfo.packagingPhone}}</view>
+                <view class="deliver_goods_tel">{{ deliverInfo.phone || deliverInfo.packagingPhone }}</view>
             </view>
             <view class="flex_1" v-else>请选择打包站</view>
         </view>

@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import cancel_icon from "@/static/images/cancel_icon.png"
 import { dateStrToDateFormat, formatNumber } from '@/utils/utils'
 
 const props = defineProps({
@@ -9,6 +10,7 @@ const props = defineProps({
             totalHandNum: number,
             totalNum: number,
             totalAmount: number,
+            paymentAmount: number,
             createTime: string,
             statusMsg: string,
             paymentStatusMsg: string
@@ -34,11 +36,12 @@ const viewOrderDetailFu = () => {
 
 
 <template>
-    <view class="order_item flex_column" @click="viewOrderDetailFu">
+    <view class="order_item flex_column" :class="`order_item_${orderData.status}`" @click="viewOrderDetailFu">
         <view class="order_item_title flex_align">
             <view class="order_unpaid">{{ orderData.paymentStatusMsg }}</view>
             <view class="flex_1">订单号: {{ orderData.orderNo }}</view>
-            <view class="order_item_status">{{ orderData.statusMsg }}</view>
+            <view class="order_item_status" :class="`order_item_status_${orderData.status}`">{{ orderData.statusMsg }}
+            </view>
         </view>
         <view class="order_item_info flex">
             <view class="order_item_info_address">{{ orderData?.wholesale?.districtName }}</view>
@@ -50,9 +53,10 @@ const viewOrderDetailFu = () => {
             <view class="order_item_price_old">¥{{ formatNumber(orderData.totalAmount) }}</view>
             <view class="flex_align">
                 <text>已收:</text>
-                <text class="order_item_price_new">¥{{ formatNumber(100) }}</text>
+                <text class="order_item_price_new">¥{{ formatNumber(orderData.paymentAmount) }}</text>
             </view>
         </view>
+        <image v-if="orderData.status === 6" class="cancel_icon" :src="cancel_icon"></image>
     </view>
 </template>
 
@@ -82,6 +86,22 @@ const viewOrderDetailFu = () => {
             font-size: 26rpx;
             color: #FF840C;
         }
+
+        .order_item_status_6 {
+            color: #A9A9A9;
+        }
+
+        .order_item_status_3,
+        .order_item_status_4 {
+            color: #52B73C;
+        }
+
+        .order_item_status_5,
+        .order_item_status_0 {
+            color: #EF4747;
+        }
+
+
     }
 
     .order_item_info {
@@ -113,6 +133,20 @@ const viewOrderDetailFu = () => {
         .order_item_price_new {
             color: #F73030;
         }
+    }
+}
+
+.order_item_6 {
+    background-color: #f9f9f9;
+    opacity: 0.7;
+    position: relative;
+
+    .cancel_icon {
+        width: 132rpx;
+        height: 132rpx;
+        position: absolute;
+        top: 16rpx;
+        left: 358rpx;
     }
 }
 </style>

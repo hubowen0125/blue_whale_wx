@@ -35,19 +35,6 @@ const funList = [
         path: '/pages/agreement/index?type=privacyAgreement'
     },
 ]
-const popupData = {
-    popupTitle: '立即续费',
-    pupupType: 'default',
-    popupContent: [
-        {
-            text: '请联系',
-            desc: '15618257147',
-            text1: '进行续费'
-        },
-    ],
-    confirmText: '确定',
-    callBakc: true
-}
 const reportList = [
     {
         title: '订单数',
@@ -66,7 +53,6 @@ const dateShift = createDateShifter() // 默认从今天开始
 
 
 const tabBarIndex = inject("tabBarIndex") as Ref<number>
-const popupCom = ref()
 const infoDetails = ref<any>({})
 const date = ref(dateShift.get())
 const isLoad = ref(false) // 是否加载
@@ -220,7 +206,6 @@ const logoutFu = () => {
         </view>
         <button class="logout_btn" @click="logoutFu">退出登录</button>
     </view>
-    <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="confirmPopupFu"></com-popup_com>
 </template>
 
 

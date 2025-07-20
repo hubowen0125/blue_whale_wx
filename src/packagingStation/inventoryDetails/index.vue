@@ -8,20 +8,28 @@ const { proxy } = getCurrentInstance() as any;
 
 const inventoryDetail = reactive([
     {
-        title: '订单号: ',
-        orderNo: computed(() => inventoryDetails.value.orderNo),
+        title: '订单号 ',
+        value: computed(() => inventoryDetails.value.orderNo),
+    },
+    {
+        title: '创建时间',
         value: computed(() => dateStrToDateFormat(inventoryDetails.value.createTime, '')),
-        arrow: true
     },
     {
         title: '厂家',
         value: computed(() => inventoryDetails.value.manufacturerName),
-        value1: computed(() => inventoryDetails.value.manufacturerPhone),
+    },
+    {
+        title: '厂家电话号',
+        value: computed(() => inventoryDetails.value.manufacturerPhone),
     },
     {
         title: '批发商',
         value: computed(() => inventoryDetails.value.wholesaleName),
-        value1: computed(() => inventoryDetails.value.wholesalePhone),
+    },
+    {
+        title: '批发商电话号',
+        value: computed(() => inventoryDetails.value.wholesalePhone),
     },
     {
         title: '客户仓位',
@@ -151,16 +159,9 @@ onUnmounted(() => {
             <view class="inventory_details">
                 <view class="inventory_details_item flex_align flex_between" v-for="item, index in inventoryDetail"
                     :key="index">
-                    <view class="flex_align inventory_details_item_title">
-                        <text :class="{ 'order_title': item.arrow }">{{ item.title }}</text>
-                        <template v-if="item.arrow">
-                            <text class="order_no">{{ item.orderNo }}</text>
-                            <image class="arrow_right" :src="arrow_right"></image>
-                        </template>
-                    </view>
+                    <view class="inventory_details_item_title">{{ item.title }}</view>
                     <view class="flex_1  inventory_details_item_value" :class="{ 'flex_align flex_end': item.button }">
                         <view>{{ item.value }}</view>
-                        <view v-if="item.value1">{{ item.value1 }}</view>
                         <button class="inventory_details_item_button" v-if="item.button" @click="modifyFu">修改</button>
                     </view>
                 </view>
@@ -220,37 +221,21 @@ onUnmounted(() => {
         .inventory_details {
             background: #FFFFFF;
             border-radius: 24rpx;
-            padding: 0 28rpx;
+            padding: 40rpx 28rpx;
 
             .inventory_details_item {
-                padding: 34rpx 0;
-                border-bottom: 1rpx solid #EFEFEF;
+                margin-top: 20rpx;
 
                 .inventory_details_item_title {
-                    font-weight: 500;
-                    font-size: 28rpx;
-                    color: #202020;
-
-                    .order_title {
-                        font-size: 32rpx;
-                        color: #202020;
-                    }
-
-                    .order_no {
-                        font-size: 32rpx;
-                        color: #0C62FF;
-                    }
-
-                    .arrow_right {
-                        width: 28rpx;
-                        height: 28rpx;
-                    }
+                    font-weight: 400;
+                    font-size: 26rpx;
+                    color: #7C8191;
                 }
 
                 .inventory_details_item_value {
                     font-weight: 400;
-                    font-size: 28rpx;
-                    color: #7C8191;
+                    font-size: 26rpx;
+                    color: #202020;
                     text-align: right;
 
                     .inventory_details_item_button {
