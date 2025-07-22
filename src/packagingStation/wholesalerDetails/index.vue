@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { wholesaleDetailApi } from '../http/packagingStation';
 import { dateStrToDateFormat } from '@/utils/utils';
+import del_icon from "@/static/images/del_icon.png"
 
 const { proxy } = getCurrentInstance() as any;
 
@@ -15,7 +16,7 @@ const wholesalerDetailsList = reactive([
     },
     {
         title: '客户地区',
-        value: computed(() => `${wholesaleDetails.value.wholesaleProvince}${wholesaleDetails.value.wholesaleCity}${wholesaleDetails.value.wholesaleDistrict}`)
+        value: computed(() => `${wholesaleDetails.value.wholesaleProvinceName}${wholesaleDetails.value.wholesaleCityName}${wholesaleDetails.value.wholesaleDistrictName}`)
     },
     {
         title: '客户地址',
@@ -31,7 +32,7 @@ const wholesalerDetailsList = reactive([
     },
     {
         title: '未打包天数',
-        value: computed(() => `${wholesaleDetails.value.unpackingDays}天`)
+        value: computed(() => `${wholesaleDetails.value.unpackingDays == -1 ? '未打包过' : wholesaleDetails.value.unpackingDays + '天'}`)
     },
 ])
 const popupData = {
@@ -141,7 +142,11 @@ const modifyFu = () => {
                 <com-no_data v-else noDataText="暂无数据"></com-no_data>
             </view>
         </view>
-        <view class="footer_con">
+        <view class="footer_con flex">
+            <view class="del_btn flex_align">
+                <image class="del_icon" :src="del_icon"></image>
+                <view>删除</view>
+            </view>
             <button class="button_defalut" @click="modifyFu">编辑仓位</button>
         </view>
     </view>
@@ -251,6 +256,18 @@ const modifyFu = () => {
                 }
             }
         }
+    }
+}
+
+.del_btn {
+    font-weight: 400;
+    font-size: 28rpx;
+    color: #7C8191;
+
+    .del_icon {
+        width: 28rpx;
+        height: 28rpx;
+        margin-right: 6rpx;
     }
 }
 </style>

@@ -181,51 +181,21 @@ const scrolltolower = () => {
     <view class="record_com flex_column">
         <view class="bg"></view>
         <view class="record_header">入库记录</view>
-        <view class="record_main flex_1 flex_column">
-            <view class="query_criteria">
-                <view class="flex_align time_desc">
-                    <picker mode="date" :value="recordParams.startTime" :start="startDate" :end="endDate"
-                        @change="startChangeFu">
-                        <view class="flex_align">
-                            <text>开始时间</text>
-                            <image class="desc_icon" :src="arrow_bottom"></image>
+        <view class="record_main">
+            <scroll-view class="scroll_con " scroll-y="true"
+                lower-threshold="50"
+                @scrolltolower="scrolltolower">
+                <view class="query_criteria">
+                    <view class="quert_input_list flex_column">
+                        <view class="flex_align quert_input" v-for="item, index in quertList" :key="index">
+                            <image class="search_icon" :src="search_icon"></image>
+                            <input class="flex_1" type="text" :placeholder="item.placeholder"
+                                v-model.trim="recordParams[item.value]" />
                         </view>
-                    </picker>
-                    <picker mode="date" :value="recordParams.endTime" :start="startDate" :end="endDate"
-                        @change="endChangeFu">
-                        <view class="flex_align ">
-                            <text>结束时间</text>
-                            <image class="desc_icon" :src="arrow_bottom"></image>
-                        </view>
-                    </picker>
-                </view>
-                <view class="select_time flex_align">
-                    <view class="flex_align">
-                        <picker mode="date" :value="recordParams.startTime" :start="startDate" :end="endDate"
-                            @change="startChangeFu">
-                            <view>{{ recordParams.startTime }}</view>
-                        </picker>
-                        <image class="long_arrow" :src="long_arrow"></image>
-                        <picker mode="date" :value="recordParams.endTime" :start="startDate" :end="endDate"
-                            @change="endChangeFu">
-                            <view>{{ recordParams.endTime }}</view>
-                        </picker>
                     </view>
-                    <view class="time_long flex_1">共{{ timeDesc }}</view>
+                    <button class="button_defalut" @click="resetParams">查询</button>
                 </view>
-                <view class="quert_input_list flex_column">
-                    <view class="flex_align quert_input" v-for="item, index in quertList" :key="index">
-                        <image class="search_icon" :src="search_icon"></image>
-                        <input class="flex_1" type="text" :placeholder="item.placeholder"
-                            v-model.trim="recordParams[item.value]" />
-                    </view>
-                </view>
-                <button class="button_defalut" @click="resetParams">查询</button>
-            </view>
-            <view class="flex_1 record_con">
-                <scroll-view class="scroll_con " scroll-y="true"
-                    lower-threshold="50"
-                    @scrolltolower="scrolltolower">
+                <view class=" record_con">
                     <view class="record_list flex_column" v-if="recordList.length > 0">
                         <view class="record_item" v-for="item in recordList" :key="item.id"
                             @click="viewRecordDetailFu(item)">
@@ -235,7 +205,7 @@ const scrolltolower = () => {
                             </view>
                             <view class="record_item_info flex_align">
                                 <view>{{ item.wholesaleName }}</view>
-                                <view class="record_item_position">{{ item.wholesaleAddress }}</view>
+                                <view class="record_item_position">{{ item.wholesaleProvinceName }}</view>
                             </view>
                             <view class="record_item_manufacturer">厂家: {{ item.manufacturerName }}</view>
                             <view class="record_item_num">入库数量: {{ item.checkHandNum }}手</view>
@@ -243,8 +213,8 @@ const scrolltolower = () => {
                         </view>
                     </view>
                     <com-no_data v-else noDataText="暂无批发商数据"></com-no_data>
-                </scroll-view>
-            </view>
+                </view>
+            </scroll-view>
         </view>
     </view>
 </template>
@@ -286,53 +256,19 @@ const scrolltolower = () => {
 
         .query_criteria {
             width: 702rpx;
-            height: 644rpx;
+            height: auto;
             background: #FFFFFF;
             border-radius: 24rpx;
-            padding: 40rpx 28rpx;
+            padding: 20rpx 28rpx;
             box-sizing: border-box;
-            margin-top: 40rpx;
-
-            .time_desc {
-                font-weight: 400;
-                font-size: 24rpx;
-                color: #7C8191;
-                gap: 196rpx;
-
-                .desc_icon {
-                    width: 24rpx;
-                    height: 24rpx;
-                    margin-left: 8rpx;
-                }
-            }
-
-            .select_time {
-                font-weight: 500;
-                font-size: 30rpx;
-                color: #202020;
-                font-style: normal;
-                margin-top: 10rpx;
-
-                .long_arrow {
-                    width: 90rpx;
-                    height: 28rpx;
-                    margin: 0 32rpx;
-                }
-
-                .time_long {
-                    font-weight: 400;
-                    font-size: 26rpx;
-                    color: #0C62FF;
-                    text-align: right;
-                }
-            }
+            margin-top: 10rpx;
 
             .quert_input_list {
                 gap: 16rpx;
-                margin: 40rpx 0 32rpx;
+                margin-bottom: 12rpx;
 
                 .quert_input {
-                    height: 88rpx;
+                    height: 78rpx;
                     background: #F7F8FA;
                     border-radius: 12rpx;
                     padding: 0 32rpx;

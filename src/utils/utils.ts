@@ -481,3 +481,12 @@ export const calculateDaysDifference = (time1: string, time2: string) => {
     const day = Math.floor(diff / (24 * 3600 * 1000))
     return day
 }
+
+// utils/encoder.ts
+export function encodeText(str: string): ArrayBuffer {
+    const codeUnits = [];
+    for (let i = 0; i < str.length; i++) {
+        codeUnits.push(str.charCodeAt(i));
+    }
+    return new Uint8Array(codeUnits).buffer;
+}

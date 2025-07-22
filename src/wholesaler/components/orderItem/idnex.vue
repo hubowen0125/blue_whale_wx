@@ -69,15 +69,17 @@ const viewDetailFu = () => {
             color: #FF840C;
         }
 
+        .order_item_status_3,
+        .order_item_status_4,
         .order_item_status_6 {
             color: #A9A9A9;
         }
 
-        .order_item_status_3,
-        .order_item_status_4 {
+        .order_item_status_2 {
             color: #52B73C;
         }
 
+        .order_item_status_1,
         .order_item_status_5,
         .order_item_status_0 {
             color: #EF4747;

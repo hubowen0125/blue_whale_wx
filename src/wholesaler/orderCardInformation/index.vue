@@ -192,7 +192,9 @@ onUnmounted(() => {
             <view class="product_list flex_column">
                 <template v-for="item in createParams.cardProductsList" :key="item.id">
                     <view class="product_item">
-                        <com-orderTable orderType="show" :productDetail="item" miniRole="wholesaler"></com-orderTable>
+                        <com-orderTable orderType="show" :productDetail="item" miniRole="wholesaler" 
+                            :viewInventory="createParams.viewInventory"
+                        ></com-orderTable>
                     </view>
                 </template>
             </view>

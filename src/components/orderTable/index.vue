@@ -31,6 +31,10 @@ const props = defineProps({
     deleteBtn: {
         type: Boolean,
         default: false
+    },
+    viewInventory: {
+        type: Number,
+        default: 0
     }
 })
 
@@ -237,11 +241,12 @@ defineExpose({
                             </view>
                         </view>
                     </view>
-                    <view class="table_cell" v-else-if="col.key == 'sizeName' && miniRole == 'manufacturer'">
-                        {{ tableDetail.sizeName }}({{ row.stockNum }})
+                    <view class="table_cell"
+                        v-else-if="col.key == 'sizeName' && (miniRole == 'manufacturer' || (miniRole == 'wholesaler' && viewInventory > 0))">
+                        {{ tableDetail.sizeName }}({{ row.stockNum || 0 }})
                     </view>
                     <view class="table_cell" v-else-if="col.key == 'unitQuantity'">
-                          {{ preciseMathFu.multiply(tableDetail.unitQuantity , row.handNum) }}
+                        {{ preciseMathFu.multiply(tableDetail.unitQuantity, row.handNum) }}
                     </view>
                     <view :class="['table_cell', orderType == 'show' && col.key == 'handNum' ? 'table_cell_color' : '']"
                         v-else>{{

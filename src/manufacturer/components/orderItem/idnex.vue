@@ -16,7 +16,7 @@ const props = defineProps({
             paymentStatusMsg: string
             wholesale: {
                 deptName: string,
-                districtName: string
+                cityName: string
             }
         },
         default: () => ({})
@@ -44,7 +44,7 @@ const viewOrderDetailFu = () => {
             </view>
         </view>
         <view class="order_item_info flex">
-            <view class="order_item_info_address">{{ orderData?.wholesale?.districtName }}</view>
+            <view class="order_item_info_address">{{ orderData?.wholesale?.cityName }}</view>
             <view class="flex_1 ">{{ orderData?.wholesale?.deptName }}</view>
             <view>{{ orderData.totalHandNum }}手</view>
         </view>
@@ -87,15 +87,17 @@ const viewOrderDetailFu = () => {
             color: #FF840C;
         }
 
+        .order_item_status_3,
+        .order_item_status_4,
         .order_item_status_6 {
             color: #A9A9A9;
         }
 
-        .order_item_status_3,
-        .order_item_status_4 {
+        .order_item_status_2 {
             color: #52B73C;
         }
 
+        .order_item_status_1,
         .order_item_status_5,
         .order_item_status_0 {
             color: #EF4747;

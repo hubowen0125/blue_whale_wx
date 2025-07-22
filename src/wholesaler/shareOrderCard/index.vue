@@ -177,6 +177,7 @@ const orderDelFu = (id: number) => {
                             orderType="handleOrder"
                             :deleteBtn="true"
                             :productDetail="item"
+                            :viewInventory="cardOrderDetail.viewInventory"
                             @orderDelFu="orderDelFu">
                         </com-orderTable>
                     </view>

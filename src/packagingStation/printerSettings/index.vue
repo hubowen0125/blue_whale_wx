@@ -1,9 +1,12 @@
 <script lang="ts" setup>
 import { getByIdApi } from '../http/packagingStation';
 import { useUserStore } from '@/store/modules/user';
+import { hexStringToBuff } from '@/packagingStation/printerSettings/util.js'
 
 declare const wx: any;
 
+var k = 0;
+var strArray: string | any[];
 let timer: any = null;
 const useUser = useUserStore()
 const { proxy } = getCurrentInstance() as any;
@@ -40,6 +43,7 @@ onLoad((e: any) => {
     } else {
         generateCanvasFu()
     }
+    // writeBLECharacteristicValue()
 })
 
 onShow(() => {
@@ -53,6 +57,36 @@ onShow(() => {
         }
     }
 })
+
+const writeBLECharacteristicValue = () => {
+    k = 0;
+    strArray = [];
+
+    strArray.push("┌────────────杭盛打包站────────────┐")
+    strArray.push("│ 客户：云南，潘石屹     仓位：B38 │")
+    strArray.push("├──────────────────────────────┤")
+    strArray.push("│ 厂家：木童巷多多                     │")
+    strArray.push("├──────────────────────────────┤")
+    strArray.push("│ 数量：135手                          │")
+    strArray.push("├──────────────────────────────┤")
+    strArray.push("│ 打印时间：2024年12月28日 19:36     │")
+    strArray.push("└──────────────────────────────┘")
+
+    printText();
+}
+
+const printText = () => {
+    if (k < strArray.length) {
+        var bufferstr = hexStringToBuff(strArray[k]);
+        console.log(bufferstr, 'bufferstrbufferstrbufferstrbufferstr');
+        k++
+        printText();
+        sendStr(bufferstr, function (success) {
+            k++;
+            printText();
+        });
+    }
+}
 
 
 const getByIdFu = () => {
@@ -399,117 +433,26 @@ wx.onBLEConnectionStateChange((res: { connected: any; }) => {
     }
 })
 
-const printReceipt = async () => {
-    if (!connected.value) {
-        proxy.$Toast({ title: '请先连接打印机' });
-        return;
-    }
-    if (printing.value) {
-        proxy.$Toast({ title: '正在打印中，请稍候...' });
-        return;
-    }
-    printing.value = true; // 设置打印中状态
-    status.value = '正在将Canvas转为图片...';
-    status.value = '正在生成打印指令...';
-    const commands = await canvasGetImageDataFu()
-    console.log(commands, 'commandscommandscommandscommandscommands');
-
-    status.value = '正在发送数据...';
-    await writeData(commands);
-    printing.value = false; // 重置打印中状态
-    status.value = '打印完成';
-    uni.showToast({ title: '打印指令已发送', icon: 'success' });
-
-}
-
-const canvasGetImageDataFu = () => {
-    return new Promise<Uint8Array>((resolve, reject) => {
-        const canvasW = canvasWidth.value
-        const canvasH = canvasHeight.value
-
-        wx.canvasGetImageData({
-            canvasId: 'labelCanvas',
-            x: 0,
-            y: 0,
-            width: canvasW,
-            height: canvasH,
-            success(res: any) {
-                const imageData = res.data // Uint8ClampedArray
-                const monoData: number[] = []
-
-                // === 灰度 + 二值化 ===
-                for (let i = 0; i < imageData.length; i += 4) {
-                    const r = imageData[i]
-                    const g = imageData[i + 1]
-                    const b = imageData[i + 2]
-                    const gray = 0.299 * r + 0.587 * g + 0.114 * b
-                    monoData.push(gray < 128 ? 1 : 0)
-                }
-
-                // === 打包成 ESC/POS 位图 ===
-                const bytesPerLine = Math.ceil(canvasW / 8)
-                const escPosData: number[] = []
-
-                for (let y = 0; y < canvasH; y++) {
-                    for (let x = 0; x < bytesPerLine; x++) {
-                        let byte = 0
-                        for (let bit = 0; bit < 8; bit++) {
-                            const pxIndex = y * canvasW + x * 8 + bit
-                            if (pxIndex < monoData.length && monoData[pxIndex]) {
-                                byte |= (0x80 >> bit)
-                            }
-                        }
-                        escPosData.push(byte)
-                    }
-                }
-                // === ESC/POS header ===
-                const xL = bytesPerLine & 0xFF
-                const xH = (bytesPerLine >> 8) & 0xFF
-                const yL = canvasH & 0xFF
-                const yH = (canvasH >> 8) & 0xFF
-                const header = [0x1D, 0x76, 0x30, 0x00, xL, xH, yL, yH]
-                const gapCmd = [0x1B, 0x4A, 78]; // 往下走50点
-                const printData = new Uint8Array(header.length + escPosData.length + gapCmd.length);
-                printData.set(header, 0)
-                printData.set(escPosData, header.length)
-                printData.set(gapCmd, header.length + escPosData.length);
-                resolve(printData)
-            },
-            fail(err: any) {
-                console.error('canvasGetImageData failed', err)
-                printing.value = false; // 重置打印中状态
-            }
-        })
+const sendStr = (bufferstr: any, success: (arg0: any) => void) => {
+    wx.writeBLECharacteristicValue({
+        deviceId: deviceId.value,
+        serviceId: serviceId.value,
+        characteristicId: characteristicId.value,
+        value: bufferstr,
+        success: function (res: any) {
+            success(res);
+            console.log('发送的数据：' + bufferstr)
+            console.log('message发送成功')
+        },
+        failed: function (res: any) {
+            // fail(res)
+            console.log("数据发送失败:" + JSON.stringify(res))
+        },
+        complete: function (res: any) {
+            console.log("发送完成:" + JSON.stringify(res))
+        }
     })
 }
-
-
-const writeData = async (data: Uint8Array) => {
-    if (!deviceId || !serviceId || !characteristicId) {
-        throw new Error('Not connected to a device or service/characteristic not found.');
-    }
-    const len = data.length;
-    console.log(`Writing data of length: ${len}`);
-    for (let i = 0; i < len; i += 20) {
-        const chunk = data.slice(i, i + 20);
-        console.log(chunk.buffer, 'chunkchunkchunkchunkchunk');
-        try {
-            await wx.writeBLECharacteristicValue({
-                deviceId: deviceId.value,
-                serviceId: serviceId.value,
-                characteristicId: characteristicId.value,
-                value: chunk.buffer,
-            });
-            // A small delay might be needed for some printers
-            await new Promise(resolve => setTimeout(resolve, 20));
-        } catch (err) {
-            printing.value = false; // 重置打印中状态
-            console.error('Failed to write chunk:', err);
-            throw err;
-        }
-    }
-};
-
 
 /**
  * 页面
@@ -535,7 +478,7 @@ onUnmounted(() => {
                     <image class="label_img" :src="labelImg"></image>
                 </view>
             </view>
-            <template v-if="inventoryId">
+            <template>
                 <button @click="searchPrinter">搜索蓝牙</button>
                 <view v-for="item in devices" :key="item.deviceId" class="device-item" @click="connectPrinter(item)">
                     {{ item.name || '未知设备' }} ({{ item.deviceId }})
@@ -545,7 +488,7 @@ onUnmounted(() => {
         </view>
         <canvas canvas-id="labelCanvas" id="labelCanvas"
             :style="{ width: canvasWidth + 'px', height: canvasHeight + 'px', transform: 'scale(.8)', position: 'absolute', left: '-99999px' }"></canvas>
-        <view v-if="inventoryId" class="footer_con"><button class="button_defalut" @click="printReceipt">打印</button>
+        <view class="footer_con"><button class="button_defalut" @click="writeBLECharacteristicValue">打印</button>
         </view>
     </view>
 </template>

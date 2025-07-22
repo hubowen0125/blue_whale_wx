@@ -20,7 +20,7 @@ interface STOCKINPARAMS {
 }
 
 const tabBarIndex = inject("tabBarIndex") as Ref<number>
-const stockInParams = reactive<STOCKINPARAMS>({
+const stockInParams = ref<STOCKINPARAMS>({
     type: 1, // 类型1.输入 2.扫码 
     manufacturerName: '',
     packagingWholesaleId: '',
@@ -147,8 +147,8 @@ const showWholesalerFu = () => {
  */
 const selectSubmitFu = (e: any) => {
     wholesaleName.value = e.wholesaleName
-    stockInParams.packagingWholesaleId = e.id
-    stockInParams.storageNum = e.storageNum
+    stockInParams.value.packagingWholesaleId = e.id
+    stockInParams.value.storageNum = e.storageNum
 }
 
 const inputValueFu = async (e: any, key: string) => {
@@ -156,10 +156,9 @@ const inputValueFu = async (e: any, key: string) => {
     const result = await handleInput(value) as string;
     if (result) {
         const num = parseInt(result, 10)
-        console.log(num, 'numnumnumnum');
-        stockInParams[key] = num.toString()
+        stockInParams.value[key] = num.toString()
     } else {
-        stockInParams[key] = 0
+        stockInParams.value[key] = 0
     }
 }
 
@@ -168,8 +167,8 @@ const inputValueFu = async (e: any, key: string) => {
  * 入库
  */
 const stockInFu = () => {
-    const { type, manufacturerName, packagingWholesaleId, storageNum, checkHandNum } = stockInParams
-    console.log(stockInParams, 'stockInParamsstockInParamsstockInParams');
+    const { type, manufacturerName, packagingWholesaleId, storageNum, checkHandNum } = stockInParams.value
+    console.log(stockInParams.value, 'stockInParamsstockInParamsstockInParams');
     if (!manufacturerName) {
         return proxy.$Toast({ title: '请输入厂家名称' })
     }
@@ -180,7 +179,7 @@ const stockInFu = () => {
         return proxy.$Toast({ title: '请输入核点数量' })
     }
     proxy.$Loading()
-    stockInApi(stockInParams).then((res: any) => {
+    stockInApi(stockInParams.value).then((res: any) => {
         const { code, data, msg } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
@@ -197,13 +196,15 @@ const stockInFu = () => {
 }
 
 const resetStockInParamsFu = () => {
-    stockInParams.type = 1
-    stockInParams.manufacturerName = ''
-    stockInParams.packagingWholesaleId = ''
-    stockInParams.storageNum = ''
-    stockInParams.checkHandNum = ''
-    stockInParams.orderNo = ''
-    stockInParams.shipId = ''
+    stockInParams.value = {
+        type: 1,
+        manufacturerName: '',
+        packagingWholesaleId: '',
+        storageNum: '',
+        checkHandNum: '',
+        orderNo: '',
+        shipId: ''
+    }
     wholesaleName.value = ''
 }
 
@@ -249,12 +250,9 @@ const queryScanCodeFu = (orderNo: string, shipId: string) => {
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
             console.log(data, '0000');
-            const { manufacturerName, packagingWholesaleId, storageNum, wholesaleName: name } = data
-            stockInParams.manufacturerName = manufacturerName
-            stockInParams.packagingWholesaleId = packagingWholesaleId
-            stockInParams.storageNum = storageNum
-            stockInParams.orderNo = orderNo
-            stockInParams.shipId = shipId
+            const { wholesaleName: name } = data
+            stockInParams.value = { ...stockInParams.value, ...data }
+            stockInParams.value.name = name
             wholesaleName.value = name
         } else {
             proxy.$Toast({ title: msg })

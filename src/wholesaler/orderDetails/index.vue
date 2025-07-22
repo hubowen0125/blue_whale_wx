@@ -2,9 +2,10 @@
 import { delByOrderNoApi, getByOrderNoApi } from "@/http/api/order";
 import wait_icon from "@/static/images/wait_icon.png";
 import del_icon from "@/static/images/del_icon.png";
-import { dateStrToDateFormat, formatNumber } from "@/utils/utils";
+import { dateStrToDateFormat, formatNumber , preciseMath } from "@/utils/utils";
 
 const { proxy } = getCurrentInstance() as any;
+const preciseMathFu = preciseMath()
 
 const orderText = reactive([
     {
@@ -153,7 +154,10 @@ const delByOrderNoFu = () => {
                         <image class="wait_icon" :src="wait_icon"></image>
                         <text>{{ orderDetails.statusMsg }}</text>
                     </view>
-                    <view class="wait_num">已发货{{ orderDetails.unSendHandNum }}/{{ orderDetails.unSendNum }}</view>
+                    <view class="wait_num">已发货{{ preciseMathFu.subtract(orderDetails.totalHandNum || 0,
+                        orderDetails.unSendHandNum || 0)
+                    }}手/{{ preciseMathFu.subtract(orderDetails.totalNum || 0, orderDetails.unSendNum || 0) }}件
+                    </view>
                 </view>
                 <view class="order_details_item flex_align flex_between" v-for="item, index in orderText"
                     :key="index">
@@ -172,7 +176,8 @@ const delByOrderNoFu = () => {
                         <com-orderTable
                             miniRole="wholesaler"
                             orderType="detail"
-                            :productDetail="item">
+                            :productDetail="item"
+                            :viewInventory="orderDetails.viewInventory">
                         </com-orderTable>
                     </template>
                 </view>

@@ -63,13 +63,13 @@ const confirmSelection = () => {
     if (cascaderOptions.value[selectedProvinceIndex.value].children) {
         city = cascaderOptions.value[selectedProvinceIndex.value].children[selectedCityIndex.value]?.text || ''
         cityCode = cascaderOptions.value[selectedProvinceIndex.value]?.children[selectedCityIndex.value]?.value || ''
-        if (cascaderOptions.value[selectedProvinceIndex.value].children[selectedCityIndex.value].children) {
-            district = cascaderOptions.value[selectedProvinceIndex.value]?.children[selectedCityIndex.value]?.children[selectedDistrictIndex.value]?.text || ''
-            districtCode = cascaderOptions.value[selectedProvinceIndex.value]?.children[selectedCityIndex.value]?.children[selectedDistrictIndex.value]?.value || ''
-        } else {
-            district = ''
-            districtCode = ''
-        }
+        // if (cascaderOptions.value[selectedProvinceIndex.value].children[selectedCityIndex.value].children) {
+        //     district = cascaderOptions.value[selectedProvinceIndex.value]?.children[selectedCityIndex.value]?.children[selectedDistrictIndex.value]?.text || ''
+        //     districtCode = cascaderOptions.value[selectedProvinceIndex.value]?.children[selectedCityIndex.value]?.children[selectedDistrictIndex.value]?.value || ''
+        // } else {
+        district = ''
+        districtCode = ''
+        // }
     } else {
         city = ''
         cityCode = ''
@@ -114,13 +114,13 @@ defineExpose({
                         class="flex_align flex_center">{{
                             province.text }}</view>
                 </picker-view-column>
-                <picker-view-column class="picker_view_column"
+                <!-- <picker-view-column class="picker_view_column"
                     v-if="cascaderOptions[selectedProvinceIndex] && cascaderOptions[selectedProvinceIndex].children && cascaderOptions[selectedProvinceIndex].children[selectedCityIndex]?.children">
                     <view
                         v-for="(province, index) in cascaderOptions[selectedProvinceIndex].children[selectedCityIndex].children"
                         class="flex_align flex_center"
                         :key="index">{{ province.text }}</view>
-                </picker-view-column>
+                </picker-view-column> -->
             </picker-view>
         </view>
     </uni-popup>

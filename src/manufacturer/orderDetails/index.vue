@@ -2,62 +2,81 @@
 import { getByOrderNoApi, delByOrderNoApi } from "@/http/api/order";
 import wait_icon from "@/static/images/wait_icon.png";
 import del_icon from "@/static/images/del_icon.png";
+import close_icon_1 from "@/static/images/close_icon_1.png"
 import deliverGoodsInfo from "../components/deliverGoodsInfo/index.vue"
-import { dateStrToDateFormat, formatNumber } from "@/utils/utils";
+import { dateStrToDateFormat, formatNumber, preciseMath } from "@/utils/utils";
+import QRCode from 'weapp-qrcode';
 
 const { proxy } = getCurrentInstance() as any;
-
+const preciseMathFu = preciseMath()
 
 const orderText = reactive([
     {
         title: '批发商',
-        value: computed(() => orderDetails.value?.wholesale?.deptName),
+        value: computed(() => orderDetails.value?.wholesale?.cityName),
+        value1: computed(() => orderDetails.value?.wholesale?.deptName),
+        show: true
     },
     {
         title: '批发商手机号',
         value: computed(() => orderDetails.value?.wholesale?.phone),
+        show: true
     },
     {
         title: '总件数',
         value: computed(() => `${orderDetails.value?.totalHandNum}手/${orderDetails.value?.totalNum}件`),
+        show: true
     },
     {
         title: '核点',
         value: computed(() => `${orderDetails.value?.checkHandNum}手`),
+        show: true
     },
     {
         title: '总金额',
         value: computed(() => formatNumber(orderDetails.value?.totalAmount)),
-        type: 'price',
+        show: true
     },
     {
         title: '已收金额',
         value: computed(() => formatNumber(orderDetails.value?.paymentAmount)),
         type: 'price',
+        show: true
     },
     {
         title: '订单号',
         value: computed(() => orderDetails.value?.orderNo),
+        show: true
     },
     {
         title: '创建时间',
         value: computed(() => dateStrToDateFormat(orderDetails.value?.createTime, '')),
+        show: true
     },
     {
         title: '打包站',
         value: computed(() => orderDetails.value?.packaging?.deptName || ''),
+        show: true
     },
     {
         title: '打包站地址',
         value: computed(() => orderDetails.value?.packaging?.address || ''),
+        show: true
     },
     {
         title: '打包站手机号',
         value: computed(() => orderDetails.value?.packaging?.phone || ''),
+        show: true
+    },
+    {
+        title: '发货二维码',
+        buttonText: '立即查看',
+        show: computed(() => orderDetails.value?.shipId ? true : false),
     },
     {
         title: '备注',
         value: computed(() => orderDetails.value?.remark),
+        show: true
     },
 ])
 const popupData = {
@@ -72,10 +91,11 @@ const popupData = {
     confirmText: '确定',
     callBack: true
 }
-
+const qrcodeIcon = ref('')
 const popupCom = ref()
 const orderNo = ref('')
 const orderDetails = ref<any>({})
+const codePopupRef = ref()
 
 onLoad((e: any) => {
     if (e.orderNo) {
@@ -162,6 +182,39 @@ const cashOnDeliveryFu = () => {
 }
 
 
+/**
+ * 查看二维码
+ * @param item 
+ */
+const viewCodeFu = () => {
+    console.log('1111');
+
+    const { orderNo, packagingId, shipId } = orderDetails.value
+    // 生成二维码
+    new QRCode({
+        width: 140,
+        height: 140,
+        canvasId: 'qrcode',
+        text: `shipId=${shipId}&orderNo=${orderNo}&packagingId=${packagingId}`, // 二维码内容动态化
+        callback: (res: any) => {
+            console.log(res)
+            uni.canvasToTempFilePath({
+                canvasId: 'qrcode',
+                success: async (res: any) => {
+                    qrcodeIcon.value = res.tempFilePath;
+                    codePopupRef.value.open('center')
+                }
+            })
+        }
+    });
+};
+
+
+const closePopupFu = () => {
+    codePopupRef.value.close()
+}
+
+
 </script>
 
 
@@ -176,17 +229,25 @@ const cashOnDeliveryFu = () => {
                         <image class="wait_icon" :src="wait_icon"></image>
                         <text>{{ orderDetails.statusMsg }}</text>
                     </view>
-                    <view class="wait_num">已发货{{ orderDetails.unSendHandNum }}/{{ orderDetails.unSendNum }}</view>
-                </view>
-                <view class="order_details_item flex_align flex_between" v-for="item, index in orderText"
-                    :key="index">
-                    <view class="flex_align order_details_item_title">{{ item.title }}</view>
-                    <view class="flex_1  order_details_item_value">
-                        <view v-if="item.type === 'price'" class="order_details_item_value_price">¥{{ item.value }}
-                        </view>
-                        <view v-else>{{ item.value }}</view>
+                    <view class="wait_num">已发货{{ preciseMathFu.subtract(orderDetails.totalHandNum || 0,
+                        orderDetails.unSendHandNum || 0)
+                    }}手/{{ preciseMathFu.subtract(orderDetails.totalNum || 0, orderDetails.unSendNum || 0) }}件
                     </view>
                 </view>
+                <template v-for="item, index in orderText"
+                    :key="index">
+                    <view class="order_details_item flex_align flex_between" v-if="item.show">
+                        <view class="flex_align order_details_item_title">{{ item.title }}</view>
+                        <view class="flex_1  order_details_item_value">
+                            <view v-if="item.type === 'price'" class="order_details_item_value_price">¥{{ item.value }}
+                            </view>
+                            <view v-else-if="item.buttonText" style="color: #52B73C;" @click="viewCodeFu">{{
+                                item.buttonText }}</view>
+                            <view v-else>{{ item.value }}</view>
+                            <view v-if="item.value1">{{ item.value1 }}</view>
+                        </view>
+                    </view>
+                </template>
             </view>
             <!-- <deliverGoodsInfo :deliver-info="orderDetails.packaging"></deliverGoodsInfo> -->
             <view class="order_info">
@@ -213,8 +274,17 @@ const cashOnDeliveryFu = () => {
             <button v-if="orderDetails.paymentStatus == 1" class="button_defalut flex_1"
                 @click="cashOnDeliveryFu">收银</button>
         </view>
+        <canvas class="code_icon" canvas-id="qrcode"
+            style="width: 140px; height: 140px;position: absolute;left: -9999px;"></canvas>
     </view>
     <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="delByOrderNoFu"></com-popup_com>
+    <uni-popup ref="codePopupRef" :mask-click="false">
+        <view class="popup_main flex_column flex_align">
+            <view>发货二维码</view>
+            <image class="popup_img" :show-menu-by-longpress="true" :src="qrcodeIcon"></image>
+        </view>
+        <image class="close_icon" :src="close_icon_1" @click="closePopupFu"></image>
+    </uni-popup>
 </template>
 
 
@@ -267,7 +337,7 @@ const cashOnDeliveryFu = () => {
             }
 
             .order_details_item {
-                margin-top: 20rpx; 
+                margin-top: 20rpx;
 
                 .order_details_item_title {
                     width: 200rpx;
@@ -350,5 +420,30 @@ const cashOnDeliveryFu = () => {
             width: 200rpx;
         }
     }
+}
+
+.popup_main {
+    width: 532rpx;
+    height: 480rpx;
+    background: #FFFFFF;
+    border-radius: 24rpx;
+    font-weight: bold;
+    font-size: 36rpx;
+    color: #202020;
+    padding-top: 60rpx;
+    box-sizing: border-box;
+
+    .popup_img {
+        width: 280rpx;
+        height: 280rpx;
+        margin: 36rpx auto 0;
+    }
+}
+
+.close_icon {
+    width: 56rpx;
+    height: 56rpx;
+    display: block;
+    margin: 40rpx auto 0;
 }
 </style>
