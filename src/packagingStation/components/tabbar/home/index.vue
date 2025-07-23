@@ -73,7 +73,12 @@ const renewPopupData = reactive({
 const renewPopup = ref()
 const codePopupCom = ref()
 const popupCom = ref()
-
+const wholesalerParams = ref<any>({
+    packagingId: useUser.userInfo.deptId,
+    wholesaleName: ''
+})
+// 是否支持选择经销商
+const isSupportSelectWholesaler = ref(false)
 
 watch(() => tabBarIndex.value, (newVal) => {
     if (newVal == 0) {
@@ -90,13 +95,15 @@ onMounted(() => {
  * 获取批发商列表
  */
 const packagingWholesalePageFu = () => {
-    packagingWholesalePageApi({ packagingId: useUser.userInfo.deptId }).then((res: any) => {
+    packagingWholesalePageApi(wholesalerParams.value).then((res: any) => {
         const { code, data, msg, token } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
             console.log(data, '0000');
             if (data && data.length > 0) {
                 wholesaleList.value = data;
+            } else {
+                wholesaleList.value = []
             }
         } else {
             proxy.$Toast({ title: msg })
@@ -263,6 +270,21 @@ const queryScanCodeFu = (orderNo: string, shipId: string) => {
     }))
 }
 
+const searchInputBlur = (e: string) => {
+    console.log('搜索输入框失去焦点');
+    wholesalerParams.value.wholesaleName = e
+    wholesaleName.value = ''
+    stockInParams.value.packagingWholesaleId = ''
+    stockInParams.value.storageNum = ''
+    isSupportSelectWholesaler.value = false
+    packagingWholesalePageFu()
+}
+
+const searchInputFu = (e: string) => {
+    console.log('搜索输入框输入');
+    isSupportSelectWholesaler.value = true
+}
+
 // 确认弹窗
 const confirmPopupFu = () => {
     console.log('1111');
@@ -316,7 +338,15 @@ const confirmPopupFu = () => {
         </view>
     </view>
     <com-selectWholesaler ref="selectWholesalerRef"
-        :wholesaleList="wholesaleList" @selectSubmitFu="selectSubmitFu"></com-selectWholesaler>
+        :wholesaleList="wholesaleList" @selectSubmitFu="selectSubmitFu"
+        :isSupportSelectWholesaler="isSupportSelectWholesaler">
+        <template #search>
+            <view class="search_input">
+                <com-searchInput placeholder="请输入批发商名称进行查询" @onBlur="searchInputBlur"
+                @onFocus="searchInputFu"></com-searchInput>
+            </view>
+        </template>
+    </com-selectWholesaler>
     <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="confirmPopupFu"></com-popup_com>
     <com-popup_com ref="codePopupCom" :popupData="codePopupData"></com-popup_com>
     <com-popup_com ref="renewPopup" :popupData="renewPopupData"></com-popup_com>
@@ -428,5 +458,13 @@ const confirmPopupFu = () => {
         }
     }
 
+}
+
+.search_input {
+    border: 2rpx solid #DDE8FC;
+    margin-top: -20rpx;
+    margin-bottom: 20rpx;
+    border-radius: 20rpx;
+    overflow: hidden;
 }
 </style>

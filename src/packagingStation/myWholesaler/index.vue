@@ -148,7 +148,7 @@ const scrolltolower = () => {
                         <view class="wholesaler_item flex_column" v-for="item in wholesalerList" :key="item.id"
                             @click="wholesalerDetailFu(item.id)">
                             <view class="wholesaler_item_name flex">
-                                <view>{{ `${item.wholesaleProvinceName}-${item.wholesaleName}-${item.storageNum}` }}
+                                <view>{{ `${item.wholesaleCityName}-${item.wholesaleName}-${item.storageNum}` }}
                                 </view>
                                 <view class="wholesaler_item_address">{{ item.wholesaleAddress }}</view>
                             </view>

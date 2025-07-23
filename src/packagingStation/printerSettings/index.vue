@@ -58,19 +58,35 @@ onShow(() => {
     }
 })
 
-const writeBLECharacteristicValue = () => {
+const writeBLECharacteristicValue = async () => {
     k = 0;
     strArray = [];
 
-    strArray.push("┌────────────杭盛打包站────────────┐")
-    strArray.push("│ 客户：云南，潘石屹     仓位：B38 │")
-    strArray.push("├──────────────────────────────┤")
-    strArray.push("│ 厂家：木童巷多多                     │")
-    strArray.push("├──────────────────────────────┤")
-    strArray.push("│ 数量：135手                          │")
-    strArray.push("├──────────────────────────────┤")
-    strArray.push("│ 打印时间：2024年12月28日 19:36     │")
-    strArray.push("└──────────────────────────────┘")
+
+    // strArray.push(0x1B, 0x40);
+    strArray.push(hexStringToBuff("┌────────────杭盛打包站────────────┐"))
+    // 切纸指令
+    // strArray.push(0x1D, 0x56, 0x42, 0x00);
+
+    for (let i = 0; i < strArray.length; i ++) {
+        // const chunk = data.slice(i, i + 20);
+        // console.log(chunk.buffer, 'chunkchunkchunkchunkchunk');
+        try {
+            await wx.writeBLECharacteristicValue({
+                deviceId: deviceId.value,
+                serviceId: serviceId.value,
+                characteristicId: characteristicId.value,
+                value: strArray[i],
+            });
+        //     // A small delay might be needed for some printers
+        //     await new Promise(resolve => setTimeout(resolve, 20));
+        } catch (err) {
+        //     printing.value = false; // 重置打印中状态
+            console.error('Failed to write chunk:', err);
+            throw err;
+        }
+    }
+
 
     printText();
 }

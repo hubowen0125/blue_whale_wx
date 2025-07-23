@@ -177,8 +177,13 @@ const scrolltolower = () => {
         <view class="main_con flex_1 flex_column">
             <scroll-view class="scroll_con" scroll-y="true" lower-threshold="50" @scrolltolower="scrolltolower">
                 <view class="product_lsit flex_column" v-if="productList.length > 0">
-                    <view v-for="item in productList" :key="item.id">
-                        <com-orderInfo :productDetail="item" @viewDetailsFu="viewDetailsFu"></com-orderInfo>
+                    <view class="product_item" v-for="item in productList" :key="item.id">
+                        <com-orderTable
+                            orderType="detail"
+                            miniRole="manufacturer"
+                            :goodsShelves="'manufacturer'"
+                            :productDetail="item">
+                        </com-orderTable>
                     </view>
                 </view>
                 <com-no_data v-else :noDataText="'暂无订单'"></com-no_data>
@@ -239,11 +244,14 @@ const scrolltolower = () => {
         overflow-y: auto;
 
         .product_lsit {
-            background: #FFFFFF;
-            border-radius: 24rpx;
-            padding: 28rpx;
-            margin: 0 24rpx;
-            gap: 56rpx;
+            gap: 20rpx;
+
+            .product_item {
+                background: #FFFFFF;
+                border-radius: 24rpx;
+                padding: 28rpx;
+                margin: 0 24rpx;
+            }
         }
     }
 

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 
-const emit = defineEmits(['onBlur'])
+const emit = defineEmits(['onBlur' , 'onFocus'])
 
 const props = defineProps({
     placeholder: {
@@ -36,12 +36,16 @@ const onBlur = () => {
     }, props.debounceTime)
 }
 
+
+const onFocus = () => {
+    emit('onFocus')
+}
 </script>
 
 <template>
     <view class="search_con flex_align">
         <uni-easyinput prefixIcon="search" v-model="inputValue" :placeholder="placeholder" @iconClick="onClick"
-            trim="all" @blur="onBlur" @clear="onBlur"
+            trim="all" @blur="onBlur" @clear="onBlur" @focus="onFocus"
             :inputBorder="false"></uni-easyinput>
     </view>
 </template>

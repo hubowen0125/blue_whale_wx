@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { sysRegionListApi } from "@/http/api/all";
-import { packagingWholesaleAddApi } from "../http/packagingStation";
+import { packagingWholesaleAddApi, getWholesaleByPhoneApi } from "../http/packagingStation";
 import arrow_bottom from "@/static/images/arrow_bottom.png"
 import { areasMap, checkStr } from "@/utils/utils";
 import { useUserStore } from "@/store/modules/user";
@@ -9,6 +9,17 @@ const useUser = useUserStore()
 const { proxy } = getCurrentInstance() as any;
 
 const inputList = [
+    {
+        label: '批发商手机号',
+        value: 'wholesalePhone',
+        type: 'input',
+        placeholder: '请输入批发商手机号',
+        maxlength: 11,
+        inputType: 'number',
+        disabled: false,
+        required: true,
+        blur: true
+    },
     {
         label: '批发商名称',
         value: 'wholesaleName',
@@ -40,16 +51,6 @@ const inputList = [
         required: false,
     },
     {
-        label: '批发商手机号',
-        value: 'wholesalePhone',
-        type: 'input',
-        placeholder: '请输入批发商手机号',
-        maxlength: 11,
-        inputType: 'number',
-        disabled: false,
-        required: true,
-    },
-    {
         label: '批发商仓位',
         value: 'storageNum',
         type: 'input',
@@ -60,7 +61,7 @@ const inputList = [
         required: true,
     },
 ]
-const addParams = reactive<any>({
+const addParams = ref<any>({
     wholesaleName: '',
     province: '',
     city: '',
@@ -100,6 +101,30 @@ const sysRegionListFu = () => {
     }))
 }
 
+const onBLurFu = (e: any) => {
+    const { value } = e.target
+    if (checkStr(value)) {
+        getWholesaleByPhoneFu(value)
+    }
+}
+
+const getWholesaleByPhoneFu = (e: any) => {
+    getWholesaleByPhoneApi({ phone: e }).then((res: any) => {
+        const { code, data, msg } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            if (data && data.wholesalePhone) {
+                addParams.value = { ...addParams.value, ...data, ...{ packagingId: useUser.userInfo.deptId } }
+                addParams.value.areaDetail = `${data.provinceName}${data.cityName}`
+            }
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
 /**
  * 显示选择收货地址弹窗
  */
@@ -113,14 +138,18 @@ const showSelectAreaFu = () => {
  */
 const selectAreaFu = (e: any) => {
     const { province, city, district, provinceCode, cityCode, districtCode } = e
-    addParams.areaDetail = `${province}${city}${district}`
-    addParams.province = provinceCode
-    addParams.city = cityCode
-    addParams.district = districtCode
+    addParams.value.areaDetail = `${province}${city}${district}`
+    addParams.value.province = provinceCode
+    addParams.value.city = cityCode
+    addParams.value.district = districtCode
 }
 
 const formSubmit = (e: any) => {
-    const { wholesaleName, areaDetail, address, wholesalePhone, storageNum } = addParams
+    const { wholesaleName, areaDetail, address, wholesalePhone, storageNum } = addParams.value
+    if (!checkStr(wholesalePhone)) {
+        proxy.$Toast({ title: '请输入批发商手机号' })
+        return
+    }
     if (!wholesaleName) {
         proxy.$Toast({ title: '请输入批发商名称' })
         return
@@ -133,16 +162,12 @@ const formSubmit = (e: any) => {
     //     proxy.$Toast({ title: '请输入详情地址' })
     //     return
     // }
-    if (!checkStr(wholesalePhone)) {
-        proxy.$Toast({ title: '请输入批发商手机号' })
-        return
-    }
     if (!storageNum) {
         proxy.$Toast({ title: '请输入批发商仓位' })
         return
     }
     proxy.$Loading()
-    packagingWholesaleAddApi(addParams).then((res: any) => {
+    packagingWholesaleAddApi(addParams.value).then((res: any) => {
         const { code, data, msg } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
@@ -169,7 +194,8 @@ const formSubmit = (e: any) => {
                         <text class="form_label" :class="{ 'required': item.required }">{{ item.label }}</text>
                         <view class="form_input flex_align" @click=" item.type === 'select' && showSelectAreaFu()">
                             <input class="flex_1" :placeholder="item.placeholder" :maxlength="item.maxlength"
-                                v-model.trim="addParams[item.value]" :type="item.inputType" :disabled="item.disabled">
+                                v-model.trim="addParams[item.value]" :type="item.inputType" :disabled="item.disabled"
+                                @blur="item.blur && onBLurFu($event)">
                             <image v-if="item.type === 'select'" class="arrow_bottom" :src="arrow_bottom"></image>
                         </view>
                     </view>
@@ -201,7 +227,8 @@ const formSubmit = (e: any) => {
                     color: #202020;
                     position: relative;
                 }
-                .required{
+
+                .required {
                     &::after {
                         content: '*';
                         position: absolute;

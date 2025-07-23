@@ -35,6 +35,10 @@ const props = defineProps({
     viewInventory: {
         type: Number,
         default: 0
+    },
+    goodsShelves: {
+        type: String,
+        default: ''
     }
 })
 
@@ -56,6 +60,7 @@ const columns = reactive([
         key: 'handNum'
     }
 ])
+const showTable = ref(true)
 const selectTitle = computed(() => {
     return useUser.miniRole == 'manufacturer' ? '剩余全发' : '剩余全退'
 })
@@ -104,6 +109,16 @@ watch(() => props.orderType, (newVal) => {
                 key: 'returnNum'
             })
         }
+    }
+}, { immediate: true })
+
+watch(() => props.goodsShelves, (newVal) => {
+    if (props.goodsShelves) {
+        showTable.value = false
+        columns[columns.length - 1].title = '库存'
+        columns[columns.length - 1].key = 'stockNum'
+    } else {
+        showTable.value = true
     }
 }, { immediate: true })
 
@@ -177,6 +192,10 @@ const orderDelFu = () => {
     emit('orderDelFu', tableDetail.value.id)
 }
 
+const showTableFu = () => {
+    showTable.value = !showTable.value
+}
+
 
 defineExpose({
     tableDetail
@@ -186,7 +205,9 @@ defineExpose({
 
 <template>
     <view class="order_table">
-        <com-orderInfo :productDetail="tableDetail" :orderType="orderType">
+        <com-orderInfo :productDetail="tableDetail" :orderType="orderType" :goodsShelves="goodsShelves"
+            :showTable="showTable"
+            @showTableFu="showTableFu">
             <template #button>
                 <template v-if="orderType == 'handleOrder' || orderType == 'shareDetail'">
                     <button class="order_unit">1手/{{ tableDetail.unitQuantity }}件</button>
@@ -213,7 +234,7 @@ defineExpose({
                 <image v-if="deleteBtn" class="order_del_icon" :src="del_icon" @click="orderDelFu"></image>
             </template>
         </com-orderInfo>
-        <view class="table_container">
+        <view class="table_container" v-if="showTable">
             <!-- 表头 -->
             <view class="table_row table_header">
                 <view
@@ -246,7 +267,10 @@ defineExpose({
                         {{ tableDetail.sizeName }}({{ row.stockNum || 0 }})
                     </view>
                     <view class="table_cell" v-else-if="col.key == 'unitQuantity'">
-                        {{ preciseMathFu.multiply(tableDetail.unitQuantity, row.handNum) }}
+                        {{ preciseMathFu.multiply(tableDetail.unitQuantity || 0, row.handNum || 0) }}
+                    </view>
+                    <view class="table_cell table_cell_color" v-else-if="goodsShelves && col.key == 'stockNum'">
+                        {{ row[col.key] || 0 }}
                     </view>
                     <view :class="['table_cell', orderType == 'show' && col.key == 'handNum' ? 'table_cell_color' : '']"
                         v-else>{{

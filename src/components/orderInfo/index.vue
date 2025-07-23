@@ -1,9 +1,10 @@
 <script lang="ts" setup>
+import arrow_bottom from "@/static/images/arrow_bottom.png"
 import { useUserStore } from '@/store/modules/user';
 
 const useUser = useUserStore();
 
-const emit = defineEmits(['viewDetailsFu']);
+const emit = defineEmits(['viewDetailsFu', 'showTableFu']);
 
 const props = defineProps({
     needDownload: {
@@ -22,6 +23,14 @@ const props = defineProps({
         type: String,  // show 展示   handleOrder 下单  handleRefund 退款
         default: 'show'
     },
+    goodsShelves: {
+        type: String,
+        default: ''
+    },
+    showTable: {
+        type: Boolean,
+        default: false
+    }
 });
 
 const orderImage = computed(() => {
@@ -33,6 +42,10 @@ const orderImage = computed(() => {
  */
 const viewDetailsFu = () => {
     emit('viewDetailsFu', props.productDetail);
+}
+
+const showTableFu = () => {
+    emit('showTableFu');
 }
 
 const downLoadingFu = () => {
@@ -52,19 +65,28 @@ const downLoadingFu = () => {
             <view v-if="needDownload" class="order_image_tips">下载图片</view>
         </view>
         <view class="flex_column flex_1">
-            <view>{{ productDetail.productName }}</view>
-            <view class="flex_1 order_number">款号: {{ productDetail.styleNumber }}</view>
-            <view class="order_price" v-if="orderType !== 'handleRefund'">
+            <view class="flex_align flex_between">
+                <view>款号: {{ productDetail.styleNumber }}</view>
+                <view class="order_price order_price_red" v-if="goodsShelves">
+                    <text class="order_price_icon">¥</text>
+                    <text>{{ productDetail.price }}</text>
+                </view>
+            </view>
+            <view class="order_name flex_1">{{ productDetail.productName }}</view>
+            <view class="order_price" v-if="orderType !== 'handleRefund' && !goodsShelves">
                 <text class="order_price_icon">¥</text>
                 <text>{{ productDetail.price }}</text>
             </view>
+            <view class="order_quantity flex_between" v-if="goodsShelves" @click="showTableFu">
+                <view class="flex_align">
+                    <view>销量(手): <text class="order_quantity_num">{{ productDetail.salesNum }}</text></view>
+                    <view>总库存(手): <text class="order_quantity_num">{{productDetail.stockNum}}</text></view>
+                </view>
+                <image class="arrow_bottom" :class="{ 'rotate180': showTable }" :src="arrow_bottom"></image>
+            </view>
         </view>
-        <view class="order_unit_con">
-            <slot name="button"></slot>
-        </view>
-        <view class="order_del">
-            <slot name="del"></slot>
-        </view>
+        <slot name="button"></slot>
+        <slot name="del"></slot>
     </view>
 </template>
 
@@ -80,6 +102,7 @@ const downLoadingFu = () => {
         width: 140rpx;
         height: 140rpx;
         border-radius: 16rpx;
+        margin-right: 20rpx;
         overflow: hidden;
 
         .order_image {
@@ -103,7 +126,8 @@ const downLoadingFu = () => {
 
     }
 
-    .order_number {
+
+    .order_name {
         font-weight: 400;
         font-size: 24rpx;
         color: #7C8191;
@@ -119,16 +143,31 @@ const downLoadingFu = () => {
         }
     }
 
-    .order_quantity {
-        padding: 8rpx 14rpx;
-        font-weight: 500;
-        font-size: 26rpx;
-        color: #0C62FF;
-        background: rgba(12, 104, 255, 0.03);
-        border-radius: 12rpx;
-        border: 1rpx solid #CDE1FF;
+    .order_price_red {
+        color: #F73030;
     }
 
+    .order_quantity {
+        font-weight: 400;
+        font-size: 24rpx;
+        color: #7C8191;
 
+        .order_quantity_num {
+            color: #0C62FF;
+            margin-right: 32rpx;
+        }
+
+        .arrow_bottom {
+            width: 32rpx;
+            height: 32rpx;
+            transform: rotate(0);
+            transition: all 0.3s ease;
+        }
+
+        .rotate180 {
+            transform: rotate(180deg);
+            transition: all 0.3s ease;
+        }
+    }
 }
 </style>

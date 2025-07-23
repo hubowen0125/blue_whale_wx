@@ -187,5 +187,57 @@ export function scanCodeApi(params: any) {
     })
 }
 
+/**
+ * 修改仓位
+ * @param params
+ * @returnsF
+ */
+export function updateStorageNumApi(params: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/packagingWholesale/updateStorageNum`,
+                method: "GET",
+                params
+            })
+        )
+    })
+}
+
+/**
+ * 禁用-启用 打包站-批发商
+ * @param params
+ * @returnsF
+ */
+export function updateStatusApi(params: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/packagingWholesale/updateStatus`,
+                method: "GET",
+                params
+            })
+        )
+    })
+}
+
+/**
+ * 手机号查询批发商
+ * @param params
+ * @returnsF
+ */
+export function getWholesaleByPhoneApi(params: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/packagingWholesale/getWholesaleByPhone`,
+                method: "GET",
+                params
+            })
+        )
+    })
+}
+
+
 
 

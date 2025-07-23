@@ -1,8 +1,9 @@
 <script lang="ts" setup>
-import { wholesaleDetailApi } from '../http/packagingStation';
+import { wholesaleDetailApi, updateStorageNumApi, updateStatusApi } from '../http/packagingStation';
 import { dateStrToDateFormat } from '@/utils/utils';
 import del_icon from "@/static/images/del_icon.png"
 
+let timer: any
 const { proxy } = getCurrentInstance() as any;
 
 const wholesalerDetailsList = reactive([
@@ -35,7 +36,7 @@ const wholesalerDetailsList = reactive([
         value: computed(() => `${wholesaleDetails.value.unpackingDays == -1 ? '未打包过' : wholesaleDetails.value.unpackingDays + '天'}`)
     },
 ])
-const popupData = {
+const popupData = ref({
     popupTitle: '编辑仓位',
     pupupType: 'input',
     popupContent: [
@@ -48,14 +49,32 @@ const popupData = {
     confirmText: '确认',
     placeholder: '请输入新仓位',
     callBack: true
-}
+})
 const popupCom = ref()
 const activeTabs = ref(0)
 const wholesaleDetails = ref<any>({})
 const recordList = ref<any[]>([])
+const updateStorageParams = ref({
+    id: '',
+    storageNum: ''
+})
+const delPopup = reactive({
+    popupTitle: '提示',
+    pupupType: 'default',
+    popupContent: [
+        {
+            text: '是否确认删除批发商',
+        },
+    ],
+    cancelText: '取消',
+    confirmText: '确认',
+    callBack: true
+})
+const delPopupCom = ref()
 
 onLoad((e: any) => {
     if (e.id) {
+        updateStorageParams.value.id = e.id;
         wholesaleDetailFu(e.id)
     }
 })
@@ -72,6 +91,7 @@ const wholesaleDetailFu = (id: any) => {
             console.log(data, '0000');
             wholesaleDetails.value = data;
             recordList.value = data.storageInputList || [];
+            popupData.value.popupContent[0].desc = data.storageNum;
         } else {
             proxy.$Toast({ title: msg })
         }
@@ -89,12 +109,29 @@ const setActiveTabs = (index: number) => {
 /**
  * 确认选择
  */
-const confirmPopupFu = () => {
+const confirmPopupFu = (value: string) => {
     console.log('324324');
     // popupData.value = popupList[1]
     // setTimeout(() => {
     //     popupCom.value.showPopup()
     // }, 200);
+    updateStorageParams.value.storageNum = value;
+    proxy.$Loading()
+    updateStorageNumApi(updateStorageParams.value).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data, '0000');
+            wholesaleDetails.value.storageNum = updateStorageParams.value.storageNum;
+            popupCom.value.hidePopup()
+            proxy.$Toast({ title: '修改成功' })
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
 }
 
 
@@ -102,6 +139,40 @@ const modifyFu = () => {
     popupCom.value.showPopup()
 }
 
+const updateStatusFu = () => {
+    proxy.$Loading()
+    updateStatusApi({ id: updateStorageParams.value.id }).then((res: any) => {
+        const { code, data, msg, token } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            console.log(data, '0000');
+            proxy.$Toast({
+                title: '删除成功',
+                successCB: () => {
+                    timer = setTimeout(() => {
+                        uni.navigateBack()
+                    }, 1500)
+                }
+            })
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
+
+/**
+ * 页面
+ */
+onUnmounted(() => {
+    // 清除定时器
+    if (timer) {
+        clearTimeout(timer);
+        timer = null;
+    }
+})
 </script>
 
 
@@ -131,7 +202,7 @@ const modifyFu = () => {
                         <view class="flex_align record_item_info flex_between">
                             <view>入库数量: {{ item.checkHandNum }}手</view>
                             <view>{{ activeTabs == 1 ? `订单编号：${item.orderNo}` : dateStrToDateFormat(item.createTime, '')
-                            }}
+                                }}
                             </view>
                         </view>
                         <view v-if="activeTabs == 1" class="record_item_info">{{ dateStrToDateFormat(item.createTime,
@@ -142,8 +213,8 @@ const modifyFu = () => {
                 <com-no_data v-else noDataText="暂无数据"></com-no_data>
             </view>
         </view>
-        <view class="footer_con flex">
-            <view class="del_btn flex_align">
+        <view class="footer_con flex_align">
+            <view class="del_btn flex_align flex_center" @click="delPopupCom.showPopup()">
                 <image class="del_icon" :src="del_icon"></image>
                 <view>删除</view>
             </view>
@@ -151,6 +222,7 @@ const modifyFu = () => {
         </view>
     </view>
     <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="confirmPopupFu"></com-popup_com>
+    <com-popup_com ref="delPopupCom" :popupData="delPopup" @confirmPopupFu="updateStatusFu"></com-popup_com>
 </template>
 
 
@@ -259,15 +331,28 @@ const modifyFu = () => {
     }
 }
 
-.del_btn {
-    font-weight: 400;
-    font-size: 28rpx;
-    color: #7C8191;
+.footer_con {
+    gap: 20rpx;
 
-    .del_icon {
-        width: 28rpx;
-        height: 28rpx;
-        margin-right: 6rpx;
+    .del_btn {
+        font-weight: 400;
+        font-size: 28rpx;
+        color: #7C8191;
+        height: 96rpx;
+        background: rgba(255, 12, 12, 0.04);
+        border-radius: 48rpx;
+        border: 1rpx solid #F9ABAB;
+        font-weight: 500;
+        font-size: 30rpx;
+        color: #FF0C0C;
+        line-height: 96rpx;
+        width: 292rpx;
+
+        .del_icon {
+            width: 38rpx;
+            height: 38rpx;
+            margin-right: 6rpx;
+        }
     }
 }
 </style>

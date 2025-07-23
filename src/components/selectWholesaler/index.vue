@@ -12,6 +12,10 @@ const props = defineProps({
     wholesaleList: {
         type: Array<any>,
         default: () => []
+    },
+    isSupportSelectWholesaler: {
+        type: Boolean,
+        default: false
     }
 })
 
@@ -76,7 +80,8 @@ defineExpose({
                     <image class="off_icon" :src="off_icon"></image>
                 </view>
             </view>
-            <view class=" main_con flex_1">
+            <slot name="search"></slot>
+            <view class="main_con flex_1" :class="{ 'pointer': isSupportSelectWholesaler }">
                 <scroll-view class="scroll_con" scroll-y="true" lower-threshold="50" @scrolltolower="scrolltolower">
                     <view class="packaging_station_list flex_column">
                         <template v-for="item in wholesaleList" :key="item.id" v-if="wholesaleList.length > 0">
@@ -87,7 +92,8 @@ defineExpose({
                                     <view class="flex_align packaging_station_info">
                                         <image class="position_icon" :src="position_1"></image>
                                         <view class="packaging_station_name">{{
-                                            `${item.wholesaleName || ''}${item.district || ''}` }}</view>
+                                            `${item.wholesaleCityName ? item.wholesaleCityName + '-' :
+                                            ''}${item.wholesaleName || ''}` }}</view>
                                     </view>
                                     <view>{{ item.address }}</view>
                                     <view>{{ item.wholesalePhone }}</view>
