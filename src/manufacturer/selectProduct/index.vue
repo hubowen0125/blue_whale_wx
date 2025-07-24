@@ -30,12 +30,12 @@ const addProductParams = ref<any>({
     ]
 })
 const shareProductParams = ref({
-    productName: "",
+    styleNumber: "",
     manufacturerName: useUser.userInfo.nickName,
     cardNo: ""
 })
 const getProductParams = ref({
-    productName: '',
+    styleNumber: '',
 })
 const isLoad = ref(false) // 是否加载
 
@@ -269,11 +269,11 @@ const searchInputBlur = (e: string) => {
     shareCradList.value = []
     paramsPage.pageNum = 1
     if (selectProductType.value == 'orderCard') {
-        getProductParams.value.productName = e
+        getProductParams.value.styleNumber = e
         paramsPage.pageNum = 1
         productsPageFu()
     } else {
-        shareProductParams.value.productName = e
+        shareProductParams.value.styleNumber = e
         productListFu()
     }
 }
@@ -311,7 +311,7 @@ onUnmounted(() => {
         <view class="bg">
             <com-header :header-title="headerTitle" :backColor="false" :titleColor="true"></com-header>
             <view class="search_con ">
-                <com-searchInput placeholder="搜索商品" @onBlur="searchInputBlur"></com-searchInput>
+                <com-searchInput placeholder="搜索款号" @onBlur="searchInputBlur"></com-searchInput>
             </view>
         </view>
         <view class="main_con flex_1">

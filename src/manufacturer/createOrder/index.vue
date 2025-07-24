@@ -14,7 +14,7 @@ const paramsPage = reactive({
     pageSize: 10,
 })
 const getProductParams = ref({
-    productName: '',
+    styleNumber: '',
 })
 const productList = ref<any[]>([])
 const slideLoading = ref(true) // 是否需要滑动加载
@@ -120,7 +120,7 @@ const viewOrderCardDetailFu = () => {
 }
 
 const searchInputBlur = (e: string) => {
-    getProductParams.value.productName = e
+    getProductParams.value.styleNumber = e
     paramsPage.pageNum = 1
     productList.value = []
     slideLoading.value = true
@@ -146,7 +146,7 @@ const scrolltolower = () => {
         <view class="bg">
             <com-header header-title="创建订单" :backColor="false" :titleColor="true"></com-header>
             <view class="search_con ">
-                <com-searchInput placeholder="搜索商品" @onBlur="searchInputBlur"></com-searchInput>
+                <com-searchInput placeholder="搜索款号" @onBlur="searchInputBlur"></com-searchInput>
             </view>
         </view>
         <view class="main_con flex_1">

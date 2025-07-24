@@ -305,25 +305,30 @@ const confirmPopupFu = () => {
             <view class="table_con">
                 <text class="table_title">厂家名称</text>
                 <input class="table_input" type="text" placeholder="请输入厂家名称"
-                    v-model="stockInParams.manufacturerName">
+                    v-model="stockInParams.manufacturerName" placeholder-style="color: #7C8191">
             </view>
             <view class="table_con">
                 <text class="table_title">批发商名称</text>
                 <view class="flex table_input_list">
                     <view class="flex_align table_input table_input_item" @click="showWholesalerFu">
-                        <input class=" flex_1" type="text"
+                        <!-- <input class=" flex_1" type="text"
                             placeholder="选择批发商" disabled
-                            v-model="wholesaleName">
+                            v-model="wholesaleName"> -->
+                        <view class="flex_1"
+                            :style="{ color: wholesaleName ? '' : '#7C8191', fontWeight: 500 }">{{
+                                wholesaleName || '选择批发商' }}</view>
                         <image class="arrow_bottom" :src="arrow_bottom"></image>
                     </view>
                     <input class="table_input flex_1" type="number" placeholder="请输入仓位"
-                        v-model="stockInParams.storageNum" @blur="(e: any) => inputValueFu(e, 'storageNum')">
+                        v-model="stockInParams.storageNum" @blur="(e: any) => inputValueFu(e, 'storageNum')"
+                        placeholder-style="color: #7C8191">
                 </view>
             </view>
             <view class="table_con">
                 <text class="table_title">核点数量(手)</text>
                 <input class="table_input" type="number" placeholder="请输入核点数量"
-                    v-model="stockInParams.checkHandNum" @blur="(e: any) => inputValueFu(e, 'checkHandNum')">
+                    v-model="stockInParams.checkHandNum" @blur="(e: any) => inputValueFu(e, 'checkHandNum')"
+                    placeholder-style="color: #7C8191">
             </view>
             <view class="btn_con flex_align">
                 <button class="reset_btn" @click="resetStockInParamsFu">重置</button>
@@ -343,7 +348,7 @@ const confirmPopupFu = () => {
         <template #search>
             <view class="search_input">
                 <com-searchInput placeholder="请输入批发商名称进行查询" @onBlur="searchInputBlur"
-                @onFocus="searchInputFu"></com-searchInput>
+                    @onFocus="searchInputFu"></com-searchInput>
             </view>
         </template>
     </com-selectWholesaler>

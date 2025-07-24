@@ -205,7 +205,7 @@ const scrolltolower = () => {
                             </view>
                             <view class="record_item_info flex_align">
                                 <view>{{ item.wholesaleName }}</view>
-                                <view class="record_item_position">{{ item.wholesaleProvinceName }}</view>
+                                <view class="record_item_position">{{ item.wholesaleCityName }}</view>
                             </view>
                             <view class="record_item_manufacturer">厂家: {{ item.manufacturerName }}</view>
                             <view class="record_item_num">入库数量: {{ item.checkHandNum }}手</view>

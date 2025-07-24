@@ -30,7 +30,7 @@ const paramsPage = reactive({
     pageSize: 10,
 })
 const getProductParams = ref({
-    productName: '',
+    styleNumber: '',
 })
 const productList = ref<any[]>([])
 const isLoad = ref(false) // 是否加载
@@ -40,6 +40,7 @@ const statisticsDetail = ref({
     totalSales: 0,
     totalStock: 0,
 })
+const isInputFocus = ref(false) // 是否输入框聚焦
 
 onShow(() => {
     const pages = getCurrentPages()
@@ -133,15 +134,22 @@ const viewDetailsFu = (productDetail: any) => {
 
 const searchInputBlur = (e: string) => {
     console.log('搜索输入框失去焦点');
-    getProductParams.value.productName = e
+    getProductParams.value.styleNumber = e
     paramsPage.pageNum = 1
     productList.value = []
     slideLoading.value = true
+    isInputFocus.value = false
     productsPageFu()
 }
 
+
+const searchInputFu = (e: string) => {
+    console.log('搜索输入框输入');
+    isInputFocus.value = true
+}
+
 const resetParams = () => {
-    getProductParams.value.productName = ''
+    getProductParams.value.styleNumber = ''
     paramsPage.pageNum = 1
     productList.value = []
     slideLoading.value = true
@@ -165,7 +173,7 @@ const scrolltolower = () => {
     <view class="goods_shelves_con flex_column">
         <view class="goods_shelves_title">货架</view>
         <view class="search_input">
-            <com-searchInput placeholder="搜索商品" @onBlur="searchInputBlur"></com-searchInput>
+            <com-searchInput placeholder="搜索款号" @onBlur="searchInputBlur" @onFocus="searchInputFu"></com-searchInput>
         </view>
         <view class="inventory_type_con flex">
             <view class="inventory_type_item flex_column flex_align flex_center flex_1" v-for="item in inventoryType"
@@ -174,7 +182,7 @@ const scrolltolower = () => {
                 <view class="inventory_type_item_title">{{ item.title }}</view>
             </view>
         </view>
-        <view class="main_con flex_1 flex_column">
+        <view class="main_con flex_1 flex_column" :class="{ 'pointer': isInputFocus }">
             <scroll-view class="scroll_con" scroll-y="true" lower-threshold="50" @scrolltolower="scrolltolower">
                 <view class="product_lsit flex_column" v-if="productList.length > 0">
                     <view class="product_item" v-for="item in productList" :key="item.id">
@@ -189,7 +197,7 @@ const scrolltolower = () => {
                 <com-no_data v-else :noDataText="'暂无订单'"></com-no_data>
             </scroll-view>
         </view>
-        <view class="footer_con flex">
+        <view class="footer_con flex" :class="{ 'pointer': isInputFocus }">
             <button class="create_btn" @click="createOrderFu">创建订单</button>
             <button class="button_defalut flex_1" @click="addProductFu">添加商品</button>
         </view>

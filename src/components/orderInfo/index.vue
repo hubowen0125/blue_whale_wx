@@ -41,6 +41,11 @@ const orderImage = computed(() => {
  * 查看详情
  */
 const viewDetailsFu = () => {
+    if (props.goodsShelves) {
+        uni.navigateTo({
+            url: `/manufacturer/productDetails/index?id=${props.productDetail.id}`
+        })
+    }
     emit('viewDetailsFu', props.productDetail);
 }
 
@@ -77,10 +82,10 @@ const downLoadingFu = () => {
                 <text class="order_price_icon">¥</text>
                 <text>{{ productDetail.price }}</text>
             </view>
-            <view class="order_quantity flex_between" v-if="goodsShelves" @click="showTableFu">
+            <view class="order_quantity flex_between" v-if="goodsShelves" @click.stop="showTableFu">
                 <view class="flex_align">
                     <view>销量(手): <text class="order_quantity_num">{{ productDetail.salesNum }}</text></view>
-                    <view>总库存(手): <text class="order_quantity_num">{{productDetail.stockNum}}</text></view>
+                    <view>总库存(手): <text class="order_quantity_num">{{ productDetail.stockNum }}</text></view>
                 </view>
                 <image class="arrow_bottom" :class="{ 'rotate180': showTable }" :src="arrow_bottom"></image>
             </view>

@@ -75,7 +75,7 @@ defineExpose({
     <uni-popup ref="popupRef" :safe-area="false" :mask-click="false">
         <view class="popup_content flex_column ">
             <view class="popup_header flex_align flex_between">
-                <text>选择批发商</text>
+                <view>选择批发商</view>
                 <view class="off_con" @click="closePopupFu">
                     <image class="off_icon" :src="off_icon"></image>
                 </view>

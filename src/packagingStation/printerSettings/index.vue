@@ -68,20 +68,26 @@ const writeBLECharacteristicValue = async () => {
     // 切纸指令
     // strArray.push(0x1D, 0x56, 0x42, 0x00);
 
-    for (let i = 0; i < strArray.length; i ++) {
+    for (let i = 0; i < strArray.length; i++) {
         // const chunk = data.slice(i, i + 20);
         // console.log(chunk.buffer, 'chunkchunkchunkchunkchunk');
         try {
+            console.log({
+                deviceId: deviceId.value,
+                serviceId: serviceId.value,
+                characteristicId: characteristicId.value,
+            } , 'asdjsajdjas');
+
             await wx.writeBLECharacteristicValue({
                 deviceId: deviceId.value,
                 serviceId: serviceId.value,
                 characteristicId: characteristicId.value,
                 value: strArray[i],
             });
-        //     // A small delay might be needed for some printers
-        //     await new Promise(resolve => setTimeout(resolve, 20));
+            //     // A small delay might be needed for some printers
+            //     await new Promise(resolve => setTimeout(resolve, 20));
         } catch (err) {
-        //     printing.value = false; // 重置打印中状态
+            //     printing.value = false; // 重置打印中状态
             console.error('Failed to write chunk:', err);
             throw err;
         }
