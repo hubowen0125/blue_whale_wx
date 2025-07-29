@@ -11,6 +11,10 @@ const { proxy } = getCurrentInstance() as any;
 // 功能列表
 const funList = [
     {
+        name: '入库记录',
+        path: '/wholesaler/storageRecord/index'
+    },
+    {
         name: '我的员工',
         path: '/pages/myEmployees/index?userRole=wholesaler'
     },

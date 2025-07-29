@@ -25,7 +25,7 @@ export function wholesaleListApi(data: any, params: any) {
  * @param params
  * @returnsF
  */
-export function productListApi(data: any, ) {
+export function productListApi(data: any,) {
     return new Promise((resolve, reject) => {
         resolve(
             request({
@@ -82,6 +82,23 @@ export function getWholesaleOrderStatisticsApi() {
             request({
                 url: `api/business/wholesale/getWholesaleOrderStatistics`,
                 method: "GET",
+            })
+        )
+    })
+}
+
+/**
+ * 分页查询入库记录(批发商)
+ * @param params
+ * @returnsF
+ */
+export function wholesalePageApi(data: any, params: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/storageInput/wholesalePage?${splicingObjects(params)}`,
+                method: "POST",
+                data
             })
         )
     })

@@ -198,7 +198,7 @@ const scrolltolower = () => {
             gap: 20rpx;
 
             .wholesaler_info_item {
-                height: 184rpx;
+                height: 130rpx;
                 background: #F2F6FF;
                 border-radius: 20rpx;
                 font-weight: 400;
@@ -213,7 +213,6 @@ const scrolltolower = () => {
 
                 .wholesaler_name {
                     height: 56rpx;
-                    margin-top: 10rpx;
                 }
             }
         }

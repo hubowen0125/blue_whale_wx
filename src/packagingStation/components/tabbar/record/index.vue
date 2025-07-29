@@ -181,7 +181,7 @@ const scrolltolower = () => {
     <view class="record_com flex_column">
         <view class="bg"></view>
         <view class="record_header">入库记录</view>
-        <view class="record_main">
+        <view class="record_main flex_1">
             <scroll-view class="scroll_con " scroll-y="true"
                 lower-threshold="50"
                 @scrolltolower="scrolltolower">
@@ -195,7 +195,7 @@ const scrolltolower = () => {
                     </view>
                     <button class="button_defalut" @click="resetParams">查询</button>
                 </view>
-                <view class=" record_con">
+                <view class="record_con">
                     <view class="record_list flex_column" v-if="recordList.length > 0">
                         <view class="record_item" v-for="item in recordList" :key="item.id"
                             @click="viewRecordDetailFu(item)">
@@ -248,6 +248,7 @@ const scrolltolower = () => {
         font-size: 48rpx;
         color: #FFFFFF;
         position: relative;
+        margin-bottom: 10rpx;
     }
 
     .record_main {
@@ -261,7 +262,6 @@ const scrolltolower = () => {
             border-radius: 24rpx;
             padding: 20rpx 28rpx;
             box-sizing: border-box;
-            margin-top: 10rpx;
 
             .quert_input_list {
                 gap: 16rpx;

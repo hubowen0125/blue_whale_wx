@@ -7,6 +7,7 @@ const props = defineProps({
         type: Object as () => {
             orderNo: string,
             status: number,
+            paymentStatus: number,
             totalHandNum: number,
             totalNum: number,
             totalAmount: number,
@@ -38,7 +39,7 @@ const viewOrderDetailFu = () => {
 <template>
     <view class="order_item flex_column" :class="`order_item_${orderData.status}`" @click="viewOrderDetailFu">
         <view class="order_item_title flex_align">
-            <view class="order_unpaid">{{ orderData.paymentStatusMsg }}</view>
+            <view class="order_unpaid" :class="`order_unpaid_${orderData.paymentStatus}`">{{ orderData.paymentStatusMsg }}</view>
             <view class="flex_1">订单号: {{ orderData.orderNo }}</view>
             <view class="order_item_status" :class="`order_item_status_${orderData.status}`">{{ orderData.statusMsg }}
             </view>
@@ -79,6 +80,9 @@ const viewOrderDetailFu = () => {
             background: rgba(247, 48, 48, 0.04);
             border-radius: 12rpx;
             margin-right: 16rpx;
+        }
+        .order_unpaid_2 {
+            color: #A9A9A9;
         }
 
         .order_item_status {

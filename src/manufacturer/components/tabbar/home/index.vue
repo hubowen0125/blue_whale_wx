@@ -226,18 +226,17 @@ const lookAll = () => {
 
     .order_type_con {
         gap: 16rpx;
-        margin: 32rpx 30rpx 56rpx;
+        margin: 30rpx;
 
         .order_type_item {
             width: 220rpx;
-            height: 200rpx;
+            height: 100rpx;
             background: #FFFFFF;
             box-shadow: 0rpx 4rpx 12rpx 0rpx #DDE8FC;
             border-radius: 24rpx;
             font-weight: bold;
             font-size: 40rpx;
             color: #0C62FF;
-            gap: 10rpx;
 
             .order_type_item_title {
                 font-weight: 400;

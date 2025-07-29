@@ -159,12 +159,12 @@ const createAddFu = async () => {
     // if (!createParams.packagingId) {
     //     return proxy.$Toast({ title: '请选择打包站' })
     // }
-    // createParams.cardProductsParams = shoppingCart.value.map((item) => {
-    //     return {
-    //         productsDetailParams: item.productColorsList,
-    //         productId: item.id,
-    //     }
-    // })
+    createParams.cardProductsParams = shoppingCart.value.map((item) => {
+        return {
+            productsDetailParams: item.productColorsList,
+            productId: item.id,
+        }
+    })
     proxy.$Loading()
     await createAddApi(createParams).then((res: any) => {
         const { code, data, msg } = res

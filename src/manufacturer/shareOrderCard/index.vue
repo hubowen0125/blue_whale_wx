@@ -23,7 +23,7 @@ const totalAmount = computed(() => {
     if (list.length > 0) {
         for (let i = 0; i < list.length; i++) {
             for (let j = 0; j < list[i].productColorsList.length; j++) {
-                total += list[i].price * list[i].productColorsList[j].handNum
+                total += list[i].price * list[i].productColorsList[j].handNum * list[i].unitQuantity
             }
         }
     }

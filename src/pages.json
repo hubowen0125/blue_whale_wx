@@ -225,6 +225,12 @@
                     "style": {
                         "navigationStyle": "custom"
                     }
+                },
+                {
+                    "path": "storageRecord/index",
+                    "style": {
+                        "navigationStyle": "custom"
+                    }
                 }
             ]
         },

@@ -12,7 +12,7 @@ const totalAmount = computed(() => {
     let total = 0
     for (let i = 0; i < shoppingCart.value.length; i++) {
         for (let j = 0; j < shoppingCart.value[i].productColorsList.length; j++) {
-            total += shoppingCart.value[i].price * shoppingCart.value[i].productColorsList[j].handNum
+            total += shoppingCart.value[i].price * shoppingCart.value[i].productColorsList[j].handNum * shoppingCart.value[i].unitQuantity
         }
     }
     return total

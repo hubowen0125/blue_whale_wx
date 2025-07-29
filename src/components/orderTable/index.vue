@@ -75,7 +75,7 @@ const totalAmount = computed(() => {
     let total = 0
     if (tableDetail.value && tableDetail.value.productColorsList?.length > 0) {
         for (let j = 0; j < tableDetail.value.productColorsList.length; j++) {
-            total += tableDetail.value.price * tableDetail.value.productColorsList[j].handNum
+            total += tableDetail.value.price * tableDetail.value.productColorsList[j].handNum * tableDetail.value.unitQuantity
         }
     }
     return total
@@ -209,16 +209,17 @@ defineExpose({
             :showTable="showTable"
             @showTableFu="showTableFu">
             <template #button>
-                <template v-if="orderType == 'handleOrder' || orderType == 'shareDetail'">
+                <template v-if="orderType == 'handleOrder' || orderType == 'shareDetail' ||  orderType == 'show'">
                     <button class="order_unit">1手/{{ tableDetail.unitQuantity }}件</button>
                     <view class="order_unit_price">¥{{ formatNumber(totalAmount) }}</view>
                 </template>
-                <template v-if="orderType == 'show'">
+                <!-- <template v-if="orderType == 'show'">
                     <view class="order_quantity">
                         <text>x</text>
                         <text>{{ totalNum }}</text>
                     </view>
-                </template>
+                    <view class="order_unit_price">¥{{ formatNumber(totalAmount) }}</view>
+                </template> -->
                 <template v-if="orderType == 'handleRefund'">
                     <view class="flex_column flex_between">
                         <view class="flex_align order_refund_btn" @click="selectItemFu(!selectItem)">
