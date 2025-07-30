@@ -15,7 +15,11 @@ const printCommand: any = {
     clear: [27, 64], //初始化
     enter: [10],
     leftMargin: [29, 76, 0, 0], // 左间距
-    // 打印并向前走纸
+    // 切换页模式
+    enterPageMode: [27, 64],
+    // 设置打印区域（60mm x 40mm = 480 x 320 点）
+    setPageArea: [27, 87, 0, 0, 0, 0, 224, 1, 64, 1],
+    // 打印并走纸到下页首
     lineFeed: [27, 100, 1],
 };
 console.log(printCommand.clear);
@@ -110,7 +114,7 @@ const generateCanvasFu = async () => {
         ctx.strokeRect(0, 0, canvasW, canvasH)
         ctx.setFontSize(30)
         ctx.setTextAlign('center')
-        ctx.fillText(`${useUser.userInfo.dept.deptName || '杭盛打包站'}`, canvasW / 2, y)
+        ctx.fillText(`${useUser.userInfo?.dept?.deptName || '杭盛打包站'}`, canvasW / 2, y)
         y += lineHeight + 10
         drawLine(0, y - lineHeight / 2, canvasW, y - lineHeight / 2)
         colDividerY = y - lineHeight / 2
@@ -167,14 +171,14 @@ const generateCanvasFu = async () => {
  * 打印中
  */
 const printReceipt = async () => {
-    if (!connected.value) {
-        proxy.$Toast({ title: '请先连接打印机' });
-        return;
-    }
-    if (printing.value) {
-        proxy.$Toast({ title: '正在打印中，请稍候...' });
-        return;
-    }
+    // if (!connected.value) {
+    //     proxy.$Toast({ title: '请先连接打印机' });
+    //     return;
+    // }
+    // if (printing.value) {
+    //     proxy.$Toast({ title: '正在打印中，请稍候...' });
+    //     return;
+    // }
     printing.value = true; // 设置打印中状态
     status.value = '正在将Canvas转为图片...';
     status.value = '正在生成打印指令...';
@@ -242,7 +246,8 @@ const getPrintImageWriteArray = () => {
     let arr = imageInfoArray.value
     const width = canvasWidth.value / 8
     let writeArray = [];
-    const iniTcommand = [].concat(printCommand.clear).concat(printCommand.center);
+    // const iniTcommand = [].concat(printCommand.clear).concat(printCommand.center);
+    const iniTcommand = [...printCommand.clear, ...printCommand.enterPageMode, ...printCommand.setPageArea, ...printCommand.center]
     const command = getImageCommandArray();
     writeArray.push(new Uint8Array(iniTcommand));
     // 分段逐行打印的数据
@@ -253,6 +258,7 @@ const getPrintImageWriteArray = () => {
     }
     console.log(writeArray, 'writeArray');
     writeArray.push(new Uint8Array(printCommand.lineFeed));
+    console.log(writeArray, 'writeArray');
     allUint8Array.value = writeArray
     sendDataToPrint()
 }
@@ -366,7 +372,7 @@ onUnmounted(() => {
                     <image class="label_img" :src="labelImg"></image>
                 </view>
             </view>
-            <template v-if="inventoryId">
+            <template>
                 <!-- 搜索 -->
                 <button class="button_defalut" @click="searchPrinter">搜索蓝牙</button>
                 <view class="device_list flex_1">
@@ -380,7 +386,7 @@ onUnmounted(() => {
         </view>
         <canvas canvas-id="labelCanvas" id="labelCanvas"
             :style="{ width: canvasWidth + 'px', height: canvasHeight + 'px', transform: 'scale(.8)', position: 'absolute', left: '-99999px' }"></canvas>
-        <view v-if="inventoryId" class="footer_con"><button class="button_defalut" @click="printReceipt">打印</button>
+        <view class="footer_con"><button class="button_defalut" @click="printReceipt">打印</button>
         </view>
     </view>
 </template>
