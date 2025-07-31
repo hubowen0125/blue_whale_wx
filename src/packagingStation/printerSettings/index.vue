@@ -1,11 +1,16 @@
+<script lang="ts">
+const GBK = require('../../static/js/gbk.min.js');
+export { GBK };
+</script>
+
 <script lang="ts" setup>
 import { getByIdApi } from '../http/packagingStation';
 import { useUserStore } from '@/store/modules/user';
-import { useBluetoothPrinter } from './useBluetoothPrinter';
-
-declare const wx: any;
+import { useBluetoothPrinter } from '@/store/modules/useBluetoothPrinter';
+// import * as GBK from './gbk.min.js';
 
 const useUser = useUserStore()
+const bluetoothPrinter = useBluetoothPrinter()
 const { proxy } = getCurrentInstance() as any;
 
 const printCommand: any = {
@@ -24,20 +29,6 @@ const printCommand: any = {
 };
 console.log(printCommand.clear);
 
-// 蓝牙相关状态和方法
-const {
-    devices,
-    status,
-    connected,
-    connectedDeviceId,
-    deviceId,
-    serviceId,
-    characteristicId,
-    printing,
-    searchPrinter,
-    connectPrinter,
-    stopDiscovery
-} = useBluetoothPrinter();
 
 const canvasWidth = ref(448);
 const canvasHeight = ref(310); // Adjust height as needed for the content.
@@ -49,13 +40,7 @@ const imageInfoArray = ref<Array<any>>([])
 const allUint8Array = ref<Array<any>>([])
 
 onLoad((e: any) => {
-    const currentDate = new Date();
-    const year = currentDate.getFullYear()
-    const month = currentDate.getMonth() + 1 < 10 ? '0' + (currentDate.getMonth() + 1) : currentDate.getMonth() + 1
-    const day = currentDate.getDate() < 10 ? '0' + currentDate.getDate() : currentDate.getDate()
-    const hours = currentDate.getHours() < 10 ? '0' + currentDate.getHours() : currentDate.getHours()
-    const minutes = currentDate.getMinutes() < 10 ? '0' + currentDate.getMinutes() : currentDate.getMinutes()
-    createTime.value = `${year}年${month}月${day}日${hours}:${minutes}`
+    getCreateTimeFu()
     if (e.id) {
         inventoryId.value = e.id
         getByIdFu()
@@ -65,16 +50,25 @@ onLoad((e: any) => {
 })
 
 onShow(() => {
-    if (useUser.bluetoothInfo.status) {
-        devices.value = useUser.bluetoothInfo.list
-        connected.value = true
-        if (useUser.bluetoothInfo.printing) {
-            status.value = '正在发送数据...';
-        } else {
-            status.value = '已连接'
-        }
-    }
+    // if (useUser.bluetoothInfo.status) {
+    //     devices.value = useUser.bluetoothInfo.list
+    //     connected.value = true
+    //     if (useUser.bluetoothInfo.printing) {
+    //         status.value = '正在发送数据...';
+    //     } else {
+    //         status.value = '已连接'
+    //     }
+    // }
 })
+const getCreateTimeFu = () => {
+    const currentDate = new Date();
+    const year = currentDate.getFullYear()
+    const month = currentDate.getMonth() + 1 < 10 ? '0' + (currentDate.getMonth() + 1) : currentDate.getMonth() + 1
+    const day = currentDate.getDate() < 10 ? '0' + currentDate.getDate() : currentDate.getDate()
+    const hours = currentDate.getHours() < 10 ? '0' + currentDate.getHours() : currentDate.getHours()
+    const minutes = currentDate.getMinutes() < 10 ? '0' + currentDate.getMinutes() : currentDate.getMinutes()
+    createTime.value = `${year}年${month}月${day}日${hours}:${minutes}`
+}
 
 const getByIdFu = () => {
     proxy.$Loading()
@@ -171,20 +165,77 @@ const generateCanvasFu = async () => {
  * 打印中
  */
 const printReceipt = async () => {
-    // if (!connected.value) {
-    //     proxy.$Toast({ title: '请先连接打印机' });
-    //     return;
-    // }
-    // if (printing.value) {
-    //     proxy.$Toast({ title: '正在打印中，请稍候...' });
-    //     return;
-    // }
-    printing.value = true; // 设置打印中状态
-    status.value = '正在将Canvas转为图片...';
-    status.value = '正在生成打印指令...';
-    await canvasGetImageDataFu()
-    status.value = '正在发送数据...';
-    getPrintImageWriteArray()
+    if (!bluetoothPrinter.connected) {
+        proxy.$Toast({ title: '请先连接打印机' });
+        return;
+    }
+    if (bluetoothPrinter.printing) {
+        proxy.$Toast({ title: '正在打印中，请稍候...' });
+        return;
+    }
+    bluetoothPrinter.printing = true; // 设置打印中状态
+    bluetoothPrinter.status = '正在将Canvas转为图片...';
+    bluetoothPrinter.status = '正在生成打印指令...';
+    // await canvasGetImageDataFu()
+    bluetoothPrinter.status = '正在发送数据...';
+    // getPrintImageWriteArray()
+    getPrintTextWriteArray()
+}
+
+const getPrintTextWriteArray = () => {
+    getCreateTimeFu()
+    const message = [
+        `${useUser.userInfo?.dept?.deptName || '杭盛打包站'}`,
+        `客户：${inventoryDetails.value.wholesaleName || '云南，潘石屹'}`,
+        `厂家：${inventoryDetails.value.manufacturerName || '木童巷多多'}`,
+        `仓位：${inventoryDetails.value.storageNum || '仓位'}`,
+        `数量：${inventoryDetails.value.checkHandNum || 0}手`,
+        `打印时间：${createTime.value}\n`
+    ]
+
+    let writeArray = [];
+    // 正确指令组合
+    const iniTcommand = [
+        27, 64,                    // 初始化 ESC @
+        27, 76,                    // 进入页模式 ESC L
+        27, 87, 0, 0, 0, 0, 220, 1, 60, 1, // 设置打印区域 ESC W
+        27, 36, 0, 0,               // ESC $ xL xH 设置 X 起始点为 0（低位优先）
+        // 29, 33, 17,   // 字体大小 GS ! 0x11 => 2倍宽高
+        // 28, 87, 4,   // 字体大小 GS ! 0x11 => 2倍宽高
+        27, 51, 32,                // 设置行高 ESC 3 32
+        27, 97, 0                // 居左 ESC a 0（注意居中可能会超出页宽）
+    ];
+    // ✅ 字体样式设置：双倍宽高、字符间距 6 点
+    // const fontSizeCommand = [
+    // 29, 33, 17,   // 字体大小 GS ! 0x11 => 2倍宽高
+    // 27, 32, 6     // 字符间距 ESC SP 6
+    // ];
+    writeArray.push(new Uint8Array(iniTcommand));
+    // writeArray.push(new Uint8Array(fontSizeCommand));
+    let currentY = 20;
+    const lineHeight = 32; // 每行高度，单位：dots，32 适合中文字体大小
+    for (let index = 0; index < message.length; index++) {
+        const element = message[index];
+        // 设置绝对位置（X=0, Y=currentY）
+        const x = 10; // 固定从左侧开始
+        const xL = x % 256;
+        const xH = Math.floor(x / 256);
+        const yL = currentY % 256;
+        const yH = Math.floor(currentY / 256);
+        // ESC $ 设置绝对位置（X坐标）
+        writeArray.push(new Uint8Array([27, 36, xL, xH]));
+        writeArray.push(new Uint8Array([29, 36, yL, yH]));
+        // writeArray.push(new Uint8Array([27, 77, 49  ])); // 字符间距
+        // writeArray.push(new Uint8Array([27, 33, 48])); // 双倍宽高
+        // 打印内容
+        writeArray.push(new Uint8Array(GBK.encode(element)));
+
+        currentY += lineHeight;
+    }
+    writeArray.push(new Uint8Array([12]));
+    // writeArray.push(new Uint8Array([27, 12]));
+    allUint8Array.value = writeArray
+    sendDataToPrint()
 }
 
 const canvasGetImageDataFu = () => {
@@ -229,7 +280,7 @@ const canvasGetImageDataFu = () => {
                 resolve()
             },
             fail(err: any) {
-                printing.value = false; // 重置打印中状态
+                bluetoothPrinter.printing = false; // 重置打印中状态
             }
         })
     })
@@ -246,10 +297,16 @@ const getPrintImageWriteArray = () => {
     let arr = imageInfoArray.value
     const width = canvasWidth.value / 8
     let writeArray = [];
-    // const iniTcommand = [].concat(printCommand.clear).concat(printCommand.center);
-    const iniTcommand = [...printCommand.clear, ...printCommand.enterPageMode, ...printCommand.setPageArea, ...printCommand.center]
-    const command = getImageCommandArray();
+    // 正确指令组合
+    const iniTcommand = [
+        27, 64,                    // 初始化 ESC @
+        27, 76,                    // 进入页模式 ESC L
+        27, 87, 0, 0, 0, 0, 220, 1, 60, 1, // 设置打印区域 ESC W
+        27, 51, 32,                // 设置行高 ESC 3 32
+        27, 97, 1                 // 居左 ESC a 0（注意居中可能会超出页宽）
+    ];
     writeArray.push(new Uint8Array(iniTcommand));
+    const command = getImageCommandArray();
     // 分段逐行打印的数据
     for (let i = 0; i < arr.length / width; i++) {
         const subArr = arr.slice(i * width, i * width + width);
@@ -257,7 +314,7 @@ const getPrintImageWriteArray = () => {
         writeArray.push(new Uint8Array(tempArr));
     }
     console.log(writeArray, 'writeArray');
-    writeArray.push(new Uint8Array(printCommand.lineFeed));
+    writeArray.push(new Uint8Array([12]));
     console.log(writeArray, 'writeArray');
     allUint8Array.value = writeArray
     sendDataToPrint()
@@ -285,10 +342,10 @@ const getImageCommandArray = () => {
  */
 const sendDataToPrint = () => {
     const writeArrayCopyer = allUint8Array.value.slice(0);
-    console.log(new Date(), '开始时间');
+    console.log(new Date(), '开始时间', allUint8Array.value.slice(0));
     const print = (options: { lasterSuccess?: any; }, writeArray: any[]) => {
-        // console.log('writeArraywriteArray', writeArray.length, 'writeArray.lengthwriteArray.lengthwriteArray.length');
         if (writeArray.length) {
+            console.log(writeArray.length, ' writeArray.shift().buffer');
             sendDataToDevice({
                 value: writeArray.shift().buffer,
                 lasterSuccess: () => {
@@ -297,8 +354,8 @@ const sendDataToPrint = () => {
                     } else {
                         console.log('打印成功');
                         console.log(new Date(), '结束时间');
-                        status.value = '打印完成';
-                        printing.value = false; // 重置打印中状态
+                        bluetoothPrinter.status = '打印完成';
+                        bluetoothPrinter.printing = false; // 重置打印中状态
                         // options.lasterSuccess && options.lasterSuccess();
                     }
                 },
@@ -309,14 +366,15 @@ const sendDataToPrint = () => {
 }
 
 const sendDataToDevice = (options: any) => {
+    console.log(options.value, 'options.valueoptions.valueoptions.valueoptions.value');
     let byteLength = options.value.byteLength;
     //这里默认一次20个字发送
     const speed = options.onceByleLength || 20;
     if (byteLength > 0) {
         wx.writeBLECharacteristicValue({
-            deviceId: deviceId.value,
-            serviceId: serviceId.value,
-            characteristicId: characteristicId.value,
+            deviceId: bluetoothPrinter.deviceId,
+            serviceId: bluetoothPrinter.serviceId,
+            characteristicId: bluetoothPrinter.characteristicId,
             value: options.value.slice(0, byteLength > speed ? speed : byteLength),
             success: function (res: any) {
                 if (byteLength > speed) {
@@ -347,20 +405,7 @@ const sendDataToDevice = (options: any) => {
         });
     }
 }
-
-/**
- * 页面
- */
-onUnmounted(() => {
-    useUser.setBluetoothInfo({
-        status: connected.value,
-        list: devices.value,
-        printing: printing.value
-    })
-})
-
 </script>
-
 
 <template>
     <view class="container flex_column">
@@ -374,14 +419,14 @@ onUnmounted(() => {
             </view>
             <template>
                 <!-- 搜索 -->
-                <button class="button_defalut" @click="searchPrinter">搜索蓝牙</button>
+                <button class="button_defalut" @click="bluetoothPrinter.searchPrinter">搜索蓝牙</button>
                 <view class="device_list flex_1">
-                    <view v-for="item in devices" :key="item.deviceId" class="device_item"
-                        @click="connectPrinter(item)">
+                    <view v-for="item in bluetoothPrinter.devices" :key="item.deviceId" class="device_item"
+                        @click="bluetoothPrinter.connectPrinter(item)">
                         {{ item.name || '未知设备' }} ({{ item.deviceId }})
                     </view>
                 </view>
-                <view class="status">状态: {{ status }}</view>
+                <view class="status">状态: {{ bluetoothPrinter.status }}</view>
             </template>
         </view>
         <canvas canvas-id="labelCanvas" id="labelCanvas"

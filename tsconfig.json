@@ -17,7 +17,9 @@
             "node"
         ],
         "allowJs": true, // 允许编译 .js 文件
-        "checkJs": true // 启用对 .js 文件的类型检查（会解析 JSDoc）
+        "checkJs": true, // 启用对 .js 文件的类型检查（会解析 JSDoc）
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true
     },
     "include": [
         "src/**/*.js",

@@ -20,10 +20,3 @@ declare module 'weapp-qrcode'
 
 
 declare const wx: any
-
-// src/types/util.d.ts
-declare module '@/packagingStation/printerSettings/util.js' {
-    export function hexStringToArrayBuffer(str: string): ArrayBuffer;
-    export function hexStringToBuff(str: string): ArrayBuffer;
-    export function send0X0A(): ArrayBuffer;
-}
