@@ -69,7 +69,8 @@ const createAddFu = async () => {
     }))
 }
 
-const editInformationFu = async () => {
+const editInformationFu = async (data: { address: string }) => {
+    useUser.setUserInfoFu({ ...useUser.userInfo, dept: { ...useUser.userInfo.dept, address: data.address } })
     await createAddFu()
 }
 

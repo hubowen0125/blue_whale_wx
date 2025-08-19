@@ -27,7 +27,8 @@ const stockInParams = ref<STOCKINPARAMS>({
     storageNum: '',
     checkHandNum: '',
     orderNo: '',
-    shipId: ''
+    shipId: '',
+    weight:''
 })
 const wholesaleList = ref<any[]>([])
 const wholesaleName = ref('')
@@ -153,7 +154,7 @@ const showWholesalerFu = () => {
  * @param e 
  */
 const selectSubmitFu = (e: any) => {
-    wholesaleName.value = e.wholesaleName
+    wholesaleName.value = `${e.wholesaleCityName}-${e.wholesaleName}`
     stockInParams.value.packagingWholesaleId = e.id
     stockInParams.value.storageNum = e.storageNum
 }
@@ -213,6 +214,7 @@ const resetStockInParamsFu = () => {
         shipId: ''
     }
     wholesaleName.value = ''
+    selectWholesalerRef.value.resetSelectDataFunc()
 }
 
 const scanCodeFu = () => {
@@ -326,9 +328,14 @@ const confirmPopupFu = () => {
             </view>
             <view class="table_con">
                 <text class="table_title">核点数量(手)</text>
-                <input class="table_input" type="number" placeholder="请输入核点数量"
-                    v-model="stockInParams.checkHandNum" @blur="(e: any) => inputValueFu(e, 'checkHandNum')"
-                    placeholder-style="color: #7C8191">
+                <view class="flex table_input_list">
+                    <input class="table_input  table_input_item" type="number" placeholder="请输入核点数量"
+                        v-model="stockInParams.checkHandNum" @blur="(e: any) => inputValueFu(e, 'checkHandNum')"
+                        placeholder-style="color: #7C8191">
+                    <input class="table_input flex_1" type="number" placeholder="请输入重量"
+                        v-model="stockInParams.weight" @blur="(e: any) => inputValueFu(e, 'weight')"
+                        placeholder-style="color: #7C8191">
+                </view>
             </view>
             <view class="btn_con flex_align">
                 <button class="reset_btn" @click="resetStockInParamsFu">重置</button>

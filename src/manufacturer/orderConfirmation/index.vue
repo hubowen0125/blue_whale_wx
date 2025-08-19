@@ -171,6 +171,9 @@ const submitPackagingFu = (e: any) => {
 }
 
 const createOrderFu = () => {
+    if(!orderDetails.value.packagingId) {
+        return proxy.$Toast({ title: '请选择打包站' })
+    }
     proxy.$Loading();
     orderDetails.value.orderProductsParams.map((item: any) => {
         item.productsDetailParams = item.productColorsList.map((item: any) => {

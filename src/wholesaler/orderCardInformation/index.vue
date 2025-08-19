@@ -121,9 +121,9 @@ const selectSubmitFu = (e: any) => {
  * 创建订单
  */
 const createOrderFu = () => {
-    // if (!createParams.value.packagingId) {
-    //     return proxy.$Toast({ title: '请选择打包站' })
-    // }
+    if (!createParams.value.packagingId) {
+        return proxy.$Toast({ title: '请选择打包站' })
+    }
     createParams.value.wholesaleId = useUser.userInfo.deptId
     proxy.$Loading()
     createOrderApi(createParams.value).then((res: any) => {

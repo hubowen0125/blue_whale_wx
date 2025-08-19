@@ -55,6 +55,8 @@ const dateShift = createDateShifter() // 默认从今天开始
 const tabBarIndex = inject("tabBarIndex") as Ref<number>
 const infoDetails = ref<any>({})
 const date = ref(dateShift.get())
+// 当前时间
+const currentDate = dateShift.get()
 const isLoad = ref(false) // 是否加载
 const statisticsDetail = ref({
     orderNum: 0,
@@ -118,6 +120,7 @@ const reduceTimeFu = () => {
 }
 
 const addTimeFu = () => {
+    if(date.value == currentDate) return
     date.value = dateShift.next()
     getSalesStatisticsFu()
 }
@@ -198,11 +201,11 @@ const logoutFu = () => {
             </view>
         </view>
         <view class="fun_list">
-            <view class="fun_item flex_between flex_align" @click="toPageFu(item)" v-for="item, index in funList"
-                :key="index">
+            <button class="fun_item flex_between flex_align" @click="toPageFu(item)" v-for="item, index in funList"
+                :key="index" :open-type="item.path ? '' : 'contact'">
                 <view>{{ item.name }}</view>
                 <image class="arrow_right_1" :src="arrow_right_1"></image>
-            </view>
+            </button>
         </view>
         <button class="logout_btn" @click="logoutFu">退出登录</button>
     </view>
@@ -336,6 +339,8 @@ const logoutFu = () => {
             color: #202020;
             padding: 36rpx 0;
             border-bottom: 1rpx solid #EFEFEF;
+            background: #FFFFFF;
+
 
             .arrow_right_1 {
                 width: 28rpx;

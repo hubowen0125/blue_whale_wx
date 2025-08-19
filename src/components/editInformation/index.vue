@@ -149,7 +149,7 @@ const formSubmit = async (e: any) => {
         }))
     }
     // getInfoFu()
-    emit('editInformationFu')
+    emit('editInformationFu',formParams)
 }
 
 /**

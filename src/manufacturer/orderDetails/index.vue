@@ -13,39 +13,39 @@ const preciseMathFu = preciseMath()
 const orderText = reactive([
     {
         title: '批发商',
-        value: computed(() => orderDetails.value?.wholesale?.cityName),
-        value1: computed(() => orderDetails.value?.wholesale?.deptName),
+        value: computed(() => orderDetails.value?.wholesale?.cityName || ''),
+        value1: computed(() => orderDetails.value?.wholesale?.deptName || ''),
         show: true
     },
     {
         title: '批发商手机号',
-        value: computed(() => orderDetails.value?.wholesale?.phone),
+        value: computed(() => orderDetails.value?.wholesale?.phone || ''),
         show: true
     },
     {
         title: '总件数',
-        value: computed(() => `${orderDetails.value?.totalHandNum}手/${orderDetails.value?.totalNum}件`),
+        value: computed(() => `${orderDetails.value?.totalHandNum || ''}手/${orderDetails.value?.totalNum || ''}件`),
         show: true
     },
     {
         title: '核点',
-        value: computed(() => `${orderDetails.value?.checkHandNum}手`),
+        value: computed(() => `${orderDetails.value?.checkHandNum || ''}手`),
         show: true
     },
     {
         title: '总金额',
-        value: computed(() => formatNumber(orderDetails.value?.totalAmount)),
+        value: computed(() => formatNumber(orderDetails.value?.totalAmount || '')),
         show: true
     },
     {
         title: '已收金额',
-        value: computed(() => formatNumber(orderDetails.value?.paymentAmount)),
+        value: computed(() => formatNumber(orderDetails.value?.paymentAmount || '')),
         type: 'price',
         show: true
     },
     {
         title: '订单号',
-        value: computed(() => orderDetails.value?.orderNo),
+        value: computed(() => orderDetails.value?.orderNo || ''),
         show: true
     },
     {
@@ -75,7 +75,7 @@ const orderText = reactive([
     },
     {
         title: '备注',
-        value: computed(() => orderDetails.value?.remark),
+        value: computed(() => orderDetails.value?.remark || ''),
         show: true
     },
 ])

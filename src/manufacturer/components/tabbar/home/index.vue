@@ -98,7 +98,9 @@ const getOrderPageFu = () => {
         if (code == proxy.$successCode) {
             console.log(data, '0000');
             if (data.datas && data.datas.length > 0) {
-                orderList.value = [...orderList.value, ...data.datas]
+                orderList.value = data.datas
+            } else {
+                orderList.value = []
             }
         } else {
             proxy.$Toast({ title: msg })

@@ -53,7 +53,8 @@ const toPageFu = (item: { path: string, key: number }) => {
     })
 }
 
-const editInformationFu = () => {
+const editInformationFu = async (data: { address: string }) => {
+    useUser.setUserInfoFu({ ...useUser.userInfo, dept: { ...useUser.userInfo.dept, address: data.address } })
     uni.navigateTo({
         url: '/wholesaler/orderInformation/index?type=shoppingCart'
     })

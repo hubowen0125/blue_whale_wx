@@ -121,11 +121,11 @@ const logoutFu = () => {
         <view class="bg"></view>
         <com-myHeader :userRole="'wholesaler'" :infoDetails="infoDetails" @editInformationFu="getInfoFu"></com-myHeader>
         <view class="fun_list">
-            <view class="fun_item flex_between flex_align" @click="toPageFu(item)" v-for="item, index in funList"
-                :key="index">
+            <button class="fun_item flex_between flex_align" @click="toPageFu(item)" v-for="item, index in funList"
+                :key="index" :open-type="item.path ? '' : 'contact'">
                 <view>{{ item.name }}</view>
                 <image class="arrow_right_1" :src="arrow_right_1"></image>
-            </view>
+            </button>
         </view>
         <view>
             <button class="logout_btn" @click="logoutFu">退出登录</button>
@@ -168,6 +168,7 @@ const logoutFu = () => {
             color: #202020;
             padding: 36rpx 0;
             border-bottom: 1rpx solid #EFEFEF;
+            background: #FFFFFF;
 
             .arrow_right_1 {
                 width: 28rpx;

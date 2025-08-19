@@ -43,6 +43,11 @@ onLoad((e: any) => {
             }
         } else {
             if (useUser.miniRole) {
+                if (useUser.miniRole == 'loading') {
+                    uni.navigateTo({
+                        url: '/pages/reviewPage/index'
+                    })
+                }
                 if (useUser.miniRole == 'guest') {
                     uni.redirectTo({
                         url: '/pages/chooseIdentity/index'

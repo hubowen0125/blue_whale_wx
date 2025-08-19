@@ -2,7 +2,7 @@
 import { delByOrderNoApi, getByOrderNoApi } from "@/http/api/order";
 import wait_icon from "@/static/images/wait_icon.png";
 import del_icon from "@/static/images/del_icon.png";
-import { dateStrToDateFormat, formatNumber , preciseMath } from "@/utils/utils";
+import { dateStrToDateFormat, formatNumber, preciseMath } from "@/utils/utils";
 
 const { proxy } = getCurrentInstance() as any;
 const preciseMathFu = preciseMath()
@@ -10,33 +10,33 @@ const preciseMathFu = preciseMath()
 const orderText = reactive([
     {
         title: '厂家',
-        value: computed(() => orderDetails.value?.manufacturer?.deptName),
+        value: computed(() => orderDetails.value?.manufacturer?.deptName || ''),
     },
     {
         title: '厂家手机号',
-        value: computed(() => orderDetails.value?.manufacturer?.phone),
+        value: computed(() => orderDetails.value?.manufacturer?.phone || ''),
     },
     {
         title: '总件数',
-        value: computed(() => `${orderDetails.value?.totalHandNum}手/${orderDetails.value?.totalNum}件`),
+        value: computed(() => `${orderDetails.value?.totalHandNum || ''}手/${orderDetails.value?.totalNum || ''}件`),
     },
     {
         title: '核点',
-        value: computed(() => `${orderDetails.value?.checkHandNum}手`),
+        value: computed(() => `${orderDetails.value?.checkHandNum || ''}手`),
     },
     {
         title: '总金额',
-        value: computed(() => formatNumber(orderDetails.value?.totalAmount)),
+        value: computed(() => formatNumber(orderDetails.value?.totalAmount || '')),
         type: 'price',
     },
     {
         title: '已收金额',
-        value: computed(() => formatNumber(orderDetails.value?.paymentAmount)),
+        value: computed(() => formatNumber(orderDetails.value?.paymentAmount || '')),
         type: 'price',
     },
     {
         title: '订单号',
-        value: computed(() => orderDetails.value?.orderNo),
+        value: computed(() => orderDetails.value?.orderNo || ''),
     },
     {
         title: '创建时间',
@@ -44,7 +44,7 @@ const orderText = reactive([
     },
     {
         title: '备注',
-        value: computed(() => orderDetails.value?.remark),
+        value: computed(() => orderDetails.value?.remark || ''),
     },
 ])
 const popupData = {
@@ -156,7 +156,7 @@ const delByOrderNoFu = () => {
                     </view>
                     <view class="wait_num">已发货{{ preciseMathFu.subtract(orderDetails.totalHandNum || 0,
                         orderDetails.unSendHandNum || 0)
-                    }}手/{{ preciseMathFu.subtract(orderDetails.totalNum || 0, orderDetails.unSendNum || 0) }}件
+                        }}手/{{ preciseMathFu.subtract(orderDetails.totalNum || 0, orderDetails.unSendNum || 0) }}件
                     </view>
                 </view>
                 <view class="order_details_item flex_align flex_between" v-for="item, index in orderText"

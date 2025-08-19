@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { renewalFeeApi } from "@/http/api/all"
 import member_icon from "@/static/images/member_icon.png"
 import icon_1 from "@/static/images/wholesaler/renewalMembership/icon_1.png"
 import icon_2 from "@/static/images/wholesaler/renewalMembership/icon_2.png"
@@ -6,6 +7,7 @@ import icon_3 from "@/static/images/wholesaler/renewalMembership/icon_3.png"
 import { useUserStore } from "@/store/modules/user"
 
 const useUser = useUserStore()
+const { proxy } = getCurrentInstance() as any;
 
 const interestsList = [
     {
@@ -39,7 +41,24 @@ const popupCom = ref()
 
 onLoad(() => {
     popupData.popupContent[0].desc = useUser.servicePhone
+    renewalFeeFu()
 })
+
+/**
+ * 续费
+ */
+const renewalFeeFu = async () => {
+    await renewalFeeApi({ type: useUser.miniRole }).then((res: any) => {
+        const { code, data, msg } = res
+        if (code == proxy.$successCode) {
+            useUser.setRenewalFeeFu(data)
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$Toast({ title: req.msg })
+    }))
+}
 
 const openPopup = () => {
     popupCom.value.showPopup()

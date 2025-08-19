@@ -117,6 +117,9 @@ watch(() => props.goodsShelves, (newVal) => {
         showTable.value = false
         columns[columns.length - 1].title = '库存'
         columns[columns.length - 1].key = 'stockNum'
+        columns[columns.length - 2].key = 'salesNum'
+        columns[columns.length - 2].title = '销量(手)'
+        columns[columns.length - 3].title = '尺寸'
     } else {
         showTable.value = true
     }
@@ -264,7 +267,7 @@ defineExpose({
                         </view>
                     </view>
                     <view class="table_cell"
-                        v-else-if="col.key == 'sizeName' && (miniRole == 'manufacturer' || (miniRole == 'wholesaler' && viewInventory > 0))">
+                        v-else-if="col.key == 'sizeName' && (miniRole == 'manufacturer' || (miniRole == 'wholesaler' && viewInventory > 0)) && !goodsShelves">
                         {{ tableDetail.sizeName }}({{ row.stockNum || 0 }})
                     </view>
                     <view class="table_cell" v-else-if="col.key == 'unitQuantity'">

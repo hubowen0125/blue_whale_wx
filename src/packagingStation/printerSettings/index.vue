@@ -1,34 +1,13 @@
-<script lang="ts">
-const GBK = require('../../static/js/gbk.min.js');
-export { GBK };
-</script>
-
 <script lang="ts" setup>
 import { getByIdApi } from '../http/packagingStation';
 import { useUserStore } from '@/store/modules/user';
 import { useBluetoothPrinter } from '@/store/modules/useBluetoothPrinter';
+const GBK = require('../../static/js/gbk.min.js');
 // import * as GBK from './gbk.min.js';
 
 const useUser = useUserStore()
 const bluetoothPrinter = useBluetoothPrinter()
 const { proxy } = getCurrentInstance() as any;
-
-const printCommand: any = {
-    left: [27, 97, 46], //居左
-    center: [27, 97, 1], //居中
-    right: [27, 97, 2], //居右
-    clear: [27, 64], //初始化
-    enter: [10],
-    leftMargin: [29, 76, 0, 0], // 左间距
-    // 切换页模式
-    enterPageMode: [27, 64],
-    // 设置打印区域（60mm x 40mm = 480 x 320 点）
-    setPageArea: [27, 87, 0, 0, 0, 0, 224, 1, 64, 1],
-    // 打印并走纸到下页首
-    lineFeed: [27, 100, 1],
-};
-console.log(printCommand.clear);
-
 
 const canvasWidth = ref(448);
 const canvasHeight = ref(310); // Adjust height as needed for the content.
@@ -49,17 +28,6 @@ onLoad((e: any) => {
     }
 })
 
-onShow(() => {
-    // if (useUser.bluetoothInfo.status) {
-    //     devices.value = useUser.bluetoothInfo.list
-    //     connected.value = true
-    //     if (useUser.bluetoothInfo.printing) {
-    //         status.value = '正在发送数据...';
-    //     } else {
-    //         status.value = '已连接'
-    //     }
-    // }
-})
 const getCreateTimeFu = () => {
     const currentDate = new Date();
     const year = currentDate.getFullYear()
@@ -138,7 +106,7 @@ const generateCanvasFu = async () => {
         y += 20
         ctx.setFontSize(22)
         ctx.setTextAlign('center')
-        ctx.fillText(`打印时间：${createTime.value}`, canvasW / 2, y)
+        ctx.fillText(`入库时间：${inventoryDetails.value.createTime || createTime.value}`, canvasW / 2, y)
         await new Promise(resolve => ctx.draw(false, resolve))
         function drawLine(x1: number, y1: number, x2: number, y2: number) {
             ctx.beginPath()
@@ -190,7 +158,7 @@ const getPrintTextWriteArray = () => {
         `厂家：${inventoryDetails.value.manufacturerName || '木童巷多多'}`,
         `仓位：${inventoryDetails.value.storageNum || '仓位'}`,
         `数量：${inventoryDetails.value.checkHandNum || 0}手`,
-        `打印时间：${createTime.value}\n`
+        `入库时间：${inventoryDetails.value.createTime || createTime.value}\n`
     ]
 
     let writeArray = [];
@@ -417,7 +385,7 @@ const sendDataToDevice = (options: any) => {
                     <image class="label_img" :src="labelImg"></image>
                 </view>
             </view>
-            <template>
+            <template v-if="inventoryId">
                 <!-- 搜索 -->
                 <button class="button_defalut" @click="bluetoothPrinter.searchPrinter">搜索蓝牙</button>
                 <view class="device_list flex_1">
@@ -431,7 +399,7 @@ const sendDataToDevice = (options: any) => {
         </view>
         <canvas canvas-id="labelCanvas" id="labelCanvas"
             :style="{ width: canvasWidth + 'px', height: canvasHeight + 'px', transform: 'scale(.8)', position: 'absolute', left: '-99999px' }"></canvas>
-        <view class="footer_con"><button class="button_defalut" @click="printReceipt">打印</button>
+        <view v-if="inventoryId" class="footer_con"><button class="button_defalut" @click="printReceipt">打印</button>
         </view>
     </view>
 </template>

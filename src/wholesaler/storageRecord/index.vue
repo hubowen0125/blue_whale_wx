@@ -17,16 +17,33 @@ onLoad(() => {
 
 const wholesalePageFunc = async () => {
     proxy.$Loading()
-    slideLoading.value = false
     wholesalePageApi({}, paramsPage).then((res: any) => {
         proxy.$CloseLoading();
         const { code, data, msg } = res
         if (code == proxy.$successCode) {
             if (data.datas && data.datas.length > 0) {
-                storageRecordList.value = [...storageRecordList.value, ...data.datas]
-                if (data.datas.length == paramsPage.pageSize) {
-                    slideLoading.value = true
+                data.datas.forEach((item: any) => {
+                    let index = storageRecordList.value.findIndex((i: any) => i.date === item.date)
+                    if (index === -1) {
+                        storageRecordList.value.push({
+                            date: item.date,
+                            list: item.list
+                        })
+                    } else {
+                        storageRecordList.value[index].list = [...storageRecordList.value[index].list, ...item.list]
+                    }
+                })
+                let num = 0
+                data.datas.forEach((item: any) => {
+                    item.list.forEach(() => {
+                        num++
+                    })
+                })
+                if (10 > num) {
+                    slideLoading.value = false
                 }
+            } else {
+                slideLoading.value = false
             }
         } else {
             proxy.$Toast({ title: msg })
@@ -57,16 +74,17 @@ const scrolltolower = () => {
                 lower-threshold="50"
                 @scrolltolower="scrolltolower">
                 <view class="record_list flex_column">
-                    <template v-if="storageRecordList.length > 0" v-for="item in storageRecordList"
-                        :key="`other_${item.id}`">
-                        <view class="record_item flex_column">
+                    <template v-if="storageRecordList.length > 0" v-for="(item, index) in storageRecordList"
+                        :key="index">
+                        <view class="record_time">{{ item.date }}</view>
+                        <view class="record_item flex_column" v-for="items in item.list" :key="items.id">
                             <view class="flex_between flex_align">
-                                <view>{{ item.manufacturerName }}</view>
-                                <view class="record_item_status">{{ item.checkHandNum }}手</view>
+                                <view>{{ items.manufacturerName }}</view>
+                                <view class="record_item_status">{{ items.checkHandNum }}手</view>
                             </view>
                             <view class="flex_between flex_align">
-                                <view class="record_item_time">{{ item.packagingName }}</view>
-                                <view class="record_item_time">{{ dateStrToDateFormat(item.createTime, '') }}</view>
+                                <view class="record_item_time">{{ items.packagingName }}</view>
+                                <view class="record_item_time">{{ dateStrToDateFormat(items.createTime, '') }}</view>
                             </view>
                         </view>
                     </template>
@@ -82,10 +100,16 @@ const scrolltolower = () => {
 .main_con {
     overflow: hidden;
     margin-top: 24rpx;
+    padding-bottom: env(safe-area-inset-bottom);
 
     .record_list {
         padding: 0 24rpx;
         gap: 20rpx;
+    }
+
+    .record_time {
+        font-size: 32rpx;
+        font-weight: 500;
     }
 
     .record_item {

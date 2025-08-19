@@ -197,11 +197,12 @@ const refresherrefreshFu = () => {
                 :refresher-enabled="true"
                 :refresher-triggered="triggered"
                 @refresherrefresh="refresherrefreshFu">
-                <view class="order_list flex_column">
+                <view class="order_list flex_column" v-if="orderList.length > 0">
                     <template v-for="item in orderList" :key="item.id">
                         <orderItem :orderData="item"></orderItem>
                     </template>
                 </view>
+                <com-no_data v-else noDataText="暂无订单"></com-no_data>
             </scroll-view>
         </view>
         <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="confirmPopupFu"></com-popup_com>

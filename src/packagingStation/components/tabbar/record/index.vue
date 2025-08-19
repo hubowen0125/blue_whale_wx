@@ -80,8 +80,26 @@ const storageInputPageFu = () => {
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {
             if (data.datas && data.datas.length > 0) {
-                recordList.value = [...recordList.value, ...data.datas]
-                if (data.datas.length < paramsPage.pageSize) {
+                data.datas.forEach((item: any) => {
+                    let index = recordList.value.findIndex((i: any) => i.date === item.date)
+                    if (index === -1) {
+                        recordList.value.push({
+                            date: item.date,
+                            list: item.list
+                        })
+                    } else {
+                        recordList.value[index].list = [...recordList.value[index].list, ...item.list]
+                    }
+                })
+                console.log(recordList.value, 'sadsd');
+
+                let num = 0
+                data.datas.forEach((item: any) => {
+                    item.list.forEach(() => {
+                        num++
+                    })
+                })
+                if (10 > num) {
                     slideLoading.value = false
                 }
             } else {
@@ -171,8 +189,8 @@ const printerFu = (item: any) => {
 const scrolltolower = () => {
     if (!slideLoading.value) return
     console.log('++++++++');
-    // manageDevicesParams.value.page += 1
-    // resetManageDevicesParams()
+    paramsPage.pageNum += 1
+    storageInputPageFu()
 }
 </script>
 
@@ -197,20 +215,26 @@ const scrolltolower = () => {
                 </view>
                 <view class="record_con">
                     <view class="record_list flex_column" v-if="recordList.length > 0">
-                        <view class="record_item" v-for="item in recordList" :key="item.id"
-                            @click="viewRecordDetailFu(item)">
-                            <view class="record_item_time flex_align flex_between">
-                                <view>{{ item.createTime }}</view>
-                                <view>仓位: {{ item.storageNum }}</view>
+                        <template v-for="(item, index) in recordList" :key="index">
+                            <view class="record_time">{{ item.date }}</view>
+                            <view class="record_item"
+                                @click="viewRecordDetailFu(items)" v-for="items in item.list" :key="items.id">
+                                <view class="record_item_time flex_align flex_between">
+                                    <view>{{ items.createTime }}</view>
+                                    <view>仓位: {{ items.storageNum }}</view>
+                                </view>
+                                <view class="record_item_info flex_align flex_between">
+                                    <view class="flex_align">
+                                        <view>{{ items.wholesaleName }}</view>
+                                        <view class="record_item_position">{{ items.wholesaleCityName }}</view>
+                                    </view>
+                                    <view class="record_item_weight" v-if="items.weight">重量:{{items.weight}}</view>
+                                </view>
+                                <view class="record_item_manufacturer">厂家: {{ items.manufacturerName }}</view>
+                                <view class="record_item_num">入库数量: {{ items.checkHandNum }}手</view>
+                                <button class="record_item_button" @click.stop="printerFu(items)">打印</button>
                             </view>
-                            <view class="record_item_info flex_align">
-                                <view>{{ item.wholesaleName }}</view>
-                                <view class="record_item_position">{{ item.wholesaleCityName }}</view>
-                            </view>
-                            <view class="record_item_manufacturer">厂家: {{ item.manufacturerName }}</view>
-                            <view class="record_item_num">入库数量: {{ item.checkHandNum }}手</view>
-                            <button class="record_item_button" @click.stop="printerFu(item)">打印</button>
-                        </view>
+                        </template>
                     </view>
                     <com-no_data v-else noDataText="暂无批发商数据"></com-no_data>
                 </view>
@@ -294,6 +318,14 @@ const scrolltolower = () => {
             .record_list {
                 gap: 20rpx;
 
+                .record_time {
+                    font-size: 28rpx;
+                    font-weight: 500;
+                    background: #FFFFFF;
+                    padding: 28rpx;
+                    border-radius: 24rpx;
+                }
+
                 .record_item {
                     background: #FFFFFF;
                     border-radius: 24rpx;
@@ -324,6 +356,11 @@ const scrolltolower = () => {
                             font-size: 26rpx;
                             color: #346BCF;
                             margin-left: 12rpx;
+                        }
+
+                        .record_item_weight {
+                            font-weight: 400;
+                            font-size: 26rpx;
                         }
                     }
 

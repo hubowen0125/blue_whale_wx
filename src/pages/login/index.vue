@@ -151,7 +151,7 @@ const getUserInfoFu = () => {
             useUser.setUserInfoFu(data.sysUser)
             useUser.setMiniRoleFu(data.miniRole)
             await servicePhoneFu()
-            await renewalFeeFu(data.miniRole)
+            // await renewalFeeFu(data.miniRole)
             if (data.miniRole == 'guest') {
                 uni.redirectTo({
                     url: '/pages/chooseIdentity/index'

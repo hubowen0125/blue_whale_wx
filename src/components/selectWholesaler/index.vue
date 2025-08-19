@@ -50,6 +50,10 @@ const submitFu = () => {
     emit('selectSubmitFu', selectData.value)
 }
 
+const resetSelectDataFunc = () => {
+    selectData.value = {}
+}
+
 // 关闭弹窗
 const closePopupFu = () => {
     popupRef.value.close();
@@ -65,7 +69,8 @@ const scrolltolower = () => {
 }
 
 defineExpose({
-    showPopupFu
+    showPopupFu,
+    resetSelectDataFunc
 });
 </script>
 
@@ -93,7 +98,7 @@ defineExpose({
                                         <image class="position_icon" :src="position_1"></image>
                                         <view class="packaging_station_name">{{
                                             `${item.wholesaleCityName ? item.wholesaleCityName + '-' :
-                                            ''}${item.wholesaleName || ''}` }}</view>
+                                                ''}${item.wholesaleName || ''}` }}</view>
                                     </view>
                                     <view>{{ item.address }}</view>
                                     <view>{{ item.wholesalePhone }}</view>

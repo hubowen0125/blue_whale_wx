@@ -88,12 +88,12 @@ const handleConfirmFu = () => {
  */
 const confirmPopupFu = () => {
     proxy.$Loading();
-    updateUserRoleApi(params).then((res: any) => {
+    updateUserRoleApi(params).then(async (res: any) => {
         const { code, data, msg, miniRole } = res
         if (code == proxy.$successCode) {
-            console.log('code');
-            getUserInfoFu()
+            await getUserInfoFu()
             if (params.userRole == 'packaging') {
+                useUser.setMiniRoleFu('loading')
                 uni.redirectTo({
                     url: '/pages/reviewPage/index'
                 })
@@ -114,8 +114,8 @@ const confirmPopupFu = () => {
     }))
 }
 
-const getUserInfoFu = () => {
-    getUserInfoApi().then((res: any) => {
+const getUserInfoFu = async () => {
+    await getUserInfoApi().then((res: any) => {
         const { code, data, msg } = res
         proxy.$CloseLoading();
         if (code == proxy.$successCode) {

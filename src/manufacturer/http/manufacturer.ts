@@ -211,7 +211,7 @@ export function manufacturerEditApi(data: any) {
  * @param data
  * @returnsF
  */
-export function productListApi(data: any , params:any) {
+export function productListApi(data: any, params: any) {
     return new Promise((resolve, reject) => {
         resolve(
             request({
@@ -284,4 +284,18 @@ export function getWholesaleStatisticsApi() {
     })
 }
 
-
+/**
+ * 删除商品信息
+ * @returns
+ */
+export function delByIdApi(params: any) {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/products/delById`,
+                method: "GET",
+                params
+            })
+        )
+    })
+}

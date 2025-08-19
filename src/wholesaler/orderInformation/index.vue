@@ -156,9 +156,9 @@ const selectProductFu = () => {
  * 创建订单
  */
 const createAddFu = async () => {
-    // if (!createParams.packagingId) {
-    //     return proxy.$Toast({ title: '请选择打包站' })
-    // }
+    if (!createParams.packagingId) {
+        return proxy.$Toast({ title: '请选择打包站' })
+    }
     createParams.cardProductsParams = shoppingCart.value.map((item) => {
         return {
             productsDetailParams: item.productColorsList,

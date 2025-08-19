@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { productsPageApi, getShelfStatisticsApi } from '@/manufacturer/http/manufacturer';
+import { productsPageApi, getShelfStatisticsApi, delByIdApi } from '@/manufacturer/http/manufacturer';
 import { useUserStore } from '@/store/modules/user';
 import { useManufacturerStore } from "@/manufacturer/store/manufacturer";
 
@@ -23,7 +23,18 @@ const inventoryType = [
         value: computed(() => statisticsDetail.value.totalStock || 0),
     },
 ]
-
+const popupData = {
+    popupTitle: '删除商品',
+    pupupType: 'default',
+    popupContent: [
+        {
+            text: '是否确认删除该商品？',
+        },
+    ],
+    cancelText: '取消',
+    confirmText: '确定',
+    callBack: true
+}
 const tabBarIndex = inject("tabBarIndex") as Ref<number>
 const paramsPage = reactive({
     pageNum: 1,
@@ -41,6 +52,8 @@ const statisticsDetail = ref({
     totalStock: 0,
 })
 const isInputFocus = ref(false) // 是否输入框聚焦
+const activeProduct = ref<any>({})
+const popupCom = ref()
 
 onShow(() => {
     const pages = getCurrentPages()
@@ -122,14 +135,28 @@ const addProductFu = () => {
     })
 }
 
-/**
- * 查看商品详情
- * @param productDetail 
- */
-const viewDetailsFu = (productDetail: any) => {
-    uni.navigateTo({
-        url: `/manufacturer/productDetails/index?id=${productDetail.id}`
-    })
+const longpressFu = (e: any) => {
+    console.log('长按事件');
+    console.log(e, '123456789');
+    activeProduct.value = e
+    popupCom.value.showPopup()
+}
+
+const confirmPopupFu = () => {
+    proxy.$Loading()
+    delByIdApi({ id: activeProduct.value.id }).then((res: any) => {
+        const { code, data, msg } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            productList.value = productList.value.filter((item: any) => item.id != activeProduct.value.id)
+            proxy.$Toast({ title: '删除成功' })
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
 }
 
 const searchInputBlur = (e: string) => {
@@ -185,7 +212,8 @@ const scrolltolower = () => {
         <view class="main_con flex_1 flex_column" :class="{ 'pointer': isInputFocus }">
             <scroll-view class="scroll_con" scroll-y="true" lower-threshold="50" @scrolltolower="scrolltolower">
                 <view class="product_lsit flex_column" v-if="productList.length > 0">
-                    <view class="product_item" v-for="item in productList" :key="item.id">
+                    <view class="product_item" v-for="item in productList" :key="item.id"
+                        @longpress="longpressFu(item)">
                         <com-orderTable
                             orderType="detail"
                             miniRole="manufacturer"
@@ -202,6 +230,7 @@ const scrolltolower = () => {
             <button class="button_defalut flex_1" @click="addProductFu">添加商品</button>
         </view>
     </view>
+    <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="confirmPopupFu"></com-popup_com>
 </template>
 
 

@@ -147,7 +147,7 @@ const selectAreaFu = (e: any) => {
 const formSubmit = (e: any) => {
     const { wholesaleName, areaDetail, address, wholesalePhone, storageNum } = addParams.value
     if (!checkStr(wholesalePhone)) {
-        proxy.$Toast({ title: '请输入批发商手机号' })
+        proxy.$Toast({ title: '请输入正确手机号' })
         return
     }
     if (!wholesaleName) {
