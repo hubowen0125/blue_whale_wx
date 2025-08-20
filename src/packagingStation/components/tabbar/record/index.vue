@@ -225,12 +225,12 @@ const scrolltolower = () => {
                                 </view>
                                 <view class="record_item_info flex_align flex_between">
                                     <view class="flex_align">
-                                        <view>{{ items.wholesaleName }}</view>
+                                        <view >{{ items.wholesaleName }}</view>
                                         <view class="record_item_position">{{ items.wholesaleCityName }}</view>
                                     </view>
                                     <view class="record_item_weight" v-if="items.weight">重量:{{items.weight}}</view>
                                 </view>
-                                <view class="record_item_manufacturer">厂家: {{ items.manufacturerName }}</view>
+                                <view class="record_item_manufacturer text_elipsis">厂家: {{ items.manufacturerName }}</view>
                                 <view class="record_item_num">入库数量: {{ items.checkHandNum }}手</view>
                                 <button class="record_item_button" @click.stop="printerFu(items)">打印</button>
                             </view>
@@ -366,6 +366,7 @@ const scrolltolower = () => {
 
                     .record_item_manufacturer {
                         margin-bottom: 16rpx;
+                        width: 440rpx;
                     }
 
                     .record_item_button {

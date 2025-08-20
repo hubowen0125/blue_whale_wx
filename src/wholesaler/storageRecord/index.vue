@@ -68,7 +68,7 @@ const scrolltolower = () => {
 
 <template>
     <view class="container flex_column">
-        <com-header header-title="操作记录"></com-header>
+        <com-header header-title="入库记录"></com-header>
         <view class="main_con flex_1">
             <scroll-view class="scroll_con " scroll-y="true"
                 lower-threshold="50"
@@ -79,7 +79,7 @@ const scrolltolower = () => {
                         <view class="record_time">{{ item.date }}</view>
                         <view class="record_item flex_column" v-for="items in item.list" :key="items.id">
                             <view class="flex_between flex_align">
-                                <view>{{ items.manufacturerName }}</view>
+                                <view class="flex_1 text_elipsis">{{ items.manufacturerName }}</view>
                                 <view class="record_item_status">{{ items.checkHandNum }}手</view>
                             </view>
                             <view class="flex_between flex_align">
@@ -134,6 +134,7 @@ const scrolltolower = () => {
             font-weight: 400;
             font-size: 26rpx;
             color: #FF840C;
+            margin-left: 20rpx;
         }
     }
 
