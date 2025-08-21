@@ -238,6 +238,18 @@ export function getWholesaleByPhoneApi(params: any) {
     })
 }
 
-
-
-
+/**
+ * 厂家记录
+ * @param params
+ * @returnsF
+ */
+export function historyNameApi() {
+    return new Promise((resolve, reject) => {
+        resolve(
+            request({
+                url: `api/business/storageInput/historyName`,
+                method: "GET"
+            })
+        )
+    })
+}

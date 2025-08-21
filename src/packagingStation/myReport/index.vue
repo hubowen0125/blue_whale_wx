@@ -78,6 +78,10 @@ const scrolltolower = () => {
                     <view>{{ wholesaleDetail.totalHandNum }}</view>
                     <view class="report_info_title">来货数量</view>
                 </view>
+                <view class="report_info_item flex_1">
+                    <view>{{ wholesaleDetail.totalWeight }}</view>
+                    <view class="report_info_title">重量</view>
+                </view>
             </view>
         </view>
         <view class="report_con flex_1">
@@ -96,6 +100,10 @@ const scrolltolower = () => {
                         <view class="flex_column flex_align report_item_right">
                             <view>{{ item.handNum }}</view>
                             <view class="report_item_title">来货数量</view>
+                        </view>
+                        <view class="flex_column flex_align report_item_right">
+                            <view>{{ item.weight }}</view>
+                            <view class="report_item_title">重量</view>
                         </view>
                     </view>
                 </view>
@@ -177,7 +185,7 @@ const scrolltolower = () => {
                 font-weight: bold;
                 font-size: 36rpx;
                 color: #202020;
-                gap: 80rpx;
+                gap: 50rpx;
 
                 .report_item_time {
                     font-weight: 500;

@@ -1,11 +1,14 @@
 <script lang="ts" setup>
-import { scanCodeApi, stockInApi } from "@/packagingStation/http/packagingStation";
+import { scanCodeApi, stockInApi, historyNameApi } from "@/packagingStation/http/packagingStation";
 import { getInfoApi, packagingWholesalePageApi } from "@/http/api/all";
 import position_1 from "@/static/images/position_1.png"
 import scan_code_icon from "@/static/images/packagingStation/scan_code_icon.png"
 import arrow_bottom from "@/static/images/arrow_bottom.png"
+import off_icon from "@/static/images/off_icon.png"
+import checkbox from "@/static/images/checkbox.png"
+import checkbox_active from "@/static/images/checkbox_active.png"
 import { useUserStore } from '@/store/modules/user';
-import { calculateTimeDifference, handleInput } from "@/utils/utils";
+import { calculateTimeDifference, handleInput, validateInput } from "@/utils/utils";
 
 const useUser = useUserStore()
 const { proxy } = getCurrentInstance() as any;
@@ -28,7 +31,7 @@ const stockInParams = ref<STOCKINPARAMS>({
     checkHandNum: '',
     orderNo: '',
     shipId: '',
-    weight:''
+    weight: ''
 })
 const wholesaleList = ref<any[]>([])
 const wholesaleName = ref('')
@@ -80,6 +83,11 @@ const wholesalerParams = ref<any>({
 })
 // 是否支持选择经销商
 const isSupportSelectWholesaler = ref(false)
+const popupRef = ref<any>(null)
+const selectManufacturerData = ref('')
+const manufacturerInput = ref('')
+const historyNameList = ref<Array<string>>([])
+const fliterHistoryNameList = ref<Array<string>>([])
 
 watch(() => tabBarIndex.value, (newVal) => {
     if (newVal == 0) {
@@ -90,7 +98,24 @@ watch(() => tabBarIndex.value, (newVal) => {
 onMounted(() => {
     packagingWholesalePageFu()
     getInfoFu()
+    historyNameFu()
 })
+
+const historyNameFu = () => {
+    historyNameApi().then((res: any) => {
+        const { code, data, msg } = res
+        proxy.$CloseLoading();
+        if (code == proxy.$successCode) {
+            historyNameList.value = data
+            fliterHistoryNameList.value = data
+        } else {
+            proxy.$Toast({ title: msg })
+        }
+    }, (req => {
+        proxy.$CloseLoading();
+        proxy.$Toast({ title: req.msg })
+    }))
+}
 
 /**
  * 获取批发商列表
@@ -204,6 +229,10 @@ const stockInFu = () => {
 }
 
 const resetStockInParamsFu = () => {
+    const index = historyNameList.value.indexOf(stockInParams.value.manufacturerName)
+    if (index == -1) {
+        historyNameList.value.push(stockInParams.value.manufacturerName)
+    }
     stockInParams.value = {
         type: 1,
         manufacturerName: '',
@@ -213,6 +242,9 @@ const resetStockInParamsFu = () => {
         orderNo: '',
         shipId: ''
     }
+    manufacturerInput.value = ''
+    selectManufacturerData.value = ''
+    fliterHistoryNameList.value = historyNameList.value
     wholesaleName.value = ''
     selectWholesalerRef.value.resetSelectDataFunc()
 }
@@ -289,11 +321,48 @@ const searchInputFu = (e: string) => {
 
 // 确认弹窗
 const confirmPopupFu = () => {
-    console.log('1111');
     renewPopupData.popupContent[0].desc = useUser.servicePhone
     renewPopup.value.showPopup()
 }
 
+const weightBlurFu = async (e: any) => {
+    let value = e.target.value;
+    value = validateInput(value);
+    stockInParams.value.weight = value
+    return value;
+}
+
+// 显示厂家弹窗
+const showManufacturerFu = () => {
+    popupRef.value.open('bottom')
+}
+
+// 关闭弹窗
+const closePopupFu = () => {
+    popupRef.value.close();
+}
+
+const checkboxFu = (item: any,) => {
+    selectManufacturerData.value = item
+}
+
+const confirmManufacturerFu = () => {
+    if (fliterHistoryNameList.value.length == 0) {
+        stockInParams.value.manufacturerName = manufacturerInput.value
+    } else {
+        if (fliterHistoryNameList.value.includes(selectManufacturerData.value)) {
+            stockInParams.value.manufacturerName = selectManufacturerData.value
+        } else {
+            stockInParams.value.manufacturerName = manufacturerInput.value
+        }
+    }
+    closePopupFu()
+}
+
+const manufacturerInputFu = (e: any) => {
+    const { value } = e.target
+    fliterHistoryNameList.value = historyNameList.value.filter(item => item.includes(value))
+}
 </script>
 
 
@@ -306,16 +375,16 @@ const confirmPopupFu = () => {
         <view class="home_main flex_column">
             <view class="table_con">
                 <text class="table_title">厂家名称</text>
-                <input class="table_input" type="text" placeholder="请输入厂家名称"
-                    v-model="stockInParams.manufacturerName" placeholder-style="color: #7C8191">
+                <view class="table_input table_input_item" @click="showManufacturerFu">
+                    <view class="flex_1"
+                        :style="{ color: stockInParams.manufacturerName ? '' : '#7C8191', fontWeight: 500 }">{{
+                            stockInParams.manufacturerName || '请输入厂家名称' }}</view>
+                </view>
             </view>
             <view class="table_con">
                 <text class="table_title">批发商名称</text>
                 <view class="flex table_input_list">
                     <view class="flex_align table_input table_input_item" @click="showWholesalerFu">
-                        <!-- <input class=" flex_1" type="text"
-                            placeholder="选择批发商" disabled
-                            v-model="wholesaleName"> -->
                         <view class="flex_1"
                             :style="{ color: wholesaleName ? '' : '#7C8191', fontWeight: 500 }">{{
                                 wholesaleName || '选择批发商' }}</view>
@@ -333,7 +402,7 @@ const confirmPopupFu = () => {
                         v-model="stockInParams.checkHandNum" @blur="(e: any) => inputValueFu(e, 'checkHandNum')"
                         placeholder-style="color: #7C8191">
                     <input class="table_input flex_1" type="number" placeholder="请输入重量"
-                        v-model="stockInParams.weight" @blur="(e: any) => inputValueFu(e, 'weight')"
+                        :value="stockInParams.weight" @blur="weightBlurFu"
                         placeholder-style="color: #7C8191">
                 </view>
             </view>
@@ -362,6 +431,37 @@ const confirmPopupFu = () => {
     <com-popup_com ref="popupCom" :popupData="popupData" @confirmPopupFu="confirmPopupFu"></com-popup_com>
     <com-popup_com ref="codePopupCom" :popupData="codePopupData"></com-popup_com>
     <com-popup_com ref="renewPopup" :popupData="renewPopupData"></com-popup_com>
+
+    <uni-popup ref="popupRef" :safe-area="false" :mask-click="false">
+        <view class="popup_content flex_column ">
+            <view class="popup_header flex_align flex_between">
+                <view>输入厂家名称</view>
+                <view class="off_con" @click="closePopupFu">
+                    <image class="off_icon" :src="off_icon"></image>
+                </view>
+            </view>
+            <input class="table_input" type="text" placeholder="请输入厂家名称" v-model="manufacturerInput"
+                placeholder-style="color: #7C8191" @input="manufacturerInputFu">
+            <view class="main_con flex_1" :class="{ 'pointer': isSupportSelectWholesaler }">
+                <view class="manufacturer_list flex_column">
+                    <template v-for="(item, index) in fliterHistoryNameList" :key="index"
+                        v-if="fliterHistoryNameList.length > 0">
+                        <view class="manufacturer_item flex_align flex_between"
+                            :class="{ 'manufacturer_item_active': item == selectManufacturerData }"
+                            @click="checkboxFu(item)">
+                            <view class="flex_column">
+                                {{ item }}
+                            </view>
+                            <image class="checkbox_icon"
+                                :src="selectManufacturerData == item ? checkbox_active : checkbox"></image>
+                        </view>
+                    </template>
+                    <com-no_data v-else noDataText="暂无数据"></com-no_data>
+                </view>
+            </view>
+            <button class="button_defalut" @click="confirmManufacturerFu">确认</button>
+        </view>
+    </uni-popup>
 </template>
 
 <style lang="scss" scoped>
@@ -410,17 +510,6 @@ const confirmPopupFu = () => {
                     right: -16rpx;
                     top: 0;
                 }
-            }
-
-            .table_input {
-                margin-top: 20rpx;
-                width: 634rpx;
-                height: 96rpx;
-                background: #F7F8FA;
-                border-radius: 12rpx;
-                padding: 0 32rpx;
-                box-sizing: border-box;
-                line-height: 96rpx;
             }
 
             .table_input_list {
@@ -472,11 +561,96 @@ const confirmPopupFu = () => {
 
 }
 
+.table_input {
+    margin-top: 20rpx;
+    width: 634rpx;
+    height: 96rpx;
+    background: #F7F8FA;
+    border-radius: 12rpx;
+    padding: 0 32rpx;
+    box-sizing: border-box;
+    line-height: 96rpx;
+}
+
 .search_input {
     border: 2rpx solid #DDE8FC;
     margin-top: -20rpx;
     margin-bottom: 20rpx;
     border-radius: 20rpx;
     overflow: hidden;
+}
+
+
+.popup_content {
+    background-color: #fff;
+    padding: 40rpx 24rpx calc(26rpx + env(safe-area-inset-bottom));
+    border-radius: 32rpx 32rpx 0 0;
+    height: 60vh;
+    overflow: hidden;
+
+    .popup_header {
+        font-weight: bold;
+        font-size: 40rpx;
+        color: #202020;
+
+        .off_con {
+            width: 50rpx;
+            height: 50rpx;
+            text-align: center;
+
+            .off_icon {
+                width: 28rpx;
+                height: 28rpx;
+            }
+        }
+
+    }
+
+    .table_input {
+        width: 100%;
+        margin-bottom: 20rpx;
+    }
+
+    .main_con {
+        overflow-x: hidden;
+        overflow-y: auto;
+
+        .manufacturer_list {
+            gap: 20rpx;
+
+            .manufacturer_item {
+                background: #F7F8FA;
+                border-radius: 24rpx;
+                border: 2rpx solid #F7F8FA;
+                padding: 32rpx;
+                font-weight: 400;
+                font-size: 24rpx;
+                color: #7C8191;
+                gap: 12rpx;
+
+                .checkbox_icon {
+                    width: 36rpx;
+                    height: 36rpx;
+                }
+            }
+
+            .manufacturer_item_active {
+                border: 2rpx solid rgba(1, 163, 255, 1);
+                border-radius: 24rpx;
+                background: #FFFFFF;
+            }
+        }
+    }
+
+    .button_defalut {
+        height: 96rpx;
+        background: linear-gradient(90deg, #0D5DFF 0%, #00AAFF 100%);
+        font-weight: 500;
+        font-size: 30rpx;
+        color: #FFFFFF;
+        line-height: 96rpx;
+        border-radius: 48rpx;
+        margin-top: 48rpx;
+    }
 }
 </style>
